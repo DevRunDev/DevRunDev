@@ -9,6 +9,8 @@ class Course(models.Model):
     description = models.TextField()
     price = models.PositiveIntegerField(default=0)
     discount_price = models.PositiveIntegerField(null=True, blank=True)
+    is_free = models.BooleanField(default=False)
+    # thumbnail = models.ImageField(upload_to='thumbnails/')  # 나중에 추가
 
     STATUS_CHOICES = [
         ("draft", "초안"),
@@ -21,21 +23,27 @@ class Course(models.Model):
         ("purchase", "구매"),
         ("subscription", "구독"),
     ]
-    access_type = models.CharField(
-        max_length=12, choices=ACCESS_CHOICES, default="purchase"
-    )
+    access_type = models.CharField(max_length=12, choices=ACCESS_CHOICES, default="purchase")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        # ✅ 가격 검증 로직 추가
+        if self.discount_price and self.discount_price > self.price:
+            raise ValueError("할인 가격은 원래 가격보다 높을 수 없습니다.")
+
+        # ✅ 자동으로 is_free 설정
+        self.is_free = self.price == 0
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
 
 
 class Section(models.Model):
-    course = models.ForeignKey(
-        Course, on_delete=models.CASCADE, related_name="sections"
-    )
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="sections")
     title = models.CharField(max_length=255)
     order = models.PositiveIntegerField()
 
@@ -44,9 +52,7 @@ class Section(models.Model):
 
 
 class Lesson(models.Model):
-    section = models.ForeignKey(
-        Section, on_delete=models.CASCADE, related_name="lessons"
-    )
+    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name="lessons")
     title = models.CharField(max_length=255)
     video_url = models.CharField(max_length=500, null=True, blank=True)
     duration = models.PositiveIntegerField(default=0)
