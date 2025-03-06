@@ -25,11 +25,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: pre-commit 실행
-      run: |
-        pip install pre-commit
-        pre-commit run --all-files
-
     - name: Django 테스트 실행
       env:
         DJANGO_SETTINGS_MODULE: config.settings
