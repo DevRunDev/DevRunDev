@@ -30,3 +30,14 @@ class Course(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Section(models.Model):
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, related_name="sections"
+    )
+    title = models.CharField(max_length=255)
+    order = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.course.title} - {self.title}"
