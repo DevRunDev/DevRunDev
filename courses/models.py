@@ -41,3 +41,17 @@ class Section(models.Model):
 
     def __str__(self):
         return f"{self.course.title} - {self.title}"
+
+
+class Lesson(models.Model):
+    section = models.ForeignKey(
+        Section, on_delete=models.CASCADE, related_name="lessons"
+    )
+    title = models.CharField(max_length=255)
+    video_url = models.CharField(max_length=500, null=True, blank=True)
+    duration = models.PositiveIntegerField(default=0)
+    is_completed = models.BooleanField(default=False)
+    order = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.section.title} - {self.title}"
