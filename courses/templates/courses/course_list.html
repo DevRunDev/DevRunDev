@@ -16,7 +16,9 @@
     <ul>
         {% for course in courses %}
             <li>
-                <h2>{{ course.title }}</h2>
+                <h2>
+                    <a href="{% url 'course_detail' course.id %}">{{ course.title }}</a>
+                </h2>
                 <p>{{ course.description }}</p>
                 <p>강사: {{ course.instructor.username }}</p>
 
