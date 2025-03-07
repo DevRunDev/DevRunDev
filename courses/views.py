@@ -1,5 +1,9 @@
-from django.views.generic import DetailView, ListView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DetailView, ListView
 
+from .forms import CourseForm
 from .models import Course, Section
 
 
@@ -34,3 +38,15 @@ class CourseDetailView(DetailView):
         context["sections"] = Section.objects.filter(course=course).order_by("order")
 
         return context
+
+
+class CourseCreateView(LoginRequiredMixin, CreateView):
+    model = Course
+    template_name = "courses/course_form.html"
+    form_class = CourseForm
+    success_url = reverse_lazy("course_list")
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated or request.user.role != "Teacher":
+            raise PermissionDenied("강사만 강의를 생성할 수 있습니다.")
+        return super().dispatch(request, *args, **kwargs)

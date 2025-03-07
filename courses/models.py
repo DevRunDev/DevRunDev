@@ -18,23 +18,12 @@ class Course(models.Model):
     ]
     status = models.CharField(max_length=11, choices=STATUS_CHOICES, default="draft")
 
-    ACCESS_CHOICES = [
-        ("purchase", "구매"),
-        ("subscription", "구독"),
-    ]
-    access_type = models.CharField(max_length=12, choices=ACCESS_CHOICES, default="purchase")
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        # ✅ 가격 검증 로직 추가
-        if self.discount_price and self.discount_price > self.price:
-            raise ValueError("할인 가격은 원래 가격보다 높을 수 없습니다.")
-
         # ✅ 자동으로 is_free 설정
         self.is_free = self.price == 0
-
         super().save(*args, **kwargs)
 
     def __str__(self):
