@@ -6,7 +6,7 @@ from .models import Course, Lesson, Section
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
     list_display = ("title", "instructor", "price", "is_free", "status", "created_at")
-    list_filter = ("status", "access_type", "is_free")
+    list_filter = ("status", "is_free")
     search_fields = ("title", "instructor__username")
     ordering = ("-created_at",)
 
