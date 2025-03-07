@@ -8,7 +8,6 @@ class Course(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     price = models.PositiveIntegerField(default=0)
-    discount_price = models.PositiveIntegerField(null=True, blank=True)
     is_free = models.BooleanField(default=False)
     # thumbnail = models.ImageField(upload_to='thumbnails/')  # 나중에 추가
 
