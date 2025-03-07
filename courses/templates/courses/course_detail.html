@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ course.title }}</title>
+</head>
+<body>
+    <h1>{{ course.title }}</h1>
+    <p>강사: {{ course.instructor.username }}</p>
+    <p>{{ course.description }}</p>
+
+    <h2>커리큘럼</h2>
+    <ul>
+        {% for section in sections %}
+            <li>
+                <h3>📌 {{ section.title }}</h3>
+                <ul>
+                    {% for lesson in section.lessons.all %}
+                        <li>📖 <a href="#">{{ lesson.title }}</a></li>
+                    {% empty %}
+                        <li>📌 등록된 레슨이 없습니다.</li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% empty %}
+            <li>📌 등록된 섹션이 없습니다.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
