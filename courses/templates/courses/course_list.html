@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>강의 목록</title>
+</head>
+<body>
+    <h1>강의 목록</h1>
+
+    <form method="GET">
+        <input type="text" name="q" placeholder="강의 검색" value="{{ request.GET.q }}">
+        <button type="submit">검색</button>
+    </form>
+
+    <ul>
+        {% for course in courses %}
+            <li>
+                <h2>{{ course.title }}</h2>
+                <p>{{ course.description }}</p>
+                <p>강사: {{ course.instructor.username }}</p>
+
+                {% if course.is_free %}
+                    <p><strong>무료</strong></p>
+                {% else %}
+                    <p><strong>₩{{ course.price }}</strong></p>
+                {% endif %}
+            </li>
+        {% empty %}
+            <p>등록된 강의가 없습니다.</p>
+        {% endfor %}
+    </ul>
+</body>
+</html>
