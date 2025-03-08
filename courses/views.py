@@ -47,6 +47,6 @@ class CourseCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("course_list")
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated or request.user.role != "Teacher":
+        if not request.user.is_authenticated or not request.user.is_instructor():
             raise PermissionDenied("강사만 강의를 생성할 수 있습니다.")
         return super().dispatch(request, *args, **kwargs)
