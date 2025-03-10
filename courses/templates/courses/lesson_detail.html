@@ -1,0 +1,22 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ lesson.title }}</title>
+</head>
+<body>
+    <header>
+        <a href="{% url 'courses:course_detail' lesson.section.course.id %}">← 강의로 돌아가기</a>
+    </header>
+
+    <h1>{{ lesson.title }}</h1>
+
+    {% if lesson.video_url %}
+        <iframe width="560" height="315" src="{{ lesson.video_url }}" frameborder="0" allowfullscreen></iframe>
+    {% else %}
+        <p>🎥 등록된 영상이 없습니다.</p>
+    {% endif %}
+</body>
+</html>

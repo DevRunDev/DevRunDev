@@ -3,17 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if form.instance.pk %}강의 수정{% else %}강의 생성{% endif %}</title>
+    <title>강의 생성</title>
 </head>
 <body>
-    <h1>{% if form.instance.pk %}강의 수정{% else %}강의 생성{% endif %}</h1>
+    <header>
+        <a href="{% url 'courses:course_list' %}">강의 목록</a>
+    </header>
+
+    <h1>강의 생성</h1>
 
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">{% if form.instance.pk %}수정 완료{% else %}강의 생성{% endif %}</button>
+
+        <label for="id_title">강의 제목</label>
+        <input type="text" name="title" id="id_title" value="{{ form.title.value|default:'' }}">
+
+        <label for="id_description">강의 설명</label>
+        <textarea name="description" id="id_description" rows="4" cols="40">{{ form.description.value|default:'' }}</textarea>
+
+        <label for="id_price">가격</label>
+        <input type="number" name="price" id="id_price" min="0" value="{{ form.price.value|default:'0' }}">
+
+        <button type="submit" class="button">강의 생성</button>
     </form>
 
-    <a href="{% url 'course_list' %}">강의 목록으로 돌아가기</a>
+    <a href="{% url 'courses:course_list' %}" class="button">강의 목록으로 돌아가기</a>
 </body>
 </html>

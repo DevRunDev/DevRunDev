@@ -6,9 +6,22 @@
     <title>{{ course.title }}</title>
 </head>
 <body>
+    <header>
+        <a href="{% url 'courses:course_list' %}">강의 목록</a>
+    </header>
+
     <h1>{{ course.title }}</h1>
     <p>강사: {{ course.instructor.username }}</p>
     <p>{{ course.description }}</p>
+
+    <p>
+        가격:
+        {% if course.price == 0 %}
+            <strong>무료</strong>
+        {% else %}
+            <strong>₩{{ course.price }}</strong>
+        {% endif %}
+    </p>
 
     <h2>커리큘럼</h2>
     <ul>
@@ -16,8 +29,8 @@
             <li>
                 <h3>📌 {{ section.title }}</h3>
                 <ul>
-                    {% for lesson in section.lessons.all %}
-                        <li>📖 <a href="#">{{ lesson.title }}</a></li>
+                    {% for lesson in section.lessons_list %}
+                        <li>📖 <a href="{% url 'courses:lesson_detail' lesson.id %}">{{ lesson.title }}</a></li>
                     {% empty %}
                         <li>📌 등록된 레슨이 없습니다.</li>
                     {% endfor %}
@@ -27,5 +40,8 @@
             <li>📌 등록된 섹션이 없습니다.</li>
         {% endfor %}
     </ul>
+
+
+    <a href="{% url 'courses:course_list' %}" class="button">강의 목록으로 돌아가기</a>
 </body>
 </html>
