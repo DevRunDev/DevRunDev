@@ -55,7 +55,7 @@ class Lesson(models.Model):
             youtube_regex = (
                 r"(https?://)?(www\.)?"
                 r"(youtube|youtu|youtube-nocookie)\.(com|be)/"
-                r"(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})"
+                r"(watch\?v=|embed/|v/|shorts/|v/|.+\?v=)?([^&=%\?]{11})"
             )
             match = re.search(youtube_regex, self.video_url)
             if match:

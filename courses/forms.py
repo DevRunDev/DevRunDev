@@ -46,7 +46,7 @@ class LessonForm(forms.ModelForm):
         youtube_regex = (
             r"(https?://)?(www\.)?"
             r"(youtube|youtu|youtube-nocookie)\.(com|be)/"
-            r"(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})"
+            r"(watch\?v=|embed/|v/|shorts/|v/|.+\?v=)?([^&=%\?]{11})"
         )
         match = re.search(youtube_regex, url)
 
