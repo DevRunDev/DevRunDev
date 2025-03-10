@@ -5,8 +5,8 @@ from .models import Course, Lesson, Section
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ("title", "instructor", "price", "is_free", "status", "created_at")
-    list_filter = ("status", "is_free")
+    list_display = ("title", "instructor", "price", "status", "created_at")
+    list_filter = ("status",)
     search_fields = ("title", "instructor__username")
     ordering = ("-created_at",)
 
@@ -21,7 +21,7 @@ class SectionAdmin(admin.ModelAdmin):
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    list_display = ("title", "section", "order", "duration", "is_completed")
-    list_filter = ("section", "is_completed")
+    list_display = ("title", "section", "order")
+    list_filter = ("section",)
     search_fields = ("title", "section__title")
     ordering = ("section", "order")

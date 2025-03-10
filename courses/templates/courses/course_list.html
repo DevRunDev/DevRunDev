@@ -6,7 +6,19 @@
     <title>강의 목록</title>
 </head>
 <body>
+    <header>
+        <a href="{% url 'courses:course_step1' %}" class="button">강의 생성</a>
+    </header>
+
     <h1>강의 목록</h1>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 
     <form method="GET">
         <input type="text" name="q" placeholder="강의 검색" value="{{ request.GET.q }}">
@@ -17,15 +29,21 @@
         {% for course in courses %}
             <li>
                 <h2>
-                    <a href="{% url 'course_detail' course.id %}">{{ course.title }}</a>
+                    <a href="{% url 'courses:course_detail' course.id %}">{{ course.title }}</a>
                 </h2>
                 <p>{{ course.description }}</p>
                 <p>강사: {{ course.instructor.username }}</p>
 
-                {% if course.is_free %}
-                    <p><strong>무료</strong></p>
-                {% else %}
-                    <p><strong>₩{{ course.price }}</strong></p>
+                <p>
+                    가격:
+                    {% if course.price == 0 %}
+                        <strong>무료</strong>
+                    {% else %}
+                        <strong>₩{{ course.price }}</strong>
+                    {% endif %}
+                </p>
+                {% if request.user == course.instructor and course.status == "not_approved" %}
+                    <a href="{% url 'courses:course_edit' course.id %}" class="button">수정</a>
                 {% endif %}
             </li>
         {% empty %}
