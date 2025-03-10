@@ -19,7 +19,7 @@
                 <p><strong>역할:</strong> {{ user.get_role_display }}</p>
                 
                 {% if user.is_student %}
-                  <a href="{% url 'accounts:instructor_apply' %}" class="btn btn-primary">강사 신청하기</a>
+                  <a href="{% url 'users:instructor_apply' %}" class="btn btn-primary">강사 신청하기</a>
                 {% endif %}
                 
                 {% if messages %}
