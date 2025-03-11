@@ -12,10 +12,53 @@
 
     <h1>3단계: 레슨 정보 입력</h1>
 
+    <h2>📌 섹션별 레슨 목록</h2>
+    {% for section in sections_with_titles %}
+        <h3>📌 {{ section.title }}</h3>  <!-- ✅ 섹션 제목 출력 -->
+        <ul>
+            {% for lesson_group in lessons_by_section %}
+                {% if lesson_group.section_id == section.id %}
+                    {% for lesson in lesson_group.lessons %}
+                        <li>
+                            <strong>{{ lesson.title }}</strong>
+                            <form method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="section_id" value="{{ section.id }}">
+                                <button type="submit" name="delete_lesson" value="{{ lesson.title }}">🗑️ 삭제</button>
+                            </form>
+                        </li>
+                    {% empty %}
+                        <li>등록된 레슨이 없습니다.</li>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% empty %}
+        <p>📌 등록된 섹션이 없습니다.</p>
+    {% endfor %}
+
+
+    <h3>📝 새 레슨 추가</h3>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="button">강의 생성 완료</button>
+        <label for="section_id">섹션 선택</label>
+        <select name="section_id">
+            {% for section in sections_with_titles %}
+                <option value="{{ section.id }}">{{ section.title }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="lesson_title" placeholder="새 레슨 제목" required>
+        <input type="url" name="lesson_video_url" placeholder="동영상 URL">
+        <button type="submit" name="add_lesson">➕ 레슨 추가</button>
     </form>
+
+    <br><br>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="finish_course">강의 생성 완료</button>
+    </form>
+
+    <br><br>
+    <a href="{% url 'courses:course_step2' %}">🔙 이전 단계로 돌아가기</a>
 </body>
 </html>
