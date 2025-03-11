@@ -36,15 +36,11 @@ urlpatterns = [
     ),
     path("<int:pk>/edit/", CourseUpdateView.as_view(), name="course_edit"),
     # ✅ 섹션 관련 URL
-    path(
-        "<int:course_pk>/sections/add/", SectionCreateView.as_view(), name="section_add"
-    ),  # ✅ 일관성을 위해 course_pk 추가
+    path("sections/<int:pk>/add/", SectionCreateView.as_view(), name="section_add"),
     path("sections/<int:pk>/edit/", SectionUpdateView.as_view(), name="section_edit"),
     path("sections/<int:pk>/delete/", SectionDeleteView.as_view(), name="section_delete"),
     # ✅ 레슨 관련 URL
-    path(
-        "<int:section_pk>/lessons/add/", LessonCreateView.as_view(), name="lesson_add"
-    ),  # ✅ 일관성을 위해 section_pk 추가
+    path("lessons/<int:pk>/add/", LessonCreateView.as_view(), name="lesson_add"),
     path("lessons/<int:pk>/edit/", LessonUpdateView.as_view(), name="lesson_edit"),
     path("lessons/<int:pk>/delete/", LessonDeleteView.as_view(), name="lesson_delete"),
 ]

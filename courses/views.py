@@ -42,9 +42,7 @@ class CourseDetailView(DetailView):
         sections = Section.objects.filter(course=course).order_by("order")
 
         for section in sections:
-            section.lessons_list = Lesson.objects.filter(section=section).order_by(
-                "order"
-            )
+            section.lessons_list = Lesson.objects.filter(section=section).order_by("order")
 
         context["sections"] = sections
         return context
@@ -64,9 +62,7 @@ class CourseStep1View(LoginRequiredMixin, View):
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated or not request.user.is_instructor():
-            messages.error(
-                request, "강의 생성은 강사만 가능합니다. 강사 계정으로 로그인해주세요."
-            )
+            messages.error(request, "강의 생성은 강사만 가능합니다. 강사 계정으로 로그인해주세요.")
             return redirect("courses:course_list")
         return super().dispatch(request, *args, **kwargs)
 
@@ -126,10 +122,7 @@ class CourseStep3View(LoginRequiredMixin, View):
     """레슨 정보 입력 및 강의 저장 (3단계)"""
 
     def dispatch(self, request, *args, **kwargs):
-        if (
-            "course_data" not in request.session
-            or "section_data" not in request.session
-        ):
+        if "course_data" not in request.session or "section_data" not in request.session:
             return redirect("courses:course_step1")
         return super().dispatch(request, *args, **kwargs)
 
@@ -255,14 +248,12 @@ class InstructorDashboardView(LoginRequiredMixin, View):
         status_filter = request.GET.get("status")
         courses = Course.objects.filter(instructor=request.user)
 
-
         if status_filter in ["approved", "review", "not_approved"]:
             courses = courses.filter(status=status_filter)
 
         # ✅ 최적화된 상태별 개수 조회 (한 번의 쿼리로 가져오기)
         course_counts = Course.objects.filter(instructor=request.user).values("status").annotate(count=Count("status"))
         status_counts = {item["status"]: item["count"] for item in course_counts}
-
 
         context = {
             "courses": courses,
@@ -308,6 +299,7 @@ class CourseUpdateView(LoginRequiredMixin, UpdateView):
 
         messages.success(self.request, "강의 수정이 완료되었습니다.")
         return super().form_valid(form)
+
 
 class SectionCreateView(View):
     """새로운 섹션 추가"""
