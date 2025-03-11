@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import User, InstructorApplication
-from .models import User
+
+from .models import InstructorApplication, User
 
 admin.site.register(User)
 
@@ -25,18 +25,14 @@ class InstructorApplicationAdmin(admin.ModelAdmin):
 
         for application in queryset:
             application.approve()
-        self.message_user(
-            request, f"{queryset.count()}개의 강사 신청이 승인되었습니다."
-        )
+        self.message_user(request, f"{queryset.count()}개의 강사 신청이 승인되었습니다.")
 
     approve_applications.short_description = "선택된 강사 신청을 승인"
 
     def reject_applications(self, request, queryset):
 
         queryset.update(status=InstructorApplication.Status.REJECTED)
-        self.message_user(
-            request, f"{queryset.count()}개의 강사 신청이 거부되었습니다."
-        )
+        self.message_user(request, f"{queryset.count()}개의 강사 신청이 거부되었습니다.")
 
     reject_applications.short_description = "선택된 강사 신청을 거부"
 

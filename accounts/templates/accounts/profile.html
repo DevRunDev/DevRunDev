@@ -17,11 +17,11 @@
                 <p><strong>이메일:</strong> {{ user.email }}</p>
                 <p><strong>이름:</strong> {{ user.get_full_name|default:"미설정" }}</p>
                 <p><strong>역할:</strong> {{ user.get_role_display }}</p>
-                
+
                 {% if user.is_student %}
                   <a href="{% url 'users:instructor_apply' %}" class="btn btn-primary">강사 신청하기</a>
                 {% endif %}
-                
+
                 {% if messages %}
                   <div class="alert alert-info mt-3">
                     {% for message in messages %}

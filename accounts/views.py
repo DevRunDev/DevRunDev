@@ -1,11 +1,11 @@
-from django.views.generic import CreateView, TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, TemplateView
 
-from .models import InstructorApplication, User
 from .forms import InstructorApplicationForm
+from .models import InstructorApplication
 
 
 class InstructorApplicationView(LoginRequiredMixin, CreateView):
@@ -26,9 +26,7 @@ class InstructorApplicationView(LoginRequiredMixin, CreateView):
         ).first()
 
         if existing_application:
-            messages.info(
-                request, "이미 강사 신청이 진행 중입니다. 관리자의 승인을 기다려주세요."
-            )
+            messages.info(request, "이미 강사 신청이 진행 중입니다. 관리자의 승인을 기다려주세요.")
             return redirect("accounts:profile")
 
         return super().dispatch(request, *args, **kwargs)
@@ -36,9 +34,7 @@ class InstructorApplicationView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.user = self.request.user
 
-        messages.success(
-            self.request, "강사 신청이 접수되었습니다. 심사 후 결과를 알려드립니다."
-        )
+        messages.success(self.request, "강사 신청이 접수되었습니다. 심사 후 결과를 알려드립니다.")
 
         return super().form_valid(form)
 

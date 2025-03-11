@@ -1,6 +1,7 @@
 # quizzes/forms.py
 from django import forms
-from .models import Quiz, Question, Choice, Answer
+
+from .models import Answer, Choice, Question, Quiz
 
 
 class QuizForm(forms.ModelForm):

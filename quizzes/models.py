@@ -10,9 +10,7 @@ class Quiz(models.Model):
 
     title = models.CharField(max_length=200, verbose_name="퀴즈 제목")
     description = models.TextField(blank=True, verbose_name="퀴즈 설명")
-    course = models.ForeignKey(
-        Course, on_delete=models.CASCADE, related_name="quizzes", verbose_name="강의"
-    )
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="quizzes", verbose_name="강의")
     section = models.ForeignKey(
         Section,
         on_delete=models.CASCADE,
@@ -50,9 +48,7 @@ class Quiz(models.Model):
 class Question(models.Model):
     """문제 모델"""
 
-    quiz = models.ForeignKey(
-        Quiz, on_delete=models.CASCADE, related_name="questions", verbose_name="퀴즈"
-    )
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions", verbose_name="퀴즈")
     text = models.TextField(verbose_name="문제 내용")
     order = models.PositiveIntegerField(default=0, verbose_name="문제 순서")
 
@@ -74,9 +70,7 @@ class Question(models.Model):
 class Choice(models.Model):
     """선택지 모델"""
 
-    question = models.ForeignKey(
-        Question, on_delete=models.CASCADE, related_name="choices", verbose_name="문제"
-    )
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="choices", verbose_name="문제")
     text = models.CharField(max_length=200, verbose_name="선택지 내용")
     is_correct = models.BooleanField(default=False, verbose_name="정답 여부")
 
@@ -91,9 +85,7 @@ class Choice(models.Model):
 class QuizAttempt(models.Model):
     """퀴즈 시도 모델"""
 
-    quiz = models.ForeignKey(
-        Quiz, on_delete=models.CASCADE, related_name="attempts", verbose_name="퀴즈"
-    )
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="attempts", verbose_name="퀴즈")
     student = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -103,9 +95,7 @@ class QuizAttempt(models.Model):
     started_at = models.DateTimeField(auto_now_add=True, verbose_name="시작 시간")
     completed_at = models.DateTimeField(null=True, blank=True, verbose_name="완료 시간")
     score = models.PositiveIntegerField(default=0, verbose_name="점수")
-    total_questions = models.PositiveIntegerField(
-        default=0, verbose_name="전체 문제 수"
-    )
+    total_questions = models.PositiveIntegerField(default=0, verbose_name="전체 문제 수")
     correct_answers = models.PositiveIntegerField(default=0, verbose_name="정답 수")
     is_completed = models.BooleanField(default=False, verbose_name="완료 여부")
 
@@ -135,9 +125,7 @@ class Answer(models.Model):
         related_name="answers",
         verbose_name="퀴즈 시도",
     )
-    question = models.ForeignKey(
-        Question, on_delete=models.CASCADE, related_name="answers", verbose_name="문제"
-    )
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="answers", verbose_name="문제")
     selected_choice = models.ForeignKey(
         Choice,
         on_delete=models.CASCADE,
