@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "qna",
     "notifications",
     "admin_panel",
+    "quizzes",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
