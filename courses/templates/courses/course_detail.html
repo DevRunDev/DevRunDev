@@ -11,6 +11,10 @@
     </header>
 
     <h1>{{ course.title }}</h1>
+
+    {% if request.user == course.instructor %}
+        <p><a href="{% url 'courses:course_edit' course.id %}" class="button">✏️ 강의 수정</a></p>
+    {% endif %}
     <p>강사: {{ course.instructor.username }}</p>
     <p>{{ course.description }}</p>
 
@@ -37,10 +41,9 @@
                 </ul>
             </li>
         {% empty %}
-            <li>📌 등록된 섹션이 없습니다.</li>
+            <p>📌 등록된 섹션이 없습니다.</p>
         {% endfor %}
     </ul>
-
 
     <a href="{% url 'courses:course_list' %}" class="button">강의 목록으로 돌아가기</a>
 </body>

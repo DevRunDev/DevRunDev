@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>강의 수정</title>
+</head>
+<body>
+    <h1>✏️ 강의 수정</h1>
+
+        <form method="post">
+            {% csrf_token %}
+            <label for="id_title">강의 제목</label>
+            <input type="text" name="title" id="id_title" value="{{ form.title.value }}" required>
+
+            <label for="id_description">강의 설명</label>
+            <textarea name="description" id="id_description" rows="4" cols="40">{{ form.description.value|default:'' }}</textarea>
+
+            <label for="id_price">가격</label>
+            <input type="number" name="price" id="id_price" min="0" value="{{ form.price.value }}" required>
+
+            <button type="submit">수정 완료</button>
+        </form>
+
+    <h2>📌 섹션 및 레슨 관리</h2>
+
+    {% for section in course.sections.all %}
+        <p><strong>{{ section.title }}</strong>
+            <a href="{% url 'courses:section_edit' section.id %}">수정</a>
+            <a href="{% url 'courses:section_delete' section.id %}" onclick="return confirm('이 섹션을 삭제하시겠습니까?');">삭제</a>
+        </p>
+
+        <ul>
+            {% for lesson in section.lessons.all %}
+                <li>
+                    {{ lesson.title }}
+                    <a href="{% url 'courses:lesson_edit' lesson.id %}">수정</a>
+                    <a href="{% url 'courses:lesson_delete' lesson.id %}" onclick="return confirm('이 레슨을 삭제하시겠습니까?');">삭제</a>
+                </li>
+            {% empty %}
+                <li>등록된 레슨이 없습니다.</li>
+            {% endfor %}
+        </ul>
+    {% empty %}
+        <p>등록된 섹션이 없습니다.</p>
+    {% endfor %}
+
+    <h3>📝 새 섹션 추가</h3>
+    <form method="post" action="{% url 'courses:section_add' course.id %}">
+        {% csrf_token %}
+        <input type="text" name="section_title" placeholder="새 섹션 제목" required>
+        <button type="submit">➕ 섹션 추가</button>
+    </form>
+
+    <h3>📝 새 레슨 추가</h3>
+    <form method="post" action="{% url 'courses:lesson_add' course.id %}">
+        {% csrf_token %}
+        <select name="section_id">
+            {% for section in course.sections.all %}
+                <option value="{{ section.id }}">{{ section.title }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="lesson_title" placeholder="새 레슨 제목" required>
+        <input type="url" name="lesson_video_url" placeholder="동영상 URL">
+        <button type="submit">➕ 레슨 추가</button>
+    </form>
+
+    <a href="{% url 'courses:instructor_dashboard' %}">🔙 대시보드로 돌아가기</a>
+</body>
+</html>

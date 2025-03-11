@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>레슨 수정</title>
+</head>
+<body>
+    <h1>✏️ 레슨 수정</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        <label for="id_title">레슨 제목</label>
+        <input type="text" name="title" id="id_title" value="{{ form.title.value }}" required>
+
+        <label for="id_video_url">동영상 URL</label>
+        <input type="url" name="video_url" id="id_video_url" value="{{ form.video_url.value }}">
+
+        <button type="submit">수정 완료</button>
+    </form>
+
+    <a href="{% url 'courses:course_detail' pk=lesson.section.course.id %}">🔙 강의 상세 페이지로 돌아가기</a>
+</body>
+</html>

@@ -14,8 +14,36 @@
 
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="button">다음 단계로 이동</button>
+
+        <h2>📌 섹션 목록</h2>
+        <ul>
+            {% for section in request.session.section_data %}
+                <li>
+                    <strong>{{ section.title }}</strong>
+                    <form method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" name="delete_section" value="{{ section.title }}" onclick="return confirm('이 섹션을 삭제하시겠습니까?');">
+                            🗑️ 삭제
+                        </button>
+                    </form>
+                </li>
+            {% empty %}
+                <p>등록된 섹션이 없습니다.</p>
+            {% endfor %}
+        </ul>
     </form>
+
+    <h3>📝 새 섹션 추가</h3>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="section_title" placeholder="새 섹션 제목" required>
+        <button type="submit" name="add_section">➕ 섹션 추가</button>
+    </form>
+
+    <br><br>
+    <a href="{% url 'courses:course_step3' %}" class="button">➡️ 다음 단계로 이동</a>
+
+    <br><br>
+    <a href="{% url 'courses:course_step1' %}">🔙 이전 단계로 돌아가기</a>
 </body>
 </html>

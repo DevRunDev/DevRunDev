@@ -8,8 +8,8 @@ from accounts.models import User
 class Course(models.Model):
     STATUS_CHOICES = [
         ("review", "심사 중"),
-        ("approved", "승인됨"),
-        ("not_approved", "승인되지 않음"),
+        ("approved", "승인 완료"),
+        ("not_approved", "수정 필요"),
     ]
 
     instructor = models.ForeignKey(User, on_delete=models.CASCADE)

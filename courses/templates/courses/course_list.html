@@ -6,11 +6,10 @@
     <title>강의 목록</title>
 </head>
 <body>
-    <header>
-        <a href="{% url 'courses:course_step1' %}" class="button">강의 생성</a>
-    </header>
-
     <h1>강의 목록</h1>
+    {% if request.user.is_authenticated and request.user.is_instructor %}
+        <p><a href="{% url 'courses:instructor_dashboard' %}">🚀 강사 대시보드로 이동</a></p>
+    {% endif %}
 
     {% if messages %}
         <ul class="messages">
@@ -31,9 +30,7 @@
                 <h2>
                     <a href="{% url 'courses:course_detail' course.id %}">{{ course.title }}</a>
                 </h2>
-                <p>{{ course.description }}</p>
                 <p>강사: {{ course.instructor.username }}</p>
-
                 <p>
                     가격:
                     {% if course.price == 0 %}
