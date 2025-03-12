@@ -63,3 +63,6 @@ class Lesson(models.Model):
                 self.video_url = f"https://www.youtube.com/embed/{video_id}"
 
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
