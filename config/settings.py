@@ -26,6 +26,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "debug_toolbar",
+    "django_extensions",
     "accounts",
     "courses",
     "enrollments",
@@ -36,12 +42,7 @@ INSTALLED_APPS = [
     "notifications",
     "admin_panel",
     "quizzes",
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
-    "allauth.socialaccount.providers.google",
-    "debug_toolbar",
-    "django_extensions",
+    "core",
 ]
 
 MIDDLEWARE = [

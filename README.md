@@ -5,6 +5,12 @@
 ### pre-commit hook
 
 git clone 후 아래 명령어 실행 필요
-```
+```sh
 pre-commit install
+```
+
+### seed_data command
+
+```sh
+python manage.py seed_data
 ```
