@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+          <div class="col-md-10 offset-md-1">
+            {% if messages %}
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              {% endfor %}
+            {% endif %}
+            
+            <div class="card mb-4">
+              <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                  <h3 class="mb-0">{{ quiz.title }}</h3>
+                  
+                  {% if is_instructor and is_quiz_instructor %}
+                    <div>
+                      <a href="{% url 'quizzes:quiz_edit' quiz.id %}" class="btn btn-light btn-sm me-2">
+                        <i class="fas fa-edit"></i> 퀴즈 수정
+                      </a>
+                      <a href="{% url 'quizzes:quiz_delete' quiz.id %}" class="btn btn-danger btn-sm">
+                        <i class="fas fa-trash"></i> 삭제
+                      </a>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+              
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-8">
+                    <h5>퀴즈 설명</h5>
+                    <p>{{ quiz.description|linebreaks }}</p>
+                    
+                    <div class="mt-3">
+                      <strong>강의:</strong> {{ quiz.course.title }}
+                      {% if quiz.section %}
+                        <br><strong>섹션:</strong> {{ quiz.section.title }}
+                      {% endif %}
+                      {% if quiz.lesson %}
+                        <br><strong>강의 영상:</strong> {{ quiz.lesson.title }}
+                      {% endif %}
+                    </div>
+                    
+                    <div class="mt-3">
+                      <strong>문제 수:</strong> {{ questions.count }}개
+                      <br><strong>생성일:</strong> {{ quiz.created_at|date:"Y-m-d H:i" }}
+                      <br><strong>마지막 수정일:</strong> {{ quiz.updated_at|date:"Y-m-d H:i" }}
+                    </div>
+                  </div>
+                  
+                  <div class="col-md-4">
+                    {% if not is_instructor %}
+                      {% if has_completed %}
+                        <div class="alert alert-success">
+                          <h5 class="alert-heading">이전 응시 기록</h5>
+                          <p>이전에 이 퀴즈를 {{ previous_attempts.count }}번 응시했습니다.</p>
+                          <hr>
+                          <p class="mb-0">최고 점수: {{ previous_attempts.0.score }}점</p>
+                        </div>
+                        <a href="{% url 'quizzes:quiz_take' quiz.id %}" class="btn btn-primary w-100">다시 응시하기</a>
+                      {% else %}
+                        <div class="alert alert-info">
+                          <h5 class="alert-heading">퀴즈 응시</h5>
+                          <p>아직 이 퀴즈를 응시하지 않았습니다.</p>
+                        </div>
+                        <a href="{% url 'quizzes:quiz_take' quiz.id %}" class="btn btn-primary w-100">퀴즈 응시하기</a>
+                      {% endif %}
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {% if questions.exists %}
+              <div class="card">
+                <div class="card-header bg-light">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">문제 목록 ({{ questions.count }}개)</h5>
+                    
+                    {% if is_instructor and is_quiz_instructor %}
+                      <a href="{% url 'quizzes:question_create' quiz.id %}" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus"></i> 문제 추가
+                      </a>
+                    {% endif %}
+                  </div>
+                </div>
+                
+                <div class="list-group list-group-flush">
+                  {% for question in questions %}
+                    <div class="list-group-item">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <h5 class="mb-1">문제 {{ question.order }}: {{ question.text }}</h5>
+                          
+                          {% if is_instructor and is_quiz_instructor %}
+                            <div class="mb-3">
+                              <strong>선택지:</strong>
+                              <ul>
+                                {% for choice in question.choices.all %}
+                                  <li>{{ choice.text }} {% if choice.is_correct %}<span class="badge bg-success">정답</span>{% endif %}</li>
+                                {% endfor %}
+                              </ul>
+                            </div>
+                          {% endif %}
+                        </div>
+                        
+                        {% if is_instructor and is_quiz_instructor %}
+                          <div>
+                            <a href="{% url 'quizzes:question_edit' question.id %}" class="btn btn-outline-primary btn-sm me-2">
+                              <i class="fas fa-edit"></i> 수정
+                            </a>
+                            <a href="{% url 'quizzes:question_delete' question.id %}" class="btn btn-outline-danger btn-sm">
+                              <i class="fas fa-trash"></i> 삭제
+                            </a>
+                          </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% else %}
+              <div class="alert alert-warning">
+                <p>이 퀴즈에는 아직 문제가 없습니다.</p>
+                {% if is_instructor and is_quiz_instructor %}
+                  <a href="{% url 'quizzes:question_create' quiz.id %}" class="btn btn-success btn-sm">
+                    <i class="fas fa-plus"></i> 문제 추가하기
+                  </a>
+                {% endif %}
+              </div>
+            {% endif %}
+            
+            <div class="mt-3">
+              <a href="{% url 'quizzes:quiz_list' quiz.course.id %}" class="btn btn-secondary">퀴즈 목록으로</a>
+            </div>
+          </div>
+        </div>
+      </div>
+</body>
+</html>
