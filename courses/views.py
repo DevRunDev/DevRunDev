@@ -6,6 +6,7 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import DetailView, ListView, UpdateView
 
+from enrollments.models import Enrollment
 from quizzes.forms import QuizForm
 from quizzes.models import Quiz
 
@@ -33,10 +34,10 @@ class CourseDetailView(DetailView):
     context_object_name = "course"
 
     def get_queryset(self):
-        """강사는 자신의 강의를 모두 조회 가능, 일반 사용자는 승인된 강의만 조회 가능"""
-        queryset = Course.objects.all()
-        if not self.request.user.is_authenticated or not self.request.user.is_instructor:
-            queryset = queryset.filter(status="approved")
+        """모든 사용자가 승인된 강의에 접근할 수 있도록 설정"""
+        queryset = Course.objects.filter(status="approved")
+        if self.request.user.is_authenticated and self.request.user.role == "Instructor":
+            queryset = Course.objects.all()  # ✅ 강사는 모든 강의 조회 가능
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -45,9 +46,20 @@ class CourseDetailView(DetailView):
         sections = Section.objects.filter(course=course).order_by("order")
 
         for section in sections:
-            section.lessons_list = Lesson.objects.filter(section=section).order_by("order")
+            section.lessons_detail = Lesson.objects.filter(section=section).order_by("order")
 
         context["sections"] = sections
+
+        if self.request.user.is_authenticated:
+            # ✅ 강사는 항상 수강 상태를 True로 설정 (수강 신청 없이 레슨 접근 가능)
+            if self.request.user == course.instructor:
+                context["is_enrolled"] = True
+            else:
+                # ✅ 학생이나 기타 사용자는 실제 수강 여부 확인
+                context["is_enrolled"] = Enrollment.objects.filter(student=self.request.user, course=course).exists()
+        else:
+            context["is_enrolled"] = False
+
         return context
 
 
@@ -56,8 +68,21 @@ class LessonDetailView(LoginRequiredMixin, DetailView):
     template_name = "courses/lesson_detail.html"
     context_object_name = "lesson"
 
-    def get_queryset(self):
-        return Lesson.objects.all()
+    def dispatch(self, request, *args, **kwargs):
+        """🚨 수강하지 않은 사용자는 레슨 상세 페이지 접근 불가 (단, 강사는 예외)"""
+        lesson = self.get_object()
+        course = lesson.section.course
+
+        # ✅ 강사가 자신의 강의라면 접근 허용
+        if request.user == course.instructor:
+            return super().dispatch(request, *args, **kwargs)
+
+        # ✅ 일반 사용자는 수강 여부 확인 후 접근 가능
+        if not Enrollment.objects.filter(student=request.user, course=course).exists():
+            messages.warning(request, "이 강의의 레슨을 보려면 먼저 수강 신청을 해야 합니다.")
+            return redirect("enrollments:enroll_required", course_id=course.id)
+
+        return super().dispatch(request, *args, **kwargs)
 
 
 class CourseStep1View(LoginRequiredMixin, View):
@@ -236,13 +261,14 @@ class CourseStep3View(LoginRequiredMixin, View):
         del request.session["section_data"]
         if "lesson_data" in request.session:
             del request.session["lesson_data"]
-        
+
         # 생성된 강의 ID를 세션에 저장 (CourseStep4View에서 사용)
         request.session["created_course_id"] = course.id
         request.session.modified = True
 
         messages.success(request, "강의 기본 정보가 저장되었습니다. 퀴즈를 추가해 강의를 완성하세요.")
         return redirect("courses:course_step4")  # 퀴즈 생성 페이지로 이동
+
 
 class CourseStep4View(LoginRequiredMixin, View):
     """퀴즈 정보 입력 및 저장 (4단계)"""
@@ -252,57 +278,57 @@ class CourseStep4View(LoginRequiredMixin, View):
         if not request.user.is_authenticated or not request.user.is_instructor():
             messages.error(request, "강의 생성은 강사만 가능합니다. 강사 계정으로 로그인해주세요.")
             return redirect("courses:course_list")
-        
+
         # 신규 생성된 강의 ID가 세션에 있는지 확인
         if "created_course_id" not in request.session:
             messages.error(request, "잘못된 접근입니다. 강의 생성부터 시작해주세요.")
             return redirect("courses:course_step1")
-            
+
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
         # 세션에서 생성된 강의 ID 가져오기
         course_id = request.session.get("created_course_id")
         course = get_object_or_404(Course, id=course_id, instructor=request.user)
-        
+
         # 강의의 모든 섹션과 레슨 가져오기
         sections = Section.objects.filter(course=course).order_by("order")
-        
+
         # 각 섹션에 레슨 리스트 추가
         for section in sections:
             section.lessons_list = Lesson.objects.filter(section=section).order_by("order")
-            
+
             # 각 레슨에 이미 생성된 퀴즈가 있는지 확인
             for lesson in section.lessons_list:
                 lesson.quiz = Quiz.objects.filter(lesson=lesson).first()
-        
+
         # 퀴즈 폼 초기화
         form = QuizForm(course=course)
-        
+
         context = {
             "course": course,
             "sections": sections,
             "form": form,
         }
-        
+
         return render(request, "courses/course_step4.html", context)
 
     def post(self, request):
         # 세션에서 생성된 강의 ID 가져오기
         course_id = request.session.get("created_course_id")
         course = get_object_or_404(Course, id=course_id, instructor=request.user)
-        
+
         # 생성 또는 삭제 요청 처리
         if "create_quiz" in request.POST:
             # 퀴즈 생성 처리
             lesson_id = request.POST.get("lesson_id")
             lesson = get_object_or_404(Lesson, id=lesson_id)
             section = lesson.section
-            
+
             # 퀴즈 정보 가져오기
             title = request.POST.get("title")
             description = request.POST.get("description", "")
-            
+
             # 이미 퀴즈가 있는지 확인
             existing_quiz = Quiz.objects.filter(lesson=lesson).first()
             if existing_quiz:
@@ -319,12 +345,12 @@ class CourseStep4View(LoginRequiredMixin, View):
                     course=course,
                     section=section,
                     lesson=lesson,
-                    instructor=request.user
+                    instructor=request.user,
                 )
                 messages.success(request, f"레슨 '{lesson.title}'에 새 퀴즈가 추가되었습니다.")
-            
+
             return redirect("courses:course_step4")
-        
+
         elif "delete_quiz" in request.POST:
             # 퀴즈 삭제 처리
             quiz_id = request.POST.get("quiz_id")
@@ -333,16 +359,17 @@ class CourseStep4View(LoginRequiredMixin, View):
             quiz.delete()
             messages.success(request, f"레슨 '{lesson_title}'의 퀴즈가 삭제되었습니다.")
             return redirect("courses:course_step4")
-        
+
         elif "finish" in request.POST:
             # 강의 생성 완료 처리
             # 세션에서 강의 ID 삭제
             del request.session["created_course_id"]
             messages.success(request, "강의 생성이 완료되었습니다!")
             return redirect("courses:course_detail", pk=course.id)
-        
+
         # 기본적으로 같은 페이지로 리다이렉트
         return redirect("courses:course_step4")
+
 
 class InstructorDashboardView(LoginRequiredMixin, View):
     """강사 대시보드 - 내 강의 목록 및 상태별 필터링"""
@@ -388,7 +415,7 @@ class CourseUpdateView(LoginRequiredMixin, UpdateView):
         course = self.get_object()
 
         # ✅ 강사가 아닌 경우 접근 제한
-        if not hasattr(request.user, "userrole") or request.user.userrole.role != "instructor":
+        if request.user.role.lower() != "instructor":
             messages.error(request, "강사만 강의를 수정할 수 있습니다.")
             return redirect("courses:course_list")  # ✅ 일반 사용자는 강의 목록으로 리디렉션
 
