@@ -18,5 +18,15 @@
     {% else %}
         <p>🎥 등록된 영상이 없습니다.</p>
     {% endif %}
+
+    {% if lesson.quizzes.all %}
+        <div>
+        {% for quiz in lesson.quizzes.all %}
+            <a href="{% url 'quizzes:quiz_detail' quiz.id %}" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-question-circle"></i> 퀴즈
+            </a>
+        {% endfor %}
+        </div>
+    {% endif %}
 </body>
 </html>

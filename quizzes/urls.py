@@ -19,6 +19,8 @@ urlpatterns = [
     path('quizzes/<int:quiz_id>/questions/create/', views.QuestionCreateView.as_view(), name='question_create'),
     path('questions/<int:pk>/edit/', views.QuestionUpdateView.as_view(), name='question_edit'),
     path('questions/<int:pk>/delete/', views.QuestionDeleteView.as_view(), name='question_delete'),
-    
+    # 퀴즈 응시
+    path('quizzes/<int:pk>/take/', views.QuizTakeView.as_view(), name='quiz_take'),
+    path('attempts/<int:pk>/result/', views.QuizResultView.as_view(), name='quiz_result'),
 
 ]

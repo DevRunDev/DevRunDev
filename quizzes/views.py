@@ -285,3 +285,160 @@ class QuestionDeleteView(LoginRequiredMixin, InstructorRequiredMixin, DeleteView
     def test_func(self):
         question = self.get_object()
         return super().test_func() and self.request.user == question.quiz.instructor
+    
+# 퀴즈 응시 뷰
+class QuizTakeView(LoginRequiredMixin, View):
+    template_name = 'quizzes/quiz_take.html'
+    
+    def dispatch(self, request, *args, **kwargs):
+        # 강사는 퀴즈 응시 불가
+        if request.user.is_instructor():
+            messages.error(request, '강사는 퀴즈를 응시할 수 없습니다.')
+            return redirect('quizzes:quiz_detail', pk=kwargs.get('pk'))
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get(self, request, pk):
+        quiz = get_object_or_404(Quiz, pk=pk)
+        questions = quiz.questions.all().order_by('order')
+        
+        # 문제가 없는 경우
+        if not questions.exists():
+            messages.warning(request, '이 퀴즈에는 문제가 없습니다.')
+            return redirect('quizzes:quiz_detail', pk=quiz.id)
+        
+        # 새로운 시도 생성 또는 진행 중인 시도 가져오기
+        attempt, created = QuizAttempt.objects.get_or_create(
+            quiz=quiz,
+            student=request.user,
+            is_completed=False,
+            defaults={'total_questions': questions.count()}
+        )
+        
+        # 각 문제에 대한 폼 생성
+        answer_forms = []
+        for question in questions:
+            # 이미 답변한 문제인지 확인
+            try:
+                answer = Answer.objects.get(attempt=attempt, question=question)
+                form = AnswerForm(question=question, instance=answer)
+            except Answer.DoesNotExist:
+                form = AnswerForm(question=question)
+            
+            answer_forms.append({
+                'question': question,
+                'form': form
+            })
+        
+        return render(request, self.template_name, {
+            'quiz': quiz,
+            'attempt': attempt,
+            'answer_forms': answer_forms
+        })
+    
+    def post(self, request, pk):
+        quiz = get_object_or_404(Quiz, pk=pk)
+        questions = quiz.questions.all().order_by('order')
+        
+        # 문제가 없는 경우
+        if not questions.exists():
+            messages.warning(request, '이 퀴즈에는 문제가 없습니다.')
+            return redirect('quizzes:quiz_detail', pk=quiz.id)
+        
+        # 진행 중인 시도 가져오기
+        attempt = get_object_or_404(QuizAttempt, quiz=quiz, student=request.user, is_completed=False)
+        
+        # 제출 완료 버튼을 눌렀는지 확인
+        is_submitting = 'submit_quiz' in request.POST
+        
+        # 각 문제에 대한 답변 처리
+        valid_forms = 0
+        total_forms = len(questions)
+        
+        for question in questions:
+            answer_prefix = f'question_{question.id}'
+            selected_choice_id = request.POST.get(f'{answer_prefix}-selected_choice')
+            
+            if selected_choice_id:
+                try:
+                    selected_choice = Choice.objects.get(id=selected_choice_id, question=question)
+                    
+                    # 기존 답변이 있는지 확인하고 업데이트 또는 생성
+                    try:
+                        answer = Answer.objects.get(attempt=attempt, question=question)
+                        answer.selected_choice = selected_choice
+                        answer.is_correct = selected_choice.is_correct
+                        answer.save()
+                    except Answer.DoesNotExist:
+                        Answer.objects.create(
+                            attempt=attempt,
+                            question=question,
+                            selected_choice=selected_choice,
+                            is_correct=selected_choice.is_correct
+                        )
+                    
+                    valid_forms += 1
+                except Choice.DoesNotExist:
+                    pass
+        
+        # 퀴즈 완료 처리
+        if is_submitting:
+            # 모든 문제에 답변했는지 확인
+            if valid_forms < total_forms:
+                messages.warning(request, f'모든 문제에 답변해주세요. ({valid_forms}/{total_forms})')
+                return redirect('quizzes:quiz_take', pk=quiz.id)
+            
+            # 퀴즈 완료 처리
+            attempt.is_completed = True
+            attempt.completed_at = timezone.now()
+            attempt.save()
+            
+            # 점수 계산 (모델에서 자동으로 계산)
+            attempt.calculate_score()
+            
+            messages.success(request, '퀴즈를 완료했습니다!')
+            return redirect('quizzes:quiz_result', pk=attempt.id)
+        
+        messages.info(request, f'답변이 저장되었습니다. ({valid_forms}/{total_forms})')
+        return redirect('quizzes:quiz_take', pk=quiz.id)
+
+# 퀴즈 결과 뷰
+class QuizResultView(LoginRequiredMixin, DetailView):
+    model = QuizAttempt
+    template_name = 'quizzes/quiz_result.html'
+    context_object_name = 'attempt'
+    
+    def get_queryset(self):
+        return QuizAttempt.objects.filter(student=self.request.user, is_completed=True)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        attempt = self.get_object()
+        
+        # 모든 문제와 답변 가져오기
+        questions = attempt.quiz.questions.all().order_by('order')
+        answers = attempt.answers.all()
+        
+        # 문제별 답변 정보 구성
+        question_answers = []
+        for question in questions:
+            try:
+                answer = answers.get(question=question)
+                question_answers.append({
+                    'question': question,
+                    'answer': answer,
+                    'selected_choice': answer.selected_choice,
+                    'correct_choice': question.choices.get(is_correct=True),
+                    'is_correct': answer.is_correct
+                })
+            except Answer.DoesNotExist:
+                # 답변이 없는 문제 (거의 발생하지 않을 것임)
+                question_answers.append({
+                    'question': question,
+                    'answer': None,
+                    'selected_choice': None,
+                    'correct_choice': question.choices.get(is_correct=True),
+                    'is_correct': False
+                })
+        
+        context['question_answers'] = question_answers
+        return context
