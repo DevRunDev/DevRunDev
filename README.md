@@ -9,7 +9,7 @@ git clone git@github.com:DevRunDev/DevRunDev.git
 
 ### 가상 환경 설정 및 패키지 설치
 ```sh
-co DevRunDev
+cd DevRunDev
 python -m venv venv
 source venv/bin/activate
 
