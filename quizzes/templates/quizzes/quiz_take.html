@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+          <div class="col-md-10 offset-md-1">
+            {% if messages %}
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              {% endfor %}
+            {% endif %}
+            
+            <div class="card mb-4">
+              <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">{{ quiz.title }}</h3>
+              </div>
+              <div class="card-body">
+                <p>{{ quiz.description|linebreaks }}</p>
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <strong>강의:</strong> {{ quiz.course.title }}
+                    <br><strong>문제 수:</strong> {{ answer_forms|length }}개
+                  </div>
+                  <div>
+                    <strong>시작 시간:</strong> {{ attempt.started_at|date:"Y-m-d H:i" }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <form method="post">
+              {% csrf_token %}
+              
+              {% for item in answer_forms %}
+                <div class="card mb-4 question-card" id="question-{{ item.question.id }}">
+                  <div class="card-header bg-light">
+                    <h5 class="mb-0">문제 {{ item.question.order }}: {{ item.question.text }}</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="list-group">
+                      {% for choice in item.question.choices.all %}
+                        <div class="list-group-item">
+                          <div class="form-check">
+                            <input 
+                              class="form-check-input" 
+                              type="radio" 
+                              name="question_{{ item.question.id }}-selected_choice" 
+                              id="choice_{{ choice.id }}"
+                              value="{{ choice.id }}"
+                              {% if item.form.instance.selected_choice.id == choice.id %}checked{% endif %}
+                            >
+                            <label class="form-check-label" for="choice_{{ choice.id }}">
+                              {{ choice.text }}
+                            </label>
+                          </div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+              
+              <div class="d-flex justify-content-between mb-4">
+                <button type="submit" name="save_answers" class="btn btn-info">임시 저장</button>
+                <button type="submit" name="submit_quiz" class="btn btn-primary">제출 완료</button>
+              </div>
+              
+              <div class="alert alert-warning">
+                <strong>주의:</strong> '제출 완료' 버튼을 누르면 더 이상 답변을 수정할 수 없으며, 결과가 즉시 제출됩니다.
+              </div>
+              
+              <div class="mb-4">
+                <a href="{% url 'quizzes:quiz_detail' quiz.id %}" class="btn btn-secondary">퀴즈 상세 페이지로 돌아가기</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+</body>
+</html>
