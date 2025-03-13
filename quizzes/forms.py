@@ -11,7 +11,7 @@ class QuizForm(forms.ModelForm):
 
     class Meta:
         model = Quiz
-        fields = ("title", "description")
+        fields = ("title", "description", "section", "lesson")
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
