@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>강의 생성 - 4단계</title>
+    <style>
+        .progress {
+            width: 100%;
+            background-color: #e0e0e0;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 20px;
+            background-color: #4CAF50;
+            text-align: center;
+            color: white;
+            line-height: 20px;
+        }
+        .section {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        .lesson-item {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 3px solid #4CAF50;
+        }
+        .quiz-badge {
+            background-color: #4CAF50;
+            color: white;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        .add-quiz-btn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .delete-quiz-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            width: 70%;
+            max-width: 500px;
+        }
+        .close {
+            float: right;
+            cursor: pointer;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'courses:course_list' %}">강의 목록</a>
+    </header>
+
+    <h1>4단계: 퀴즈 추가</h1>
+
+    <div class="progress">
+        <div class="progress-bar" style="width: 100%;">4/4 단계</div>
+    </div>
+
+    <h2>강의 정보: {{ course.title }}</h2>
+    <p>{{ course.description }}</p>
+    <p><strong>가격:</strong> {{ course.price|floatformat:0 }}원</p>
+
+    {% for section in sections %}
+        <div class="section">
+            <h3>📌 {{ section.title }}</h3>
+            
+            {% if section.lessons_list %}
+                {% for lesson in section.lessons_list %}
+                    <div class="lesson-item">
+                        <h4>📚 {{ lesson.title }}</h4>
+                        <p>동영상 URL: {{ lesson.video_url }}</p>
+                        
+                        {% if lesson.quiz %}
+                            <p>
+                                <span class="quiz-badge">퀴즈 있음</span>
+                                <button onclick="openEditModal('{{ lesson.id }}')" class="add-quiz-btn">퀴즈 수정</button>
+                                <form method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="quiz_id" value="{{ lesson.quiz.id }}">
+                                    <button type="submit" name="delete_quiz" class="delete-quiz-btn" 
+                                            onclick="return confirm('정말로 이 퀴즈를 삭제하시겠습니까?');">
+                                        퀴즈 삭제
+                                    </button>
+                                </form>
+                            </p>
+                        {% else %}
+                            <button onclick="openAddModal('{{ lesson.id }}')" class="add-quiz-btn">➕ 퀴즈 추가</button>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- 퀴즈 추가 모달 -->
+                    <div id="addModal{{ lesson.id }}" class="modal">
+                        <div class="modal-content">
+                            <span class="close" onclick="closeAddModal('{{ lesson.id }}')">&times;</span>
+                            <h3>퀴즈 추가 - {{ lesson.title }}</h3>
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="lesson_id" value="{{ lesson.id }}">
+                                
+                                <p>
+                                    <label for="title{{ lesson.id }}">퀴즈 제목</label><br>
+                                    <input type="text" id="title{{ lesson.id }}" name="title" required 
+                                           placeholder="예: {{ lesson.title }} 이해도 확인 퀴즈" style="width: 100%;">
+                                </p>
+                                <p>
+                                    <label for="description{{ lesson.id }}">퀴즈 설명 (선택사항)</label><br>
+                                    <textarea id="description{{ lesson.id }}" name="description" rows="3" 
+                                              placeholder="이 퀴즈의 목적과 내용을 간략하게 설명해주세요." style="width: 100%;"></textarea>
+                                </p>
+                                <p>
+                                    <small>퀴즈를 저장한 후 문제와 선택지를 추가할 수 있습니다.</small>
+                                </p>
+                                <p>
+                                    <button type="button" onclick="closeAddModal('{{ lesson.id }}')" style="margin-right: 10px;">취소</button>
+                                    <button type="submit" name="create_quiz">퀴즈 저장</button>
+                                </p>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- 퀴즈 수정 모달 -->
+                    {% if lesson.quiz %}
+                    <div id="editModal{{ lesson.id }}" class="modal">
+                        <div class="modal-content">
+                            <span class="close" onclick="closeEditModal('{{ lesson.id }}')">&times;</span>
+                            <h3>퀴즈 수정 - {{ lesson.title }}</h3>
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="lesson_id" value="{{ lesson.id }}">
+                                
+                                <p>
+                                    <label for="edit_title{{ lesson.id }}">퀴즈 제목</label><br>
+                                    <input type="text" id="edit_title{{ lesson.id }}" name="title" required 
+                                           value="{{ lesson.quiz.title }}" style="width: 100%;">
+                                </p>
+                                <p>
+                                    <label for="edit_description{{ lesson.id }}">퀴즈 설명 (선택사항)</label><br>
+                                    <textarea id="edit_description{{ lesson.id }}" name="description" rows="3" 
+                                              style="width: 100%;">{{ lesson.quiz.description }}</textarea>
+                                </p>
+                                
+                                <!-- 기존 문제 표시 -->
+                                {% with questions=lesson.quiz.questions.all %}
+                                {% if questions %}
+                                <div>
+                                    <h4>기존 문제 ({{ questions.count }}개)</h4>
+                                    <ul>
+                                        {% for question in questions %}
+                                        <li>
+                                            <strong>{{ forloop.counter }}. {{ question.text|truncatechars:50 }}</strong>
+                                            - {{ question.choices.count }}개 선택지
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                                {% endwith %}
+                                
+                                <p>
+                                    <a href="{% url 'quizzes:question_create' quiz_id=lesson.quiz.id %}" target="_blank">
+                                        문제 관리하기 >>
+                                    </a>
+                                </p>
+                                
+                                <p>
+                                    <button type="button" onclick="closeEditModal('{{ lesson.id }}')" style="margin-right: 10px;">취소</button>
+                                    <button type="submit" name="create_quiz">퀴즈 수정</button>
+                                </p>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <p>이 섹션에는 레슨이 없습니다.</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+    
+    <!-- 완료 버튼 -->
+    <div style="text-align: center; margin-top: 30px;">
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="finish" style="font-size: 1.2em; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">
+                강의 생성 완료 ✓
+            </button>
+        </form>
+        <p style="color: #666; margin-top: 10px;">
+            <small>
+                모든 레슨에 퀴즈를 추가할 필요는 없습니다. 나중에 언제든지 추가할 수 있습니다.
+            </small>
+        </p>
+    </div>
+    
+    <br><br>
+    <a href="{% url 'courses:course_step3' %}">🔙 이전 단계로 돌아가기</a>
+    
+    <script>
+        // 모달 열기/닫기 함수
+        function openAddModal(id) {
+            document.getElementById('addModal' + id).style.display = 'block';
+        }
+        
+        function closeAddModal(id) {
+            document.getElementById('addModal' + id).style.display = 'none';
+        }
+        
+        function openEditModal(id) {
+            document.getElementById('editModal' + id).style.display = 'block';
+        }
+        
+        function closeEditModal(id) {
+            document.getElementById('editModal' + id).style.display = 'none';
+        }
+        
+        // ESC 키를 누르면 모달 닫기
+        window.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                var modals = document.getElementsByClassName('modal');
+                for (var i = 0; i < modals.length; i++) {
+                    modals[i].style.display = 'none';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

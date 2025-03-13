@@ -12,6 +12,10 @@
 
     <h1>3단계: 레슨 정보 입력</h1>
 
+    <div class="progress">
+        <div class="progress-bar" role="progressbar" style="width: 75%;" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">3/4 단계</div>
+    </div>
+
     <h2>📌 섹션별 레슨 목록</h2>
     {% for section in sections_with_titles %}
         <h3>📌 {{ section.title }}</h3>  <!-- ✅ 섹션 제목 출력 -->
@@ -55,7 +59,7 @@
     <br><br>
     <form method="post">
         {% csrf_token %}
-        <button type="submit" name="finish_course">강의 생성 완료</button>
+        <button type="submit">다음 단계: 퀴즈 추가 ▶️</button>
     </form>
 
     <br><br>
