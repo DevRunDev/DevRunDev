@@ -12,8 +12,8 @@
 
     <h1>{{ course.title }}</h1>
 
-    {% if request.user == course.instructor %}
-        <p><a href="{% url 'courses:course_edit' course.id %}" class="button">✏️ 강의 수정</a></p>
+    {% if request.user == course.instructor and request.user.userrole.role == "instructor" %}
+    <p><a href="{% url 'courses:course_edit' course.id %}" class="button">✏️ 강의 수정</a></p>
     {% endif %}
     <p>강사: {{ course.instructor.username }}</p>
     <p>{{ course.description }}</p>

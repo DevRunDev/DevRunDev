@@ -48,7 +48,7 @@ class CourseDetailView(DetailView):
         return context
 
 
-class LessonDetailView(DetailView):
+class LessonDetailView(LoginRequiredMixin, DetailView):
     model = Lesson
     template_name = "courses/lesson_detail.html"
     context_object_name = "lesson"
@@ -276,9 +276,17 @@ class CourseUpdateView(LoginRequiredMixin, UpdateView):
     def dispatch(self, request, *args, **kwargs):
         """강사만 수정 가능하도록 제한"""
         course = self.get_object()
+
+        # ✅ 강사가 아닌 경우 접근 제한
+        if not hasattr(request.user, "userrole") or request.user.userrole.role != "instructor":
+            messages.error(request, "강사만 강의를 수정할 수 있습니다.")
+            return redirect("courses:course_list")  # ✅ 일반 사용자는 강의 목록으로 리디렉션
+
+        # ✅ 강의 작성자가 아닌 경우 접근 제한
         if course.instructor != request.user:
             messages.error(request, "본인의 강의만 수정할 수 있습니다.")
             return redirect("courses:instructor_dashboard")
+
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
