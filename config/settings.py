@@ -1,7 +1,12 @@
 from pathlib import Path
 
+import environ
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = environ.Env()
+environ.Env.read_env(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -46,6 +51,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -54,7 +60,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -107,20 +112,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTHENTICATION_BACKENDS = [
-    # Needed to login by username in Django admin, regardless of `allauth`
-    "django.contrib.auth.backends.ModelBackend",
-    # `allauth` specific authentication methods, such as login by email
-    "allauth.account.auth_backends.AuthenticationBackend",
-]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = "ko-kr"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Seoul"
 
 USE_I18N = True
 
@@ -132,11 +130,57 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-SITE_ID = 1
+
+# Custom user model
 
 AUTH_USER_MODEL = "accounts.User"
+
+
+# Allauth settings
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+SITE_ID = 1
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APP": {
+            "client_id": env("GOOGLE_CLIENT_ID"),
+            "secret": env("GOOGLE_CLIENT_SECRET"),
+            "key": "",
+        },
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+    }
+}
+
+LOGIN_REDIRECT_URL = "/"  # 로그인 성공 후 이동할 URL
+ACCOUNT_LOGOUT_REDIRECT_URL = "/"  # 로그아웃 후 이동할 URL
+
+# 이메일 필수 설정 (이메일 인증 요구)
+ACCOUNT_EMAIL_VERIFICATION = "optional"  # (optional, mandatory, none)
+ACCOUNT_EMAIL_REQUIRED = True
+
+# 로그인 시 사용자 이름 대신 이메일 사용
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_USERNAME_REQUIRED = False
+
+# 자동 가입 활성화 (True 시 /accounts/signup/ 없이 자동 가입)
+SOCIALACCOUNT_AUTO_SIGNUP = True
+
+# 유저명 중복 방지
+ACCOUNT_UNIQUE_EMAIL = True
