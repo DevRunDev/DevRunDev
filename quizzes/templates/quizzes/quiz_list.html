@@ -11,14 +11,14 @@
           <div class="col-md-10 offset-md-1">
             <div class="d-flex justify-content-between align-items-center mb-4">
               <h2>{{ course.title }} - 퀴즈 목록</h2>
-              
+
               {% if is_instructor %}
                 <a href="{% url 'quizzes:quiz_create' course.id %}" class="btn btn-primary">
                   <i class="fas fa-plus"></i> 새 퀴즈 만들기
                 </a>
               {% endif %}
             </div>
-            
+
             {% if messages %}
               {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
@@ -27,7 +27,7 @@
                 </div>
               {% endfor %}
             {% endif %}
-            
+
             {% if quizzes %}
               <div class="card">
                 <div class="card-header bg-light">
@@ -41,7 +41,7 @@
                           <h5 class="mb-1">{{ quiz.title }}</h5>
                           <p class="mb-1 text-muted">{{ quiz.description|truncatechars:100 }}</p>
                           <small>
-                            문제 수: {{ quiz.questions.count }}개 | 
+                            문제 수: {{ quiz.questions.count }}개 |
                             생성일: {{ quiz.created_at|date:"Y-m-d" }}
                           </small>
                         </div>
@@ -59,7 +59,7 @@
                 {% endif %}
               </div>
             {% endif %}
-            
+
             <div class="mt-3">
               <a href="javascript:history.back()" class="btn btn-secondary">뒤로 가기</a>
             </div>

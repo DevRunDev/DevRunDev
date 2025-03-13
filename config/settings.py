@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.kakao",
     "debug_toolbar",
     "django_extensions",
     "accounts",
@@ -68,7 +69,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -155,6 +156,9 @@ SITE_ID = 1
 GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID", default="")
 GOOGLE_CLIENT_SECRET = env("GOOGLE_CLIENT_SECRET", default="")
 
+KAKAO_CLIENT_ID = env("KAKAO_CLIENT_ID", default="")
+KAKAO_CLIENT_SECRET = env("KAKAO_CLIENT_SECRET", default="")
+
 if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
     raise ImproperlyConfigured("GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are required.")
 
@@ -173,8 +177,22 @@ SOCIALACCOUNT_PROVIDERS = {
         "AUTH_PARAMS": {
             "access_type": "online",
         },
-    }
+    },
+    "kakao": {
+        "APP": {
+            "client_id": KAKAO_CLIENT_ID,
+            "secret": KAKAO_CLIENT_SECRET,
+            "key": "",
+        },
+        "SCOPE": [
+            "profile_nickname",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+    },
 }
+
 
 LOGIN_REDIRECT_URL = "/"  # 로그인 성공 후 이동할 URL
 ACCOUNT_LOGOUT_REDIRECT_URL = "/"  # 로그아웃 후 이동할 URL
@@ -182,6 +200,10 @@ ACCOUNT_LOGOUT_REDIRECT_URL = "/"  # 로그아웃 후 이동할 URL
 # 이메일 필수 설정 (이메일 인증 요구)
 ACCOUNT_EMAIL_VERIFICATION = "optional"  # (optional, mandatory, none)
 ACCOUNT_EMAIL_REQUIRED = True
+
+# 소셜 계정 이메일 검증 비활성화
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
+SOCIALACCOUNT_EMAIL_REQUIRED = False
 
 # 로그인 시 사용자 이름 대신 이메일 사용
 ACCOUNT_LOGIN_METHODS = {"email"}

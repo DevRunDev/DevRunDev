@@ -19,10 +19,10 @@
               </div>
               <div class="card-body">
                 <h5 class="card-title mb-3">강의: {{ course.title }}</h5>
-                
+
                 <form method="post" novalidate>
                   {% csrf_token %}
-                  
+
                   <div class="mb-3">
                     <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }}</label>
                     {{ form.title }}
@@ -34,7 +34,7 @@
                       </div>
                     {% endif %}
                   </div>
-                  
+
                   <div class="mb-3">
                     <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
                     {{ form.description }}
@@ -46,7 +46,7 @@
                       </div>
                     {% endif %}
                   </div>
-                  
+
                   <div class="mb-3">
                     <label for="{{ form.section.id_for_label }}" class="form-label">{{ form.section.label }}</label>
                     {{ form.section }}
@@ -58,7 +58,7 @@
                       </div>
                     {% endif %}
                   </div>
-                  
+
                   <div class="mb-3">
                     <label for="{{ form.lesson.id_for_label }}" class="form-label">{{ form.lesson.label }}</label>
                     {{ form.lesson }}
@@ -70,7 +70,7 @@
                       </div>
                     {% endif %}
                   </div>
-                  
+
                   <div class="d-flex justify-content-between">
                     {% if is_update %}
                       <a href="{% url 'quizzes:quiz_detail' form.instance.id %}" class="btn btn-secondary">취소</a>

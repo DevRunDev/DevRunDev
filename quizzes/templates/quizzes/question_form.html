@@ -19,16 +19,16 @@
               </div>
               <div class="card-body">
                 <h5 class="card-title mb-3">퀴즈: {{ quiz.title }}</h5>
-                
+
                 {% if not is_update %}
                   <div class="alert alert-info">
                     <p>현재까지 추가된 문제: {{ existing_questions_count }}개</p>
                   </div>
                 {% endif %}
-                
+
                 <form method="post" novalidate>
                   {% csrf_token %}
-                  
+
                   <div class="mb-3">
                     <label for="{{ form.text.id_for_label }}" class="form-label">문제 내용</label>
                     {{ form.text }}
@@ -40,7 +40,7 @@
                       </div>
                     {% endif %}
                   </div>
-                  
+
                   <div class="mb-3">
                     <label for="{{ form.order.id_for_label }}" class="form-label">문제 순서</label>
                     {{ form.order }}
@@ -52,19 +52,19 @@
                       </div>
                     {% endif %}
                   </div>
-                  
+
                   <h5 class="mt-4 mb-3">5지선다 선택지 입력</h5>
                   <div class="alert alert-warning">
                     <p>5개의 선택지 중 1개만 정답으로 체크해주세요.</p>
                   </div>
-                  
+
                   {{ choice_formset.management_form }}
-                  
+
                   <div class="row">
                     <div class="col-md-10">선택지 내용</div>
                     <div class="col-md-2 text-center">정답</div>
                   </div>
-                  
+
                   {% for choice_form in choice_formset %}
                     <div class="row mb-2 choice-row">
                       <div class="col-md-10">
@@ -83,7 +83,7 @@
                       </div>
                     </div>
                   {% endfor %}
-                  
+
                   {% if choice_formset.non_form_errors %}
                     <div class="alert alert-danger mt-3">
                       {% for error in choice_formset.non_form_errors %}
@@ -91,7 +91,7 @@
                       {% endfor %}
                     </div>
                   {% endif %}
-                  
+
                   <div class="d-flex justify-content-between mt-4">
                     {% if is_update %}
                       <a href="{% url 'quizzes:quiz_detail' quiz.id %}" class="btn btn-secondary">취소</a>
@@ -110,13 +110,13 @@
           </div>
         </div>
       </div>
-      
+
       {% block extra_js %}
       <script>
         // 정답 체크박스 중 하나만 선택되도록 함
         document.addEventListener('DOMContentLoaded', function() {
           const correctCheckboxes = document.querySelectorAll('input[name$="-is_correct"]');
-          
+
           correctCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', function() {
               if (this.checked) {
