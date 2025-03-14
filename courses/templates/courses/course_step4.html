@@ -90,13 +90,13 @@
     {% for section in sections %}
         <div class="section">
             <h3>📌 {{ section.title }}</h3>
-            
+
             {% if section.lessons_list %}
                 {% for lesson in section.lessons_list %}
                     <div class="lesson-item">
                         <h4>📚 {{ lesson.title }}</h4>
                         <p>동영상 URL: {{ lesson.video_url }}</p>
-                        
+
                         {% if lesson.quiz %}
                             <p>
                                 <span class="quiz-badge">퀴즈 있음</span>
@@ -104,7 +104,7 @@
                                 <form method="post" style="display:inline;">
                                     {% csrf_token %}
                                     <input type="hidden" name="quiz_id" value="{{ lesson.quiz.id }}">
-                                    <button type="submit" name="delete_quiz" class="delete-quiz-btn" 
+                                    <button type="submit" name="delete_quiz" class="delete-quiz-btn"
                                             onclick="return confirm('정말로 이 퀴즈를 삭제하시겠습니까?');">
                                         퀴즈 삭제
                                     </button>
@@ -114,7 +114,7 @@
                             <button onclick="openAddModal('{{ lesson.id }}')" class="add-quiz-btn">➕ 퀴즈 추가</button>
                         {% endif %}
                     </div>
-                    
+
                     <!-- 퀴즈 추가 모달 -->
                     <div id="addModal{{ lesson.id }}" class="modal">
                         <div class="modal-content">
@@ -123,15 +123,15 @@
                             <form method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="lesson_id" value="{{ lesson.id }}">
-                                
+
                                 <p>
                                     <label for="title{{ lesson.id }}">퀴즈 제목</label><br>
-                                    <input type="text" id="title{{ lesson.id }}" name="title" required 
+                                    <input type="text" id="title{{ lesson.id }}" name="title" required
                                            placeholder="예: {{ lesson.title }} 이해도 확인 퀴즈" style="width: 100%;">
                                 </p>
                                 <p>
                                     <label for="description{{ lesson.id }}">퀴즈 설명 (선택사항)</label><br>
-                                    <textarea id="description{{ lesson.id }}" name="description" rows="3" 
+                                    <textarea id="description{{ lesson.id }}" name="description" rows="3"
                                               placeholder="이 퀴즈의 목적과 내용을 간략하게 설명해주세요." style="width: 100%;"></textarea>
                                 </p>
                                 <p>
@@ -144,7 +144,7 @@
                             </form>
                         </div>
                     </div>
-                    
+
                     <!-- 퀴즈 수정 모달 -->
                     {% if lesson.quiz %}
                     <div id="editModal{{ lesson.id }}" class="modal">
@@ -154,18 +154,18 @@
                             <form method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="lesson_id" value="{{ lesson.id }}">
-                                
+
                                 <p>
                                     <label for="edit_title{{ lesson.id }}">퀴즈 제목</label><br>
-                                    <input type="text" id="edit_title{{ lesson.id }}" name="title" required 
+                                    <input type="text" id="edit_title{{ lesson.id }}" name="title" required
                                            value="{{ lesson.quiz.title }}" style="width: 100%;">
                                 </p>
                                 <p>
                                     <label for="edit_description{{ lesson.id }}">퀴즈 설명 (선택사항)</label><br>
-                                    <textarea id="edit_description{{ lesson.id }}" name="description" rows="3" 
+                                    <textarea id="edit_description{{ lesson.id }}" name="description" rows="3"
                                               style="width: 100%;">{{ lesson.quiz.description }}</textarea>
                                 </p>
-                                
+
                                 <!-- 기존 문제 표시 -->
                                 {% with questions=lesson.quiz.questions.all %}
                                 {% if questions %}
@@ -182,13 +182,13 @@
                                 </div>
                                 {% endif %}
                                 {% endwith %}
-                                
+
                                 <p>
                                     <a href="{% url 'quizzes:question_create' quiz_id=lesson.quiz.id %}" target="_blank">
                                         문제 관리하기 >>
                                     </a>
                                 </p>
-                                
+
                                 <p>
                                     <button type="button" onclick="closeEditModal('{{ lesson.id }}')" style="margin-right: 10px;">취소</button>
                                     <button type="submit" name="create_quiz">퀴즈 수정</button>
@@ -203,7 +203,7 @@
             {% endif %}
         </div>
     {% endfor %}
-    
+
     <!-- 완료 버튼 -->
     <div style="text-align: center; margin-top: 30px;">
         <form method="post">
@@ -218,28 +218,28 @@
             </small>
         </p>
     </div>
-    
+
     <br><br>
     <a href="{% url 'courses:course_step3' %}">🔙 이전 단계로 돌아가기</a>
-    
+
     <script>
         // 모달 열기/닫기 함수
         function openAddModal(id) {
             document.getElementById('addModal' + id).style.display = 'block';
         }
-        
+
         function closeAddModal(id) {
             document.getElementById('addModal' + id).style.display = 'none';
         }
-        
+
         function openEditModal(id) {
             document.getElementById('editModal' + id).style.display = 'block';
         }
-        
+
         function closeEditModal(id) {
             document.getElementById('editModal' + id).style.display = 'none';
         }
-        
+
         // ESC 키를 누르면 모달 닫기
         window.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {

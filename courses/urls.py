@@ -1,11 +1,22 @@
 from django.urls import path
 
-from .views import (CourseDetailView, CourseListView, CourseStep1View,
-                    CourseStep2View, CourseStep3View, CourseStep4View,
-                    CourseUpdateView, InstructorDashboardView,
-                    LessonCreateView, LessonDeleteView, LessonDetailView,
-                    LessonUpdateView, SectionCreateView, SectionDeleteView,
-                    SectionUpdateView)
+from .views import (
+    CourseDetailView,
+    CourseListView,
+    CourseStep1View,
+    CourseStep2View,
+    CourseStep3View,
+    CourseStep4View,
+    CourseUpdateView,
+    InstructorDashboardView,
+    LessonCreateView,
+    LessonDeleteView,
+    LessonDetailView,
+    LessonUpdateView,
+    SectionCreateView,
+    SectionDeleteView,
+    SectionUpdateView,
+)
 
 app_name = "courses"
 
@@ -18,7 +29,7 @@ urlpatterns = [
     path("create/step1/", CourseStep1View.as_view(), name="course_step1"),
     path("create/step2/", CourseStep2View.as_view(), name="course_step2"),
     path("create/step3/", CourseStep3View.as_view(), name="course_step3"),
-     path("create/step4/", CourseStep4View.as_view(), name="course_step4"),
+    path("create/step4/", CourseStep4View.as_view(), name="course_step4"),
     # ✅ 강사 대시보드 및 강의 수정
     path(
         "instructor/dashboard/",

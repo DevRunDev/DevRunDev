@@ -17,7 +17,7 @@
                 </div>
               {% endfor %}
             {% endif %}
-            
+
             <div class="card mb-4">
               <div class="card-header bg-primary text-white">
                 <h3 class="mb-0">퀴즈 결과 - {{ attempt.quiz.title }}</h3>
@@ -48,7 +48,7 @@
                 </div>
               </div>
             </div>
-            
+
             <div class="card">
               <div class="card-header bg-light">
                 <h5 class="mb-0">문제별 결과</h5>
@@ -64,12 +64,12 @@
                         <span class="badge bg-danger">오답</span>
                       {% endif %}
                     </h5>
-                    
+
                     <div class="ms-3">
                       <p><strong>선택한 답:</strong></p>
                       <ul class="list-group">
                         {% for choice in qa.question.choices.all %}
-                          <li class="list-group-item 
+                          <li class="list-group-item
                             {% if choice.id == qa.selected_choice.id and qa.is_correct %}list-group-item-success{% endif %}
                             {% if choice.id == qa.selected_choice.id and not qa.is_correct %}list-group-item-danger{% endif %}
                             {% if choice.is_correct and choice.id != qa.selected_choice.id %}list-group-item-success{% endif %}
@@ -93,7 +93,7 @@
                 {% endfor %}
               </div>
             </div>
-            
+
             <div class="mt-4 d-flex justify-content-between">
               <a href="{% url 'quizzes:quiz_detail' attempt.quiz.id %}" class="btn btn-secondary">퀴즈 상세 페이지로</a>
               <a href="{% url 'quizzes:quiz_take' attempt.quiz.id %}" class="btn btn-primary">다시 응시하기</a>
