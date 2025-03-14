@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>내 강의 목록</title>
+    <title>강사 대시보드</title>
 </head>
 <body>
     <h1>🚀 강사 대시보드</h1>
@@ -12,22 +12,24 @@
 
     <h2>📌 강의 상태</h2>
     <a href="{% url 'courses:instructor_dashboard' %}">전체 보기</a> |
-    <a href="?status=approved">✅ 승인된 강의</a> |
-    <a href="?status=review">⏳ 심사 중</a> |
-    <a href="?status=not_approved">❌ 반려된 강의</a>
+    <a href="?status=approved">✅ 승인된 강의 ({{ approved_courses }})</a> |
+    <a href="?status=review">⏳ 심사 중 ({{ review_courses }})</a> |
+    <a href="?status=not_approved">❌ 반려된 강의 ({{ rejected_courses }})</a>
 
-    <h2>📚 강의 목록</h2>
+    <h2>📚 내가 개설한 강의</h2>
     <ul>
-        {% for course in courses %}
+        {% for course in my_courses %}
             <li>
                 <a href="{% url 'courses:course_detail' course.id %}">{{ course.title }}</a>
                 ({{ course.get_status_display }})
+                <a href="{% url 'courses:course_edit' course.id %}" class="button">✏️ 수정</a>
             </li>
         {% empty %}
-            <li>📌 해당 상태의 강의가 없습니다.</li>
+            <li>📌 아직 개설한 강의가 없습니다.</li>
         {% endfor %}
     </ul>
 
+    <h2><a href="{% url 'enrollments:student_dashboard' %}" class="button">📖 수강 중인 강의</a></h2>
     <p><a href="{% url 'courses:course_list' %}">🔙 강의 목록으로 돌아가기</a></p>
 </body>
 </html>

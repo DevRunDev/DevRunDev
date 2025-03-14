@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 강의실</title>
+</head>
+<body>
+
+    <header>
+        <h1>📚 내 강의실</h1>
+        <nav>
+            <a href="{% url 'courses:course_list' %}">강의 목록 보러가기</a>
+        </nav>
+    </header>
+
+    <main>
+        <h2>🚀 진행 중인 강의</h2>
+        <ul>
+            {% for enrollment in in_progress_courses %}
+                <li>
+                    <a href="{% url 'courses:course_detail' enrollment.course.id %}">
+                        {{ enrollment.course.title }} - 진행률: {{ enrollment.progress|floatformat:2 }}%
+                    </a>
+                    <form action="{% url 'enrollments:cancel_enrollment' enrollment.course.id %}" method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit">❌ 수강 취소</button>
+                    </form>
+                </li>
+            {% empty %}
+                <p>진행 중인 강의가 없습니다.</p>
+            {% endfor %}
+        </ul>
+
+        <h2>🎓 완료된 강의</h2>
+        <ul>
+            {% for enrollment in completed_courses %}
+                <li>
+                    <a href="{% url 'courses:course_detail' enrollment.course.id %}">
+                        {{ enrollment.course.title }} - ✅ 완료됨
+                    </a>
+                </li>
+            {% empty %}
+                <p>완료된 강의가 없습니다.</p>
+            {% endfor %}
+        </ul>
+
+        <h2>📌 다음 영상 이어보기</h2>
+        <ul>
+            {% if last_watched_lessons %}
+                {% for enrollment in last_watched_lessons %}
+                    {% if enrollment.last_watched_lesson %}
+                        <li>
+                            <a href="{% url 'courses:lesson_detail' enrollment.last_watched_lesson.id %}">
+                                ▶ {{ enrollment.last_watched_lesson.title }} ({{ enrollment.course.title }})
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <p>📌 다음 강의가 없습니다.</p>  <!-- ✅ 모든 강의 완료 시 메시지 표시 -->
+            {% endif %}
+        </ul>
+    </main>
+
+    <!-- ✅ 강사만 볼 수 있는 강사 대시보드 링크 추가 -->
+    {% if request.user.is_authenticated and request.user.role == "Instructor" %}
+        <footer>
+            <p><a href="{% url 'courses:instructor_dashboard' %}">🚀 강사 대시보드로 돌아가기</a></p>
+        </footer>
+    {% endif %}
+
+</body>
+</html>

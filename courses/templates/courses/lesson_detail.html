@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -13,20 +12,53 @@
 
     <h1>{{ lesson.title }}</h1>
 
+    <!-- ✅ 유튜브 영상이 있을 경우 -->
     {% if lesson.video_url %}
         <iframe width="560" height="315" src="{{ lesson.video_url }}" frameborder="0" allowfullscreen></iframe>
     {% else %}
-        <p>🎥 등록된 영상이 없습니다.</p>
+        <p>⚠️ 이 레슨에는 등록된 영상이 없습니다.</p>
     {% endif %}
 
-    {% if lesson.quizzes.all %}
-        <div>
-        {% for quiz in lesson.quizzes.all %}
-            <a href="{% url 'quizzes:quiz_detail' quiz.id %}" class="btn btn-sm btn-outline-primary">
-                <i class="fas fa-question-circle"></i> 퀴즈
-            </a>
-        {% endfor %}
-        </div>
+    <!-- ✅ 퀴즈가 있는 경우 (학생만 표시) -->
+    {% if request.user.is_authenticated and request.user.role == "Student" %}
+        {% if lesson.quizzes.all %}
+            <div>
+                <h3>📌 이 레슨과 관련된 퀴즈</h3>
+                {% for quiz in lesson.quizzes.all %}
+                    <a href="{% url 'quizzes:quiz_detail' quiz.id %}" class="button">
+                        📝 {{ quiz.title }} 풀기
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>❌ 이 레슨과 관련된 퀴즈가 없습니다.</p>
+        {% endif %}
     {% endif %}
+
+    <!-- ✅ 수강 완료 버튼 -->
+    {% if request.user != lesson.section.course.instructor %}
+        <form id="complete-form" action="{% url 'enrollments:lesson_complete' lesson.id %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="button" onclick="return confirm('정말 이 레슨을 완료하셨습니까?');">
+                ✅ 수강 완료
+            </button>
+        </form>
+    {% endif %}
+
+
+    <!-- ✅ 이전/다음 레슨 이동 버튼 -->
+    {% if previous_lesson %}
+        <a href="{% url 'courses:lesson_detail' previous_lesson.id %}" class="button">이전 영상으로 이동</a>
+    {% endif %}
+
+    {% if next_lesson %}
+        <a href="{% url 'courses:lesson_detail' next_lesson.id %}" class="button">다음 영상으로 이동</a>
+    {% endif %}
+
+    <!-- ✅ 모든 레슨 완료 여부 확인 -->
+    {% if not next_lesson and lesson.id in completed_lessons %}
+        <p>🎉 이 강의의 모든 레슨을 완료했습니다!</p>
+    {% endif %}
+
 </body>
 </html>

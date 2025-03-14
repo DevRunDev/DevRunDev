@@ -1,52 +1,66 @@
+import decimal
+
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 from courses.models import Course, Lesson
 
 
 class Enrollment(models.Model):
-    """수강 신청 모델 (학생이 강의를 신청하고 진행 상태를 관리)"""
+    """✅ 수강 신청 모델 (학생이 강의를 신청하고 진행 상태를 관리)"""
 
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="enrollments")
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="enrollments")
-    enrolled_at = models.DateTimeField(auto_now_add=True)  # 수강 신청 날짜
-    progress = models.FloatField(default=0.0)  # 강의 전체 진행률 (0% ~ 100%)
-    status = models.CharField(
-        max_length=20, choices=[("in_progress", "수강 중"), ("completed", "완료")], default="in_progress"
-    )
+    enrolled_at = models.DateTimeField(auto_now_add=True)
+    last_updated_at = models.DateTimeField(auto_now=True)
+    progress = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)  # ✅ 소수점 2자리까지 저장
+
+    STATUS_CHOICES = [
+        ("in_progress", "수강 중"),
+        ("completed", "완료"),
+        ("dropped", "수강 취소"),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="in_progress")
+
     last_watched_lesson = models.ForeignKey(
         Lesson, on_delete=models.SET_NULL, null=True, blank=True, related_name="last_watched"
-    )  # 마지막으로 본 레슨 (이어보기 기능)
+    )
 
     class Meta:
-        unique_together = ("student", "course")  # 중복 수강 방지
+        unique_together = ("student", "course")
 
     def update_progress(self):
-        """✅ 전체 강의 진행률 업데이트 (수강한 레슨 기준)"""
-        total_lessons = self.course.lessons.count()
+        """✅ 전체 강의 진행률 업데이트 (완료된 레슨 기준, 최적화 적용)"""
         completed_lessons = LessonProgress.objects.filter(
-            student=self.student, lesson__course=self.course, completed=True
-        ).count()
+            student=self.student, lesson__section__course=self.course, completed=True
+        ).count()  # ✅ 올바르게 LessonProgress에서 가져오기
+
+        total_lessons = Lesson.objects.filter(section__course=self.course).count()
 
         if total_lessons > 0:
-            self.progress = (completed_lessons / total_lessons) * 100
+            new_progress = (completed_lessons / total_lessons) * 100
+            self.progress = decimal.Decimal(new_progress).quantize(
+                decimal.Decimal("0.01"), rounding=decimal.ROUND_HALF_UP
+            )
         else:
-            self.progress = 0
+            self.progress = decimal.Decimal("0.00")
 
         if self.progress == 100:
-            self.status = "completed"  # 강의가 모두 완료되면 상태 변경
+            self.status = "completed"
         self.save()
 
-    def update_last_watched(self, lesson):
-        """✅ 마지막 학습한 레슨을 업데이트 (이어보기 기능)"""
-        self.last_watched_lesson = lesson
-        self.save()
-
-    def re_enroll(self):
-        """✅ 강의 재수강 기능 (완료 후 다시 학습 가능)"""
-        self.progress = 0
+    def reset_progress(self):
+        """✅ 강의 재수강 (모든 진행률 초기화, 최적화 적용)"""
+        self.progress = decimal.Decimal("0.00")
         self.status = "in_progress"
-        LessonProgress.objects.filter(student=self.student, lesson__course=self.course).update(completed=False)
+        self.last_watched_lesson = None
+
+        # ✅ 완료된 레슨만 업데이트하여 불필요한 DB 연산 방지
+        LessonProgress.objects.filter(student=self.student, lesson__section__course=self.course, completed=True).update(
+            completed=False, completed_at=None
+        )
+
         self.save()
 
     def __str__(self):
@@ -58,11 +72,29 @@ class LessonProgress(models.Model):
 
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="lesson_progress")
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name="progress")
-    completed = models.BooleanField(default=False)  # 레슨 완료 여부
-    last_watched_at = models.DateTimeField(auto_now=True)  # 마지막 학습 시간
+    completed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    last_watched_at = models.DateTimeField(null=True, blank=True)  # ✅ auto_now=True 제거
 
     class Meta:
-        unique_together = ("student", "lesson")  # 같은 레슨을 중복 저장 방지
+        unique_together = ("student", "lesson")
+
+    def mark_completed(self):
+        """✅ 레슨 완료 처리"""
+        if not self.completed:
+            self.completed = True
+            self.completed_at = timezone.now()
+            self.save()
+
+            # ✅ 강의 진행률 업데이트
+            enrollment = Enrollment.objects.filter(student=self.student, course=self.lesson.section.course).first()
+            if enrollment:
+                enrollment.update_progress()
+
+    def update_last_watched(self):
+        """✅ 마지막 시청한 시간 갱신 (불필요한 업데이트 방지)"""
+        self.last_watched_at = timezone.now()
+        self.save()
 
     def __str__(self):
         return f"{self.student.username} - {self.lesson.title} ({'완료' if self.completed else '진행 중'})"

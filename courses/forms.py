@@ -56,6 +56,5 @@ class LessonForm(forms.ModelForm):
         video_id = match.group(6)
         embed_url = f"https://www.youtube.com/embed/{video_id}"
 
-        # ✅ 변환된 URL을 저장
         self.cleaned_data["video_url"] = embed_url
         return embed_url

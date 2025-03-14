@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import DetailView, ListView, UpdateView
 
-from enrollments.models import Enrollment
+from enrollments.models import Enrollment, LessonProgress
 from quizzes.forms import QuizForm
 from quizzes.models import Quiz
 
@@ -34,7 +34,7 @@ class CourseDetailView(DetailView):
     context_object_name = "course"
 
     def get_queryset(self):
-        """모든 사용자가 승인된 강의에 접근할 수 있도록 설정"""
+        """✅ 모든 사용자가 승인된 강의에 접근할 수 있도록 설정"""
         queryset = Course.objects.filter(status="approved")
         if self.request.user.is_authenticated and self.request.user.role == "Instructor":
             queryset = Course.objects.all()  # ✅ 강사는 모든 강의 조회 가능
@@ -43,22 +43,34 @@ class CourseDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         course = self.get_object()
-        sections = Section.objects.filter(course=course).order_by("order")
 
+        # ✅ 강의에 속한 섹션과 레슨 가져오기
+        sections = Section.objects.filter(course=course).order_by("order")
         for section in sections:
             section.lessons_detail = Lesson.objects.filter(section=section).order_by("order")
-
         context["sections"] = sections
+
+        # ✅ 기본 설정
+        context["is_enrolled"] = False
+        context["progress"] = 0  # ✅ 기본값을 0으로 설정
+        context["completed_lessons"] = set()  # ✅ 완료된 레슨 목록을 저장할 Set
 
         if self.request.user.is_authenticated:
             # ✅ 강사는 항상 수강 상태를 True로 설정 (수강 신청 없이 레슨 접근 가능)
             if self.request.user == course.instructor:
                 context["is_enrolled"] = True
             else:
-                # ✅ 학생이나 기타 사용자는 실제 수강 여부 확인
-                context["is_enrolled"] = Enrollment.objects.filter(student=self.request.user, course=course).exists()
-        else:
-            context["is_enrolled"] = False
+                # ✅ 학생이 수강 중인지 확인
+                enrollment = Enrollment.objects.filter(student=self.request.user, course=course).first()
+                if enrollment:
+                    context["is_enrolled"] = True
+                    context["progress"] = enrollment.progress  # ✅ 진행률 반영
+
+                    # ✅ 사용자가 완료한 레슨 목록을 가져와 저장
+                    completed_lessons = LessonProgress.objects.filter(
+                        student=self.request.user, completed=True
+                    ).values_list("lesson_id", flat=True)
+                    context["completed_lessons"] = set(completed_lessons)  # ✅ Set으로 변환하여 빠른 조회 가능
 
         return context
 
@@ -73,16 +85,48 @@ class LessonDetailView(LoginRequiredMixin, DetailView):
         lesson = self.get_object()
         course = lesson.section.course
 
-        # ✅ 강사가 자신의 강의라면 접근 허용
-        if request.user == course.instructor:
-            return super().dispatch(request, *args, **kwargs)
-
-        # ✅ 일반 사용자는 수강 여부 확인 후 접근 가능
-        if not Enrollment.objects.filter(student=request.user, course=course).exists():
+        # ✅ 강사는 항상 접근 가능, 학생은 수강 여부 확인 후 접근
+        if (
+            request.user != course.instructor
+            and not Enrollment.objects.filter(student=request.user, course=course).exists()
+        ):
             messages.warning(request, "이 강의의 레슨을 보려면 먼저 수강 신청을 해야 합니다.")
-            return redirect("enrollments:enroll_required", course_id=course.id)
+            return redirect("enrollments:enroll_course", course_id=course.id)
 
         return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        """✅ 이전 레슨 및 다음 레슨 찾기 + 완료된 레슨 목록 추가"""
+        context = super().get_context_data(**kwargs)
+        lesson = self.get_object()
+        section = lesson.section
+        course = section.course
+
+        # ✅ 완료된 레슨 목록 가져오기
+        completed_lessons = LessonProgress.objects.filter(student=self.request.user, completed=True).values_list(
+            "lesson_id", flat=True
+        )
+        context["completed_lessons"] = set(completed_lessons)  # ✅ 빠른 조회를 위해 Set 사용
+
+        # ✅ 다음 레슨 찾기 (현재 섹션 내)
+        next_lesson = (
+            Lesson.objects.filter(section=section, order__gt=lesson.order).order_by("order").first()
+            or Lesson.objects.filter(section__course=course, section__order__gt=section.order)
+            .order_by("section__order", "order")
+            .first()
+        )
+
+        # ✅ 이전 레슨 찾기 (현재 섹션 내)
+        previous_lesson = (
+            Lesson.objects.filter(section=section, order__lt=lesson.order).order_by("-order").first()
+            or Lesson.objects.filter(section__course=course, section__order__lt=section.order)
+            .order_by("-section__order", "-order")
+            .first()
+        )
+
+        context["next_lesson"] = next_lesson
+        context["previous_lesson"] = previous_lesson
+        return context
 
 
 class CourseStep1View(LoginRequiredMixin, View):
@@ -372,28 +416,29 @@ class CourseStep4View(LoginRequiredMixin, View):
 
 
 class InstructorDashboardView(LoginRequiredMixin, View):
-    """강사 대시보드 - 내 강의 목록 및 상태별 필터링"""
+    """✅ 강사 대시보드 (내가 만든 강의 + 내가 수강한 강의)"""
 
     def get(self, request):
         if not request.user.is_instructor():
-            messages.error(
-                request,
-                "강사만 접근할 수 있는 페이지입니다. 강사 계정으로 로그인해주세요.",
-            )
+            messages.error(request, "강사만 접근할 수 있는 페이지입니다.")
             return redirect("courses:course_list")
 
         status_filter = request.GET.get("status")
-        courses = Course.objects.filter(instructor=request.user)
+        my_courses = Course.objects.filter(instructor=request.user)
+
+        # ✅ 강사가 수강한 강의 목록 (본인이 만든 강의 제외)
+        enrolled_courses = Enrollment.objects.filter(student=request.user).exclude(course__instructor=request.user)
 
         if status_filter in ["approved", "review", "not_approved"]:
-            courses = courses.filter(status=status_filter)
+            my_courses = my_courses.filter(status=status_filter)
 
-        # ✅ 최적화된 상태별 개수 조회 (한 번의 쿼리로 가져오기)
+        # ✅ 상태별 강의 개수 조회 (쿼리 최적화)
         course_counts = Course.objects.filter(instructor=request.user).values("status").annotate(count=Count("status"))
         status_counts = {item["status"]: item["count"] for item in course_counts}
 
         context = {
-            "courses": courses,
+            "my_courses": my_courses,
+            "enrolled_courses": enrolled_courses,
             "total_courses": sum(status_counts.values()),
             "approved_courses": status_counts.get("approved", 0),
             "review_courses": status_counts.get("review", 0),

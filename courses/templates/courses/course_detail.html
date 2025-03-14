@@ -7,16 +7,19 @@
 </head>
 <body>
     <header>
-        <a href="{% url 'courses:course_list' %}">강의 목록</a>
+        <a href="{% url 'courses:course_list' %}">← 강의 목록</a>
     </header>
 
     <h1>{{ course.title }}</h1>
 
+    <!-- ✅ 강사인 경우 -->
     {% if request.user == course.instructor %}
+        <p>🔹 이 강의는 당신이 만든 강의입니다.</p>
         <p><a href="{% url 'courses:course_edit' course.id %}" class="button">✏️ 강의 수정</a></p>
+        <p><a href="{% url 'courses:instructor_dashboard' %}" class="button">🎛 내 강의 관리</a></p>
     {% endif %}
 
-    <p>강사: {{ course.instructor.username }}</p>
+    <p>👨‍🏫 강사: {{ course.instructor.username }}</p>
     <p>{{ course.description }}</p>
 
     <p>
@@ -28,30 +31,44 @@
         {% endif %}
     </p>
 
+    <!-- ✅ 로그인하지 않은 경우 -->
     {% if not request.user.is_authenticated %}
         <p>
-            로그인 후 수강 신청하세요.
-            <a href="{% url 'account_login' %}">로그인</a>
+            🔐 로그인 후 수강 신청하세요.
+            <a href="{% url 'account_login' %}">🔑 로그인</a>
         </p>
+
+    <!-- ✅ 강사가 아닌 경우 (수강 신청 / 진행률 표시) -->
     {% elif request.user != course.instructor %}
 
         {% if not is_enrolled %}
+            <!-- ✅ 수강 신청 버튼 -->
             <form action="{% url 'enrollments:enroll_course' course.id %}" method="POST">
                 {% csrf_token %}
                 <button type="submit" class="button">📚 수강 신청</button>
             </form>
         {% else %}
-            {% with first_lesson=sections.0.lessons_detail.0 %}
-                {% if first_lesson %}
-                    <a href="{% url 'courses:lesson_detail' first_lesson.id %}" class="button">▶ 학습 시작하기</a>
-                {% else %}
-                    <p>레슨이 없습니다.</p>
-                {% endif %}
-            {% endwith %}
+            <!-- ✅ 진행률 표시 -->
+            <p>📊 진행률: {{ progress|floatformat:2 }}%</p>
+
+            {% if progress == 100 %}
+                <p>🎉 강의를 완료했습니다!</p>
+            {% endif %}
+
+            <!-- ✅ 학생 대시보드로 이동 -->
+            <p>
+                <a href="{% url 'enrollments:student_dashboard' %}" class="button">📚 내 강의실</a>
+            </p>
+
+            <!-- ✅ 수강 취소 버튼 -->
+            <form action="{% url 'enrollments:cancel_enrollment' course.id %}" method="POST" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="button">❌ 수강 취소</button>
+            </form>
         {% endif %}
     {% endif %}
 
-    <h2>커리큘럼</h2>
+    <h2>📖 커리큘럼</h2>
     <ul>
         {% for section in sections %}
             <li>
@@ -59,9 +76,14 @@
                 <ul>
                     {% for lesson in section.lessons_detail %}
                         {% if is_enrolled or request.user == course.instructor %}
-                            <li>📖 <a href="{% url 'courses:lesson_detail' lesson.id %}">{{ lesson.title }}</a></li>
+                            <li>
+                                {% if lesson.id in completed_lessons %}
+                                    ✅
+                                {% endif %}
+                                <a href="{% url 'courses:lesson_detail' lesson.id %}">{{ lesson.title }}</a>
+                            </li>
                         {% else %}
-                            <li>📖 <a href="{% url 'enrollments:enroll_required' course.id %}">수강 신청 후 시청 가능</a></li>
+                            <li>📖 <a href="{% url 'enrollments:enroll_course' course.id %}">🔒 수강 신청 후 시청 가능</a></li>
                         {% endif %}
                     {% endfor %}
                 </ul>
@@ -71,6 +93,6 @@
         {% endfor %}
     </ul>
 
-    <a href="{% url 'courses:course_list' %}">강의 목록으로 돌아가기</a>
+    <a href="{% url 'courses:course_list' %}">🔙 강의 목록으로 돌아가기</a>
 </body>
 </html>
