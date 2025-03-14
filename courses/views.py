@@ -6,6 +6,7 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import DetailView, ListView, UpdateView
 
+from enrollments.models import Enrollment
 from quizzes.forms import QuizForm
 from quizzes.models import Quiz
 
@@ -33,10 +34,10 @@ class CourseDetailView(DetailView):
     context_object_name = "course"
 
     def get_queryset(self):
-        """강사는 자신의 강의를 모두 조회 가능, 일반 사용자는 승인된 강의만 조회 가능"""
-        queryset = Course.objects.all()
-        if not self.request.user.is_authenticated or not self.request.user.is_instructor:
-            queryset = queryset.filter(status="approved")
+        """모든 사용자가 승인된 강의에 접근할 수 있도록 설정"""
+        queryset = Course.objects.filter(status="approved")
+        if self.request.user.is_authenticated and self.request.user.role == "Instructor":
+            queryset = Course.objects.all()  # ✅ 강사는 모든 강의 조회 가능
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -45,9 +46,20 @@ class CourseDetailView(DetailView):
         sections = Section.objects.filter(course=course).order_by("order")
 
         for section in sections:
-            section.lessons_list = Lesson.objects.filter(section=section).order_by("order")
+            section.lessons_detail = Lesson.objects.filter(section=section).order_by("order")
 
         context["sections"] = sections
+
+        if self.request.user.is_authenticated:
+            # ✅ 강사는 항상 수강 상태를 True로 설정 (수강 신청 없이 레슨 접근 가능)
+            if self.request.user == course.instructor:
+                context["is_enrolled"] = True
+            else:
+                # ✅ 학생이나 기타 사용자는 실제 수강 여부 확인
+                context["is_enrolled"] = Enrollment.objects.filter(student=self.request.user, course=course).exists()
+        else:
+            context["is_enrolled"] = False
+
         return context
 
 
@@ -56,8 +68,21 @@ class LessonDetailView(LoginRequiredMixin, DetailView):
     template_name = "courses/lesson_detail.html"
     context_object_name = "lesson"
 
-    def get_queryset(self):
-        return Lesson.objects.all()
+    def dispatch(self, request, *args, **kwargs):
+        """🚨 수강하지 않은 사용자는 레슨 상세 페이지 접근 불가 (단, 강사는 예외)"""
+        lesson = self.get_object()
+        course = lesson.section.course
+
+        # ✅ 강사가 자신의 강의라면 접근 허용
+        if request.user == course.instructor:
+            return super().dispatch(request, *args, **kwargs)
+
+        # ✅ 일반 사용자는 수강 여부 확인 후 접근 가능
+        if not Enrollment.objects.filter(student=request.user, course=course).exists():
+            messages.warning(request, "이 강의의 레슨을 보려면 먼저 수강 신청을 해야 합니다.")
+            return redirect("enrollments:enroll_required", course_id=course.id)
+
+        return super().dispatch(request, *args, **kwargs)
 
 
 class CourseStep1View(LoginRequiredMixin, View):
@@ -390,7 +415,7 @@ class CourseUpdateView(LoginRequiredMixin, UpdateView):
         course = self.get_object()
 
         # ✅ 강사가 아닌 경우 접근 제한
-        if not hasattr(request.user, "userrole") or request.user.userrole.role != "instructor":
+        if request.user.role.lower() != "instructor":
             messages.error(request, "강사만 강의를 수정할 수 있습니다.")
             return redirect("courses:course_list")  # ✅ 일반 사용자는 강의 목록으로 리디렉션
 

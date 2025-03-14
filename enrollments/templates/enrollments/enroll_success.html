@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수강 신청 완료</title>
+</head>
+<body>
+    <h1>✅ 수강 신청이 완료되었습니다!</h1>
+    <p>강의 <strong>{{ course.title }}</strong>에 대한 수강 신청이 성공적으로 완료되었습니다.</p>
+    <p>이제 강의를 학습할 수 있습니다.</p>
+    <a href="{% url 'courses:course_detail' course.id %}">📖 강의 상세 페이지로 이동</a>
+</body>
+</html>
