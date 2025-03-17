@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수강 정보 - {{ enrollment.course.title }}</title>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-10 offset-md-1">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">{{ enrollment.course.title }}</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>{{ enrollment.course.description|linebreaks }}</p>
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong>강사:</strong> {{ enrollment.course.instructor.username }}
+                                <br><strong>수강 신청일:</strong> {{ enrollment.enrolled_at|date:"Y-m-d" }}
+                                <br><strong>진행률:</strong> {{ enrollment.progress|floatformat:1 }}%
+                            </div>
+                            <div>
+                                <strong>상태:</strong> {{ enrollment.get_status_display }}
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            {% if is_completed %}
+                                <div class="alert alert-success">
+                                    <h5 class="alert-heading">강의 수료 완료!</h5>
+                                    <p>축하합니다! 이 강의의 모든 내용을 성공적으로 수료하셨습니다.</p>
+                                    
+                                    {% if certificate %}
+                                        <hr>
+                                        <p>수료증 번호: {{ certificate.certificate_id }}</p>
+                                        <p>발급일: {{ certificate.issued_at|date:"Y-m-d" }}</p>
+                                        <div class="mt-2">
+                                            <a href="{% url 'enrollments:view_certificate' certificate_id=certificate.certificate_id %}" class="btn btn-info">
+                                                수료증 보기
+                                            </a>
+                                            <a href="{% url 'enrollments:download_certificate' certificate_id=certificate.certificate_id %}" class="btn btn-primary">
+                                                수료증 인쇄하기
+                                            </a>
+                                        </div>
+                                    {% else %}
+                                        <a href="{% url 'enrollments:generate_certificate' enrollment_id=enrollment.id %}" class="btn btn-primary">
+                                            수료증 발급받기
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <h5 class="alert-heading">아직 완료되지 않았습니다</h5>
+                                    <p>수료증을 발급받으려면 모든 강의 영상을 시청하고 모든 퀴즈를 완료해야 합니다.</p>
+                                    <p><strong>완료된 강의:</strong> {{ enrollment.progress|floatformat:1 }}%</p>
+                                    <a href="{% url 'courses:course_detail' enrollment.course.id %}" class="btn btn-primary">
+                                        계속 학습하기
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{% url 'enrollments:student_dashboard' %}" class="btn btn-secondary">내 강의실로 돌아가기</a>
+                    <a href="{% url 'courses:course_detail' enrollment.course.id %}" class="btn btn-primary">강의 페이지로 이동</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
