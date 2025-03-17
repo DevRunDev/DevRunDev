@@ -7,17 +7,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('enrollments', '0003_alter_enrollment_progress_and_more'),
+        ("enrollments", "0003_alter_enrollment_progress_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Certificate',
+            name="Certificate",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('issued_at', models.DateTimeField(auto_now_add=True)),
-                ('certificate_id', models.CharField(max_length=50, unique=True)),
-                ('enrollment', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='certificate', to='enrollments.enrollment')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("issued_at", models.DateTimeField(auto_now_add=True)),
+                ("certificate_id", models.CharField(max_length=50, unique=True)),
+                (
+                    "enrollment",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="certificate",
+                        to="enrollments.enrollment",
+                    ),
+                ),
             ],
         ),
     ]

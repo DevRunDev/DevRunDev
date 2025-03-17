@@ -17,7 +17,7 @@
                         </div>
                     {% endfor %}
                 {% endif %}
-                
+
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white">
                         <h3 class="mb-0">{{ enrollment.course.title }}</h3>
@@ -34,13 +34,13 @@
                                 <strong>상태:</strong> {{ enrollment.get_status_display }}
                             </div>
                         </div>
-                        
+
                         <div class="mt-4">
                             {% if is_completed %}
                                 <div class="alert alert-success">
                                     <h5 class="alert-heading">강의 수료 완료!</h5>
                                     <p>축하합니다! 이 강의의 모든 내용을 성공적으로 수료하셨습니다.</p>
-                                    
+
                                     {% if certificate %}
                                         <hr>
                                         <p>수료증 번호: {{ certificate.certificate_id }}</p>
@@ -72,7 +72,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="mt-4">
                     <a href="{% url 'enrollments:student_dashboard' %}" class="btn btn-secondary">내 강의실로 돌아가기</a>
                     <a href="{% url 'courses:course_detail' enrollment.course.id %}" class="btn btn-primary">강의 페이지로 이동</a>

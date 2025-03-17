@@ -81,7 +81,7 @@
             <div class="title">수료증</div>
             <div class="subtitle">Certificate of Completion</div>
         </div>
-        
+
         <div class="content">
             <div class="recipient">{{ certificate.enrollment.student.username }}</div>
             <div class="statement">
@@ -92,7 +92,7 @@
                 {{ certificate.enrollment.course.title }}
             </div>
         </div>
-        
+
         <div class="footer">
             <div>
                 발급일: {{ certificate.issued_at|date:"Y년 m월 d일" }}
@@ -106,9 +106,9 @@
             </div>
         </div>
     </div>
-    
+
     <button onclick="window.print()" class="print-button">인쇄하기</button>
-    
+
     <script>
         // 자동 인쇄 다이얼로그 표시 (인쇄 모드일 때)
         {% if print_mode %}

@@ -121,19 +121,19 @@
             {{ certificate.enrollment.course.title }} 과정을 성공적으로 수료하셨습니다.
             아래에서 수료증을 확인하고 인쇄할 수 있습니다.
         </p>
-        
+
         <div class="button-group">
             <a href="{% url 'enrollments:download_certificate' certificate_id=certificate.certificate_id %}" class="btn btn-primary">수료증 인쇄하기</a>
             <a href="{% url 'enrollments:student_dashboard' %}" class="btn btn-secondary">내 강의실로 돌아가기</a>
         </div>
-        
+
         <div class="certificate-container">
             <div class="border-pattern"></div>
             <div class="header">
                 <div class="title">수료증</div>
                 <div class="subtitle">Certificate of Completion</div>
             </div>
-            
+
             <div class="content">
                 <div class="recipient">{{ certificate.enrollment.student.username }}</div>
                 <div class="statement">
@@ -144,7 +144,7 @@
                     {{ certificate.enrollment.course.title }}
                 </div>
             </div>
-            
+
             <div class="footer">
                 <div class="date">
                     발급일: {{ certificate.issued_at|date:"Y년 m월 d일" }}

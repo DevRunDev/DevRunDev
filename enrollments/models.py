@@ -72,30 +72,29 @@ class Enrollment(models.Model):
         # 모든 레슨이 완료되었는지 확인
         course_lessons = Lesson.objects.filter(section__course=self.course)
         total_lessons = course_lessons.count()
-        
+
         if total_lessons == 0:
             return False
-        
+
         completed_lessons = LessonProgress.objects.filter(
-            student=self.student,
-            lesson__section__course=self.course,
-            completed=True
+            student=self.student, lesson__section__course=self.course, completed=True
         ).count()
-        
+
         # 모든 퀴즈가 완료되었는지 확인
         course_quizzes = Quiz.objects.filter(course=self.course)
         total_quizzes = course_quizzes.count()
-        
+
         # 퀴즈가 없는 경우 레슨 완료만으로 수료 가능
         if total_quizzes == 0:
             return completed_lessons == total_lessons
-        
-        completed_quizzes = QuizAttempt.objects.filter(
-            quiz__course=self.course,
-            student=self.student,
-            is_completed=True
-        ).values('quiz').distinct().count()
-        
+
+        completed_quizzes = (
+            QuizAttempt.objects.filter(quiz__course=self.course, student=self.student, is_completed=True)
+            .values("quiz")
+            .distinct()
+            .count()
+        )
+
         # 모든 레슨과 퀴즈가 완료되었는지 확인
         return (completed_lessons == total_lessons) and (completed_quizzes == total_quizzes)
 
@@ -104,23 +103,24 @@ class Enrollment(models.Model):
         # 이미 수료증이 있는지 확인
         from enrollments.models import Certificate
 
-        
         try:
             return self.certificate
         except Certificate.DoesNotExist:
             # 수료 조건 확인
             if not self.is_course_completed():
                 return None
-            
+
             # 수료증 생성
             from .models import Certificate
+
             certificate = Certificate.objects.create(enrollment=self)
-            
+
             # 상태 업데이트
-            self.status = 'completed'
+            self.status = "completed"
             self.save()
-            
+
             return certificate
+
 
 class LessonProgress(models.Model):
     """✅ 레슨 학습 진행 모델 (학생이 특정 레슨을 완료했는지 기록)"""
@@ -154,20 +154,22 @@ class LessonProgress(models.Model):
     def __str__(self):
         return f"{self.student.username} - {self.lesson.title} ({'완료' if self.completed else '진행 중'})"
 
+
 class Certificate(models.Model):
     """수료증 모델"""
-    enrollment = models.OneToOneField(Enrollment, on_delete=models.CASCADE, related_name='certificate')
+
+    enrollment = models.OneToOneField(Enrollment, on_delete=models.CASCADE, related_name="certificate")
     issued_at = models.DateTimeField(auto_now_add=True)
     certificate_id = models.CharField(max_length=50, unique=True)
-    
+
     def __str__(self):
         return f"{self.enrollment.student.email} - {self.enrollment.course.title} 수료증"
-    
+
     def save(self, *args, **kwargs):
         # 처음 생성될 때 고유한 수료증 ID 생성
         if not self.certificate_id:
             import uuid
 
             # 'CERT-' 접두사와 UUID를 사용하여 고유한 ID 생성
-            self.certificate_id = f'CERT-{uuid.uuid4().hex[:12].upper()}'
+            self.certificate_id = f"CERT-{uuid.uuid4().hex[:12].upper()}"
         super().save(*args, **kwargs)

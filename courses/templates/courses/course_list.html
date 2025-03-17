@@ -37,6 +37,10 @@
                     <a href="{% url 'courses:course_detail' course.id %}">{{ course.title }}</a>
                 </h2>
                 <p>강사: {{ course.instructor.username }}</p>
+
+                <!-- ✅ 평균 별점 표시 -->
+                <p>⭐ 평균 별점: {{ course.avg_rating|default:"0.0"|floatformat:1 }} / 5.0</p>
+
                 <p>
                     가격:
                     {% if course.price == 0 %}
@@ -45,6 +49,7 @@
                         <strong>₩{{ course.price }}</strong>
                     {% endif %}
                 </p>
+
                 {% if request.user == course.instructor and course.status == "not_approved" %}
                     <a href="{% url 'courses:course_edit' course.id %}" class="button">수정</a>
                 {% endif %}

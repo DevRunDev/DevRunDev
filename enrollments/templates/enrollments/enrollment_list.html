@@ -10,7 +10,7 @@
         <div class="row">
             <div class="col-md-10 offset-md-1">
                 <h2 class="mb-4">내 수강 목록</h2>
-                
+
                 {% if messages %}
                     {% for message in messages %}
                         <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
@@ -19,7 +19,7 @@
                         </div>
                     {% endfor %}
                 {% endif %}
-                
+
                 {% if enrollments %}
                     <div class="card">
                         <div class="card-header bg-light">
@@ -33,7 +33,7 @@
                                             <h5 class="mb-1">{{ enrollment.course.title }}</h5>
                                             <p class="mb-1 text-muted">강사: {{ enrollment.course.instructor.username }}</p>
                                             <small>
-                                                수강 신청일: {{ enrollment.enrolled_at|date:"Y-m-d" }} | 
+                                                수강 신청일: {{ enrollment.enrolled_at|date:"Y-m-d" }} |
                                                 진행률: {{ enrollment.progress|floatformat:1 }}%
                                             </small>
                                         </div>
@@ -47,7 +47,7 @@
                                             {% else %}
                                                 <span class="badge bg-secondary">시작됨</span>
                                             {% endif %}
-                                            
+
                                             {% if enrollment.certificate %}
                                                 <span class="badge bg-warning text-dark">수료증 발급됨</span>
                                             {% endif %}
@@ -63,7 +63,7 @@
                         <a href="{% url 'courses:course_list' %}" class="btn btn-primary">강의 찾아보기</a>
                     </div>
                 {% endif %}
-                
+
                 <div class="mt-3">
                     <a href="{% url 'courses:course_list' %}" class="btn btn-secondary">강의 목록으로</a>
                 </div>
