@@ -4,6 +4,7 @@ repos:
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
+        exclude: "^requirements.txt$"  # ✅ requirements.txt에서는 실행되지 않음
       - id: trailing-whitespace
   - repo: https://github.com/psf/black
     rev: 25.1.0
