@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count
+from django.db.models import Avg, Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views import View
@@ -9,6 +9,7 @@ from django.views.generic import DetailView, ListView, UpdateView
 from enrollments.models import Enrollment, LessonProgress
 from quizzes.forms import QuizForm
 from quizzes.models import Quiz
+from reviews.models import Review
 
 from .forms import CourseForm, LessonForm, SectionForm
 from .models import Course, Lesson, Section
@@ -21,7 +22,8 @@ class CourseListView(ListView):
     ordering = ["-created_at"]
 
     def get_queryset(self):
-        queryset = Course.objects.filter(status="approved")
+        """✅ 승인된 강의만 조회하고, 평균 별점 계산"""
+        queryset = Course.objects.filter(status="approved").annotate(avg_rating=Avg("reviews__rating"))
         search_query = self.request.GET.get("q")
         if search_query:
             queryset = queryset.filter(title__icontains=search_query)
@@ -36,7 +38,7 @@ class CourseDetailView(DetailView):
     def get_queryset(self):
         """✅ 모든 사용자가 승인된 강의에 접근할 수 있도록 설정"""
         queryset = Course.objects.filter(status="approved")
-        if self.request.user.is_authenticated and self.request.user.role == "Instructor":
+        if self.request.user.is_authenticated and self.request.user.is_instructor():
             queryset = Course.objects.all()  # ✅ 강사는 모든 강의 조회 가능
         return queryset
 
@@ -54,6 +56,9 @@ class CourseDetailView(DetailView):
         context["is_enrolled"] = False
         context["progress"] = 0  # ✅ 기본값을 0으로 설정
         context["completed_lessons"] = set()  # ✅ 완료된 레슨 목록을 저장할 Set
+        context["average_rating"] = (
+            course.reviews.aggregate(avg_rating=Avg("rating"))["avg_rating"] or 0
+        )  # ✅ 평균 별점 추가
 
         if self.request.user.is_authenticated:
             # ✅ 강사는 항상 수강 상태를 True로 설정 (수강 신청 없이 레슨 접근 가능)
@@ -71,6 +76,11 @@ class CourseDetailView(DetailView):
                         student=self.request.user, completed=True
                     ).values_list("lesson_id", flat=True)
                     context["completed_lessons"] = set(completed_lessons)  # ✅ Set으로 변환하여 빠른 조회 가능
+
+        # ✅ 학생이 이미 리뷰를 남겼는지 확인
+        context["has_reviewed"] = False  # 기본값 설정
+        if self.request.user.is_authenticated and not self.request.user.is_instructor():
+            context["has_reviewed"] = Review.objects.filter(course=course, user=self.request.user).exists()
 
         return context
 
