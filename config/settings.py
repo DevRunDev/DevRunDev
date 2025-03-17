@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.kakao",
+    "allauth.socialaccount.providers.naver",
     "debug_toolbar",
     "django_extensions",
     "accounts",
@@ -159,9 +160,17 @@ GOOGLE_CLIENT_SECRET = env("GOOGLE_CLIENT_SECRET", default="")
 KAKAO_CLIENT_ID = env("KAKAO_CLIENT_ID", default="")
 KAKAO_CLIENT_SECRET = env("KAKAO_CLIENT_SECRET", default="")
 
+NAVER_CLIENT_ID = env("NAVER_CLIENT_ID", default="")
+NAVER_CLIENT_SECRET = env("NAVER_CLIENT_SECRET", default="")
+
 if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
     raise ImproperlyConfigured("GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are required.")
 
+if not KAKAO_CLIENT_ID or not KAKAO_CLIENT_SECRET:
+    raise ImproperlyConfigured("KAKAO_CLIENT_ID and KAKAO_CLIENT_SECRET are required.")
+
+if not NAVER_CLIENT_ID or not NAVER_CLIENT_SECRET:
+    raise ImproperlyConfigured("NAVER_CLIENT_ID and NAVER_CLIENT_SECRET are required.")
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
@@ -186,6 +195,19 @@ SOCIALACCOUNT_PROVIDERS = {
         },
         "SCOPE": [
             "profile_nickname",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+    },
+    "naver": {
+        "APP": {
+            "client_id": NAVER_CLIENT_ID,
+            "secret": NAVER_CLIENT_SECRET,
+            "key": "",
+        },
+        "SCOPE": [
+            "name",
         ],
         "AUTH_PARAMS": {
             "access_type": "online",
