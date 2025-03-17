@@ -163,14 +163,15 @@ KAKAO_CLIENT_SECRET = env("KAKAO_CLIENT_SECRET", default="")
 NAVER_CLIENT_ID = env("NAVER_CLIENT_ID", default="")
 NAVER_CLIENT_SECRET = env("NAVER_CLIENT_SECRET", default="")
 
+# 수정된 코드 - 필요한 소셜 로그인만 활성화
 if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
-    raise ImproperlyConfigured("GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are required.")
-
-if not KAKAO_CLIENT_ID or not KAKAO_CLIENT_SECRET:
-    raise ImproperlyConfigured("KAKAO_CLIENT_ID and KAKAO_CLIENT_SECRET are required.")
+    print("Warning: GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are not set. Google login will be disabled.")
 
 if not NAVER_CLIENT_ID or not NAVER_CLIENT_SECRET:
-    raise ImproperlyConfigured("NAVER_CLIENT_ID and NAVER_CLIENT_SECRET are required.")
+    print("Warning: NAVER_CLIENT_ID and NAVER_CLIENT_SECRET are not set. Naver login will be disabled.")
+
+if not KAKAO_CLIENT_ID or not KAKAO_CLIENT_SECRET:
+    print("Warning: KAKAO_CLIENT_ID and KAKAO_CLIENT_SECRET are not set. Kakao login will be disabled.")
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
