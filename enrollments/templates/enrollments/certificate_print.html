@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수료증 인쇄 - {{ certificate.enrollment.course.title }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 2cm;
+            color: #333;
+        }
+        .certificate-container {
+            width: 100%;
+            height: 100%;
+            border: 2px solid #ccc;
+            padding: 2cm;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .header {
+            margin-bottom: 2cm;
+        }
+        .title {
+            font-size: 42px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 0.5cm;
+        }
+        .subtitle {
+            font-size: 24px;
+            color: #7f8c8d;
+        }
+        .recipient {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 1cm;
+        }
+        .statement {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 1cm;
+        }
+        .course-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2980b9;
+            margin: 0.5cm 0;
+        }
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3cm;
+            padding-top: 1cm;
+            border-top: 1px solid #eee;
+        }
+        .signature {
+            text-align: center;
+        }
+        .print-button {
+            display: {% if print_mode %}none{% else %}block{% endif %};
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate-container">
+        <div class="header">
+            <div class="title">수료증</div>
+            <div class="subtitle">Certificate of Completion</div>
+        </div>
+        
+        <div class="content">
+            <div class="recipient">{{ certificate.enrollment.student.username }}</div>
+            <div class="statement">
+                위 학습자는 DevRunDev 플랫폼에서 제공하는<br>
+                다음 과정을 성공적으로 이수하였음을 증명합니다.
+            </div>
+            <div class="course-title">
+                {{ certificate.enrollment.course.title }}
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div>
+                발급일: {{ certificate.issued_at|date:"Y년 m월 d일" }}
+            </div>
+            <div class="signature">
+                <div>{{ certificate.enrollment.course.instructor.username }}</div>
+                <div>강사</div>
+            </div>
+            <div>
+                증명서 ID: {{ certificate.certificate_id }}
+            </div>
+        </div>
+    </div>
+    
+    <button onclick="window.print()" class="print-button">인쇄하기</button>
+    
+    <script>
+        // 자동 인쇄 다이얼로그 표시 (인쇄 모드일 때)
+        {% if print_mode %}
+        window.onload = function() {
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        };
+        {% endif %}
+    </script>
+</body>
+</html>

@@ -1,12 +1,16 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views import View
+from django.views.generic import DetailView, ListView
 
 from courses.models import Course, Lesson, Section
+from quizzes.models import Quiz, QuizAttempt
 
-from .models import Enrollment, LessonProgress
+from .models import Certificate, Enrollment, LessonProgress
 
 
 class EnrollView(LoginRequiredMixin, View):
@@ -104,10 +108,26 @@ class StudentDashboardView(LoginRequiredMixin, View):
         enrollments = Enrollment.objects.filter(student=request.user)
 
         last_watched_lessons = []
+        completed_enrollments = []
 
         for enrollment in enrollments:
             # ✅ 강의 진행률 업데이트 로직 추가
             enrollment.update_progress()
+
+            # 수료증 확인
+            try:
+                certificate = enrollment.certificate
+                enrollment.has_certificate = True
+                enrollment.certificate_id = certificate.certificate_id
+            except Certificate.DoesNotExist:
+                enrollment.has_certificate = False
+                enrollment.certificate_id = None
+            
+            # 수료 완료 여부 확인
+            enrollment.is_completed = enrollment.is_course_completed()
+            
+            if enrollment.is_completed:
+                completed_enrollments.append(enrollment)
 
             # ✅ 다음 이어볼 레슨 찾기
             sections = Section.objects.filter(course=enrollment.course).order_by("order")
@@ -138,3 +158,111 @@ class StudentDashboardView(LoginRequiredMixin, View):
             "last_watched_lessons": last_watched_lessons,
         }
         return render(request, "enrollments/student_dashboard.html", context)
+
+
+class EnrollmentListView(LoginRequiredMixin, ListView):
+    """학생의 수강 목록 조회"""
+    model = Enrollment
+    template_name = 'enrollments/enrollment_list.html'
+    context_object_name = 'enrollments'
+    
+    def get_queryset(self):
+        return Enrollment.objects.filter(student=self.request.user).select_related('course')
+
+
+class EnrollmentDetailView(LoginRequiredMixin, DetailView):
+    """수강 상세 정보 조회"""
+    model = Enrollment
+    template_name = 'enrollments/enrollment_detail.html'
+    context_object_name = 'enrollment'
+    
+    def get_queryset(self):
+        return Enrollment.objects.filter(student=self.request.user)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        enrollment = self.get_object()
+        
+        # 강의 진행 상황 확인
+        context['is_completed'] = enrollment.is_course_completed()
+        
+        # 수료증 확인
+        try:
+            context['certificate'] = enrollment.certificate
+        except Certificate.DoesNotExist:
+            context['certificate'] = None
+        
+        return context
+
+
+class GenerateCertificateView(LoginRequiredMixin, View):
+    """수료증 생성 및 발급"""
+    
+    def get(self, request, enrollment_id):
+        enrollment = get_object_or_404(Enrollment, id=enrollment_id, student=request.user)
+        
+        # 수료 조건 확인
+        if not enrollment.is_course_completed():
+            messages.error(request, "모든 강의와 퀴즈를 완료해야 수료증을 발급받을 수 있습니다.")
+            return redirect('enrollments:enrollment_detail', pk=enrollment_id)
+        
+        # 수료증 생성 또는 조회
+        certificate = enrollment.generate_certificate()
+        
+        if certificate:
+            return redirect('enrollments:view_certificate', certificate_id=certificate.certificate_id)
+        else:
+            messages.error(request, "수료증 발급 중 오류가 발생했습니다.")
+            return redirect('enrollments:enrollment_detail', pk=enrollment_id)
+
+
+class ViewCertificateView(LoginRequiredMixin, DetailView):
+    """수료증 조회"""
+    model = Certificate
+    template_name = 'enrollments/certificate.html'
+    context_object_name = 'certificate'
+    slug_field = 'certificate_id'
+    slug_url_kwarg = 'certificate_id'
+    
+    def get_queryset(self):
+        return Certificate.objects.filter(enrollment__student=self.request.user)
+
+
+class DownloadCertificateView(LoginRequiredMixin, View):
+    """수료증 PDF 다운로드(인쇄 페이지로 대체)"""
+    
+    def get(self, request, certificate_id):
+        certificate = get_object_or_404(Certificate, certificate_id=certificate_id, enrollment__student=request.user)
+        
+        # 인쇄용 템플릿 사용
+        return render(request, 'enrollments/certificate_print.html', {
+            'certificate': certificate,
+            'print_mode': True
+        })
+    
+class LessonCompleteView(LoginRequiredMixin, View):
+    """레슨 완료 처리"""
+    
+    def post(self, request, lesson_id):
+        lesson = get_object_or_404(Lesson, id=lesson_id)
+        
+        # 학생이 해당 강의를 수강 중인지 확인
+        enrollment = get_object_or_404(Enrollment, 
+                                       student=request.user, 
+                                       course=lesson.section.course)
+        
+        # 레슨 진행 정보 생성 또는 업데이트
+        lesson_progress, created = LessonProgress.objects.get_or_create(
+            student=request.user,
+            lesson=lesson,
+            defaults={'completed': True}
+        )
+        
+        if not created:
+            lesson_progress.completed = True
+            lesson_progress.save()
+        
+        # 전체 강의 진행률 업데이트
+        enrollment.update_progress()
+        
+        return JsonResponse({'success': True})

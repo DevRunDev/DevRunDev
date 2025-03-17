@@ -39,6 +39,11 @@
                     <a href="{% url 'courses:course_detail' enrollment.course.id %}">
                         {{ enrollment.course.title }} - ✅ 완료됨
                     </a>
+                    {% if enrollment.has_certificate %}
+                        <a href="{% url 'enrollments:view_certificate' certificate_id=enrollment.certificate_id %}" class="btn btn-info mt-2">수료증 보기</a>
+                    {% else %}
+                        <a href="{% url 'enrollments:enrollment_detail' pk=enrollment.id %}" class="btn btn-success mt-2">수료증 발급하기</a>
+                    {% endif %}
                 </li>
             {% empty %}
                 <p>완료된 강의가 없습니다.</p>
