@@ -9,9 +9,9 @@
     <!-- ✅ 로그인한 경우 학생/강사 대시보드 접근 링크 추가 -->
     {% if request.user.is_authenticated %}
         {% if request.user.role == "Instructor" %}
-            <p><a href="{% url 'courses:instructor_dashboard' %}">🚀 강사 대시보드로 이동</a></p>
+            <p><a href="{% url 'courses:instructor_dashboard' %}">강사 대시보드로 이동</a></p>
         {% else %}
-            <p><a href="{% url 'enrollments:student_dashboard' %}">📚 내 강의실</a></p>
+            <p><a href="{% url 'enrollments:student_dashboard' %}">내 강의실</a></p>
         {% endif %}
     {% endif %}
 

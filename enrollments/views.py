@@ -96,7 +96,7 @@ class CancelEnrollmentView(LoginRequiredMixin, View):
 
         enrollment.delete()
         messages.success(request, f"'{course.title}' 강의 수강을 취소했습니다.")
-        return redirect("enrollments:student_dashboard")
+        return redirect("courses:course_detail", pk=course.id)
 
 
 class StudentDashboardView(LoginRequiredMixin, View):

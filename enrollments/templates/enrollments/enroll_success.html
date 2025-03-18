@@ -14,20 +14,11 @@
         <p>강의 <strong>{{ course.title }}</strong>에 대한 수강 신청이 성공적으로 완료되었습니다.</p>
         <p>이제 강의를 학습할 수 있습니다.</p>
 
-        <!-- ✅ 학습 시작 버튼 (첫 번째 레슨으로 이동) -->
-        {% with first_lesson=sections.0.lessons_detail.0 %}
-            {% if first_lesson %}
-                <a href="{% url 'courses:lesson_detail' first_lesson.id %}" class="button">▶ 학습 시작하기</a>
-            {% else %}
-                <p>📌 강의에 등록된 레슨이 없습니다.</p>
-            {% endif %}
-        {% endwith %}
+        <!-- ✅ 강의 상세 페이지 링크 -->
+        <a href="{% url 'courses:course_detail' course.id %}">강의 상세 페이지로 이동</a>
 
         <!-- ✅ 수강생 대시보드로 이동 버튼 -->
-        <a href="{% url 'enrollments:student_dashboard' %}" class="button">📚 내 강의실 가기</a>
-
-        <!-- ✅ 강의 상세 페이지 링크 -->
-        <a href="{% url 'courses:course_detail' course.id %}">📖 강의 상세 페이지로 이동</a>
+        <a href="{% url 'enrollments:student_dashboard' %}" class="button">| 내 강의실로 이동</a>
     </main>
 
     <footer>

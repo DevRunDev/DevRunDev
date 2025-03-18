@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>내 강의실</title>
+    <title>강의실</title>
 </head>
 <body>
 
     <header>
-        <h1>📚 내 강의실</h1>
+        <h1>강의실</h1>
         <nav>
             <a href="{% url 'courses:course_list' %}">강의 목록 보러가기</a>
         </nav>
     </header>
 
     <main>
-        <h2>🚀 진행 중인 강의</h2>
+        <h2>수강 중인 강의</h2>
         <ul>
             {% for enrollment in in_progress_courses %}
                 <li>
@@ -37,17 +37,17 @@
             {% endfor %}
         </ul>
 
-        <h2>🎓 완료된 강의</h2>
+        <h2>수강 완료된 강의</h2>
         <ul>
             {% for enrollment in completed_courses %}
                 <li>
                     <a href="{% url 'courses:course_detail' enrollment.course.id %}">
-                        {{ enrollment.course.title }} - ✅ 완료됨
+                        {{ enrollment.course.title }}
                     </a>
                     {% if enrollment.has_certificate %}
                         <a href="{% url 'enrollments:view_certificate' certificate_id=enrollment.certificate_id %}" class="btn btn-info mt-2">수료증 보기</a>
                     {% else %}
-                        <a href="{% url 'enrollments:enrollment_detail' pk=enrollment.id %}" class="btn btn-success mt-2">수료증 발급하기</a>
+                        <a href="{% url 'enrollments:enrollment_detail' pk=enrollment.id %}" class="btn btn-success mt-2">| 수료증 발급하기</a>
                     {% endif %}
                 </li>
             {% empty %}
@@ -55,20 +55,20 @@
             {% endfor %}
         </ul>
 
-        <h2>📌 다음 영상 이어보기</h2>
+        <h2>다음 영상 이어보기</h2>
         <ul>
             {% if last_watched_lessons %}
                 {% for enrollment in last_watched_lessons %}
                     {% if enrollment.last_watched_lesson %}
                         <li>
                             <a href="{% url 'courses:lesson_detail' enrollment.last_watched_lesson.id %}">
-                                ▶ {{ enrollment.last_watched_lesson.title }} ({{ enrollment.course.title }})
+                                {{ enrollment.course.title }} → {{ enrollment.last_watched_lesson.title }}
                             </a>
                         </li>
                     {% endif %}
                 {% endfor %}
             {% else %}
-                <p>📌 다음 강의가 없습니다.</p>  <!-- ✅ 모든 강의 완료 시 메시지 표시 -->
+                <p>다음 영상이 없습니다.</p>  <!-- ✅ 모든 강의 완료 시 메시지 표시 -->
             {% endif %}
         </ul>
     </main>
@@ -76,7 +76,7 @@
     <!-- ✅ 강사만 볼 수 있는 강사 대시보드 링크 추가 -->
     {% if request.user.is_authenticated and request.user.role == "Instructor" %}
         <footer>
-            <p><a href="{% url 'courses:instructor_dashboard' %}">🚀 강사 대시보드로 돌아가기</a></p>
+            <p><a href="{% url 'courses:instructor_dashboard' %}">강사 대시보드로 돌아가기</a></p>
         </footer>
     {% endif %}
 
