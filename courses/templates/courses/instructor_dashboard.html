@@ -4,34 +4,44 @@
 
 {% block content %}
 <body>
-    <h1>🚀 강사 대시보드</h1>
+    <h1>강사 대시보드</h1>
 
-    <h2><a href="{% url 'courses:course_step1' %}" class="button">✨ 강의 생성하기</a></h2>
+    <h2><a href="{% url 'courses:course_step1' %}" class="button">강의 생성하기</a></h2>
 
-    <h2>📌 강의 상태</h2>
+    <h2>강의 상태</h2>
     <a href="{% url 'courses:instructor_dashboard' %}">전체 보기</a> |
-    <a href="?status=approved">✅ 승인된 강의 ({{ approved_courses }})</a> |
-    <a href="?status=review">⏳ 심사 중 ({{ review_courses }})</a> |
-    <a href="?status=not_approved">❌ 반려된 강의 ({{ rejected_courses }})</a>
+    <a href="?status=approved">승인된 강의 ({{ approved_courses }})</a> |
+    <a href="?status=review">심사 중 ({{ review_courses }})</a> |
+    <a href="?status=not_approved">반려된 강의 ({{ rejected_courses }})</a>
 
-    <h2>📚 내가 개설한 강의</h2>
-    <ul>
+    <h2 class="mt-8 text-2xl font-semibold text-gray-900">내가 개설한 강의</h2>
+    <ul class="space-y-4">
         {% for course in my_courses %}
-            <li>
-                <a href="{% url 'courses:course_detail' course.id %}">{{ course.title }}</a>
-                ({{ course.get_status_display }})
-                <a href="{% url 'courses:course_edit' course.id %}" class="button">수정</a>
+            <li class="p-4 bg-white shadow-md rounded-md">
+                <a href="{% url 'courses:course_detail' course.id %}" class="text-lg font-semibold text-blue-600 hover:underline">
+                    {{ course.title }}
+                </a>
+                <span class="text-gray-700">({{ course.get_status_display }})</span>
+
+                <!-- ✅ 심사 중인 강의 -->
+                {% if course.status == "review" %}
+                    <p class="text-yellow-500">현재 심사 중입니다.</p>
+                {% elif course.status == "not_approved" %}
+                    <p class="text-red-500">수정 후 다시 제출바랍니다.</p>
+                {% endif %}
+
+                <a href="{% url 'courses:course_edit' course.id %}" class="text-blue-500 hover:underline ml-2">수정</a>
             </li>
         {% empty %}
-            <li>📌 아직 개설한 강의가 없습니다.</li>
+            <p class="text-gray-500">아직 개설한 강의가 없습니다.</p>
         {% endfor %}
     </ul>
 
-    <h2>📖 수강생 관리</h2>
+    <h2>수강생 관리</h2>
     <ul>
         {% for course in my_courses %}
             <li>
-                <strong>{{ course.title }}</strong> (👥 수강생 {{ course.enrollments.count }}명)
+                <strong>{{ course.title }}</strong>
                 <ul>
                     {% for enrollment in course.enrollments.all %}
                         <li>
@@ -47,16 +57,16 @@
                             {% endif %}
                         </li>
                     {% empty %}
-                        <li>📌 아직 수강생이 없습니다.</li>
+                        <li>아직 수강생이 없습니다.</li>
                     {% endfor %}
                 </ul>
             </li>
         {% empty %}
-            <li>📌 아직 개설한 강의가 없습니다.</li>
+            <li>아직 개설한 강의가 없습니다.</li>
         {% endfor %}
     </ul>
 
-    <h2><a href="{% url 'enrollments:student_dashboard' %}" class="button">📖 수강 중인 강의</a></h2>
-    <p><a href="{% url 'courses:course_list' %}">🔙 강의 목록으로 돌아가기</a></p>
+    <h2><a href="{% url 'enrollments:student_dashboard' %}" class="button">수강 중인 강의</a></h2>
+    <p><a href="{% url 'courses:course_list' %}">강의 목록으로 돌아가기</a></p>
 </body>
 {% endblock %}
