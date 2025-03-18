@@ -22,7 +22,36 @@
             <li>
                 <a href="{% url 'courses:course_detail' course.id %}">{{ course.title }}</a>
                 ({{ course.get_status_display }})
-                <a href="{% url 'courses:course_edit' course.id %}" class="button">✏️ 수정</a>
+                <a href="{% url 'courses:course_edit' course.id %}" class="button">수정</a>
+            </li>
+        {% empty %}
+            <li>📌 아직 개설한 강의가 없습니다.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>📖 수강생 관리</h2>
+    <ul>
+        {% for course in my_courses %}
+            <li>
+                <strong>{{ course.title }}</strong> (👥 수강생 {{ course.enrollments.count }}명)
+                <ul>
+                    {% for enrollment in course.enrollments.all %}
+                        <li>
+                            {{ enrollment.student.username }} - 진행률: {{ enrollment.progress|floatformat:1 }}%
+                            {% if enrollment.progress == 0 %}
+                                <span class="text-danger">🔴 학습 전</span>
+                            {% elif enrollment.progress > 0 and enrollment.progress <= 50 %}
+                                <span class="text-warning">🟠 절반 이하 진행</span>
+                            {% elif enrollment.progress > 50 and enrollment.progress < 100 %}
+                                <span class="text-primary">🔵 절반 이상 완료</span>
+                            {% elif enrollment.progress == 100 %}
+                                <span class="text-success">✅ 수강 완료</span>
+                            {% endif %}
+                        </li>
+                    {% empty %}
+                        <li>📌 아직 수강생이 없습니다.</li>
+                    {% endfor %}
+                </ul>
             </li>
         {% empty %}
             <li>📌 아직 개설한 강의가 없습니다.</li>

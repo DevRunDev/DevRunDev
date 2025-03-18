@@ -20,10 +20,12 @@ class CourseListView(ListView):
     template_name = "courses/course_list.html"
     context_object_name = "courses"
     ordering = ["-created_at"]
+    paginate_by = 10
 
     def get_queryset(self):
         """✅ 승인된 강의만 조회하고, 평균 별점 계산"""
         queryset = Course.objects.filter(status="approved").annotate(avg_rating=Avg("reviews__rating"))
+        queryset = queryset.order_by("-created_at")
         search_query = self.request.GET.get("q")
         if search_query:
             queryset = queryset.filter(title__icontains=search_query)
@@ -136,11 +138,12 @@ class LessonDetailView(LoginRequiredMixin, DetailView):
 
         context["next_lesson"] = next_lesson
         context["previous_lesson"] = previous_lesson
-        
+
         # ✅ 이 레슨과 관련된 퀴즈 추가
         from quizzes.models import Quiz
+
         context["lesson_quizzes"] = Quiz.objects.filter(lesson=lesson)
-        
+
         return context
 
 

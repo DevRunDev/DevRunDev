@@ -38,7 +38,6 @@
                 </h2>
                 <p>강사: {{ course.instructor.username }}</p>
 
-                <!-- ✅ 평균 별점 표시 -->
                 <p>⭐ 평균 별점: {{ course.avg_rating|default:"0.0"|floatformat:1 }} / 5.0</p>
 
                 <p>
@@ -57,6 +56,20 @@
         {% empty %}
             <p>등록된 강의가 없습니다.</p>
         {% endfor %}
+
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">« 처음</a>
+                <a href="?page={{ page_obj.previous_page_number }}">‹ 이전</a>
+            {% endif %}
+
+            <span>페이지 {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">다음 ›</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">마지막 »</a>
+            {% endif %}
+        </div>
     </ul>
 </body>
 </html>
