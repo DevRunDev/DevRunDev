@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ lesson.title }}</title>
-</head>
+{% extends 'courses/base.html' %}
+
+{% block title %} {{ lesson.title }} {% endblock %}
+
+{% block content %}
 <body>
     <header>
         <a href="{% url 'courses:course_detail' lesson.section.course.id %}">← 강의로 돌아가기</a>
@@ -61,4 +59,4 @@
     {% endif %}
 
 </body>
-</html>
+{% endblock %}
