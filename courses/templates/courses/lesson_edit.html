@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>레슨 수정</title>
-</head>
+{% extends 'courses/base.html' %}
+
+{% block title %} lesson 수정 {% endblock %}
+
+{% block content %}
 <body>
     <h1>✏️ 레슨 수정</h1>
 
@@ -21,4 +19,4 @@
 
     <a href="{% url 'courses:course_detail' pk=lesson.section.course.id %}">🔙 강의 상세 페이지로 돌아가기</a>
 </body>
-</html>
+{% endblock %}

@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>강의 생성</title>
-</head>
+{% extends 'courses/base.html' %}
+
+{% block title %}강의 생성 {% endblock %}
+
+{% block content %}
 <body>
     <header>
         <a href="{% url 'courses:course_list' %}">강의 목록</a>
@@ -29,4 +27,4 @@
 
     <a href="{% url 'courses:course_list' %}" class="button">강의 목록으로 돌아가기</a>
 </body>
-</html>
+{% endblock %}
