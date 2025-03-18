@@ -22,10 +22,15 @@
                     <a href="{% url 'courses:course_detail' enrollment.course.id %}">
                         {{ enrollment.course.title }} - 진행률: {{ enrollment.progress|floatformat:2 }}%
                     </a>
-                    <form action="{% url 'enrollments:cancel_enrollment' enrollment.course.id %}" method="POST" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit">❌ 수강 취소</button>
-                    </form>
+                    {% if enrollment.progress == 0 %}
+                        <span class="text-danger">🔴 학습 전</span>
+                    {% elif enrollment.progress > 0 and enrollment.progress <= 50 %}
+                        <span class="text-warning">🟠 절반 이하 진행</span>
+                    {% elif enrollment.progress > 50 and enrollment.progress < 100 %}
+                        <span class="text-primary">🔵 절반 이상 완료</span>
+                    {% elif enrollment.progress == 100 %}
+                        <span class="text-success">✅ 수강 완료</span>
+                    {% endif %}
                 </li>
             {% empty %}
                 <p>진행 중인 강의가 없습니다.</p>
