@@ -21,10 +21,10 @@
 
     <!-- ✅ 퀴즈가 있는 경우 (학생만 표시) -->
     {% if request.user.is_authenticated and request.user.role == "Student" %}
-        {% if lesson.quizzes.all %}
+        {% if lesson_quizzes %}
             <div>
                 <h3>📌 이 레슨과 관련된 퀴즈</h3>
-                {% for quiz in lesson.quizzes.all %}
+                {% for quiz in lesson_quizzes %}
                     <a href="{% url 'quizzes:quiz_detail' quiz.id %}" class="button">
                         📝 {{ quiz.title }} 풀기
                     </a>

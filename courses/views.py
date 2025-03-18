@@ -106,7 +106,7 @@ class LessonDetailView(LoginRequiredMixin, DetailView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        """✅ 이전 레슨 및 다음 레슨 찾기 + 완료된 레슨 목록 추가"""
+        """✅ 이전 레슨 및 다음 레슨 찾기 + 완료된 레슨 목록 추가 + 퀴즈 목록 추가"""
         context = super().get_context_data(**kwargs)
         lesson = self.get_object()
         section = lesson.section
@@ -136,6 +136,11 @@ class LessonDetailView(LoginRequiredMixin, DetailView):
 
         context["next_lesson"] = next_lesson
         context["previous_lesson"] = previous_lesson
+        
+        # ✅ 이 레슨과 관련된 퀴즈 추가
+        from quizzes.models import Quiz
+        context["lesson_quizzes"] = Quiz.objects.filter(lesson=lesson)
+        
         return context
 
 

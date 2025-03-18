@@ -72,8 +72,10 @@ COURSE_DATA = [
         ],
         "quiz_data": [
             {
-                "title": "파이썬 기초 개념 퀴즈",
-                "description": "파이썬의 변수, 데이터 타입, 제어문에 대한 이해도를 평가합니다.",
+                "title": "변수와 데이터 타입 퀴즈",
+                "description": "파이썬의 변수와 데이터 타입에 대한 이해도를 평가합니다.",
+                "section_index": 1,  # 2번째 섹션
+                "lesson_index": 1,   # 2번째 레슨
                 "questions": [
                     {
                         "text": "파이썬에서 변수를 선언할 때 사용하는 키워드는?",
@@ -96,6 +98,14 @@ COURSE_DATA = [
                             {"text": "str = 'Hello World';", "is_correct": False},
                         ],
                     },
+                ],
+            },
+            {
+                "title": "반복문 퀴즈",
+                "description": "파이썬의 반복문에 대한 이해도를 평가합니다.",
+                "section_index": 2,  # 3번째 섹션
+                "lesson_index": 2,   # 3번째 레슨
+                "questions": [
                     {
                         "text": "다음 중 파이썬의 조건문 문법으로 올바른 것은?",
                         "choices": [
@@ -117,8 +127,17 @@ COURSE_DATA = [
                             },
                         ],
                     },
+                    {
+                        "text": "파이썬의 while 반복문에 대한 설명으로 올바른 것은?",
+                        "choices": [
+                            {"text": "조건이 참인 동안 계속 반복한다", "is_correct": True},
+                            {"text": "정해진 횟수만큼 반복한다", "is_correct": False},
+                            {"text": "항상 최소 한 번은 실행된다", "is_correct": False},
+                            {"text": "반복 횟수를 미리 정할 수 있다", "is_correct": False},
+                        ],
+                    },
                 ],
-            }
+            },
         ],
     },
     # 웹 개발
@@ -183,6 +202,8 @@ COURSE_DATA = [
             {
                 "title": "HTML과 CSS 기초 퀴즈",
                 "description": "HTML 태그와 CSS 속성에 대한 이해도를 평가합니다.",
+                "section_index": 1,  # 2번째 섹션
+                "lesson_index": 1,   # 2번째 레슨
                 "questions": [
                     {
                         "text": "다음 중 HTML의 제목 태그가 아닌 것은?",
@@ -212,7 +233,33 @@ COURSE_DATA = [
                         ],
                     },
                 ],
-            }
+            },
+            {
+                "title": "레이아웃 디자인 퀴즈",
+                "description": "CSS 레이아웃에 대한 이해도를 평가합니다.",
+                "section_index": 2,  # 3번째 섹션
+                "lesson_index": 2,   # 3번째 레슨
+                "questions": [
+                    {
+                        "text": "반응형 웹 디자인에 필수적인 HTML 태그는?",
+                        "choices": [
+                            {"text": "<responsive>", "is_correct": False},
+                            {"text": "<viewport>", "is_correct": False},
+                            {"text": "<meta name=\"viewport\">", "is_correct": True},
+                            {"text": "<media>", "is_correct": False},
+                        ],
+                    },
+                    {
+                        "text": "CSS Grid에서 열(column)의 크기를 지정하는 속성은?",
+                        "choices": [
+                            {"text": "grid-column-size", "is_correct": False},
+                            {"text": "grid-template-columns", "is_correct": True},
+                            {"text": "column-template", "is_correct": False},
+                            {"text": "grid-columns", "is_correct": False},
+                        ],
+                    },
+                ],
+            },
         ],
     },
     # 자바스크립트
@@ -277,6 +324,8 @@ COURSE_DATA = [
             {
                 "title": "JavaScript 기본 개념 퀴즈",
                 "description": "JavaScript의 기본 문법과 DOM 조작에 대한 이해도를 평가합니다.",
+                "section_index": 1,  # 2번째 섹션
+                "lesson_index": 1,   # 2번째 레슨
                 "questions": [
                     {
                         "text": "JavaScript에서 변수를 선언하는 키워드가 아닌 것은?",
@@ -306,7 +355,33 @@ COURSE_DATA = [
                         ],
                     },
                 ],
-            }
+            },
+            {
+                "title": "비동기 프로그래밍 퀴즈",
+                "description": "JavaScript의 비동기 프로그래밍에 대한 이해도를 평가합니다.",
+                "section_index": 2,  # 3번째 섹션
+                "lesson_index": 2,   # 3번째 레슨
+                "questions": [
+                    {
+                        "text": "async/await는 무엇을 기반으로 하는가?",
+                        "choices": [
+                            {"text": "Callbacks", "is_correct": False},
+                            {"text": "Events", "is_correct": False},
+                            {"text": "Promises", "is_correct": True},
+                            {"text": "Observers", "is_correct": False},
+                        ],
+                    },
+                    {
+                        "text": "다음 중 비동기 작업을 처리하는 방법이 아닌 것은?",
+                        "choices": [
+                            {"text": "Callbacks", "is_correct": False},
+                            {"text": "Promises", "is_correct": False},
+                            {"text": "async/await", "is_correct": False},
+                            {"text": "synchronized", "is_correct": True},
+                        ],
+                    },
+                ],
+            },
         ],
     },
 ]
@@ -374,12 +449,33 @@ class Command(BaseCommand):
                     # 퀴즈 생성
                     if "quiz_data" in template:
                         for quiz_data in template["quiz_data"]:
+                            # 섹션과 레슨 인덱스 가져오기
+                            section_index = quiz_data.get("section_index", 0)  # 기본값은 첫 번째 섹션
+                            lesson_index = quiz_data.get("lesson_index", 0)    # 기본값은 첫 번째 레슨
+                            
+                            # 인덱스 범위 체크
+                            if section_index < len(sections):
+                                target_section = sections[section_index]
+                            else:
+                                target_section = sections[0] if sections else None
+                                
+                            # 해당 섹션의 레슨 가져오기
+                            if target_section:
+                                target_lessons = Lesson.objects.filter(section=target_section).order_by("order")
+                                if lesson_index < len(target_lessons):
+                                    target_lesson = target_lessons[lesson_index]
+                                else:
+                                    target_lesson = target_lessons.first() if target_lessons.exists() else None
+                            else:
+                                target_lesson = None
+                            
                             # 퀴즈 생성
                             quiz = Quiz.objects.create(
                                 title=f"{course_title} - {quiz_data['title']}",
                                 description=quiz_data["description"],
                                 course=course,
-                                section=sections[0] if sections else None,
+                                section=target_section,
+                                lesson=target_lesson,
                                 instructor=instructor,
                             )
 
