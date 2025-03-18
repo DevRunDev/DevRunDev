@@ -34,7 +34,7 @@
         {% for course in courses %}
             <li>
                 <h2>
-                    <a href="{% url 'courses:course_detail' course.id %}">{{ course.title }}</a>
+                    <a href="{% url 'courses:course_detail' pk=course.id %}">{{ course.title }}</a>
                 </h2>
                 <p>강사: {{ course.instructor.username }}</p>
 
