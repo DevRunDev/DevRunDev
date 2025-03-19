@@ -3,149 +3,251 @@
 {% block title %} {{ course.title }} {% endblock %}
 
 {% block content %}
-<body>
-    <header>
-        <a href="{% url 'courses:course_list' %}">← 강의 목록</a>
-    </header>
+<div class="container py-5">
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{% url 'courses:course_list' %}" class="text-decoration-none">강의 목록</a></li>
+          <li class="breadcrumb-item active" aria-current="page">{{ course.title }}</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
 
-    <h1>{{ course.title }}</h1>
-
-    <!-- ✅ 강사인 경우 -->
-    {% if request.user == course.instructor %}
-        <p>🔹 이 강의는 내가 개설한 강의입니다.</p>
-        <p>👥 현재 수강생 수: {{ course.enrollments.count }}</p>
-        <p>⭐ 평균 별점: {% if average_rating > 0 %}{{ average_rating|floatformat:1 }}/5.0{% else %}아직 별점이 없습니다.{% endif %}</p>
-        <p><a href="{% url 'courses:instructor_dashboard' %}" class="button">강사 대시보드로 이동</a></p>
-    {% endif %}
-
-
-    <p>강사: {{ course.instructor.username }}</p>
-    <p>{{ course.description }}</p>
-
-    <p>
-        가격:
-        {% if course.price == 0 %}
-            <strong>무료</strong>
-        {% else %}
-            <strong>₩{{ course.price }}</strong>
-        {% endif %}
-    </p>
-
-    <!-- ✅ 로그인하지 않은 경우 -->
-    {% if not request.user.is_authenticated %}
-        <p>
-            로그인 후 수강 신청하세요.
-            <a href="{% url 'account_login' %}">로그인</a>
-        </p>
-
-    <!-- ✅ 강사가 아닌 경우 (수강 신청 / 진행률 표시) -->
-    {% elif request.user != course.instructor %}
-
-        {% if not is_enrolled %}
-            <!-- ✅ 수강 신청 버튼 -->
-            <form action="{% url 'enrollments:enroll_course' course.id %}" method="POST">
-                {% csrf_token %}
-                <button type="submit" class="button">📚 수강 신청</button>
-            </form>
-        {% else %}
-            <!-- ✅ 진행률 표시 -->
-            <p>진행률: {{ progress|floatformat:2 }}%</p>
-
-            {% if progress == 100 %}
-                <p>🎉 강의를 완료했습니다!</p>
-            {% endif %}
-
-            <!-- ✅ 학생 대시보드로 이동 -->
-            <p>
-                <a href="{% url 'enrollments:student_dashboard' %}" class="button">내 강의실</a>
-            </p>
-
-            <!-- ✅ 수강 취소 버튼 -->
-            <form action="{% url 'enrollments:cancel_enrollment' course.id %}" method="POST" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="button">수강 취소</button>
-            </form>
-        {% endif %}
-    {% endif %}
-
-    <h2>커리큘럼</h2>
-    <ul>
-        {% for section in sections %}
-            <li>
-                <h3>{{ section.title }}</h3>
-                <ul>
-                    {% for lesson in section.lessons_detail %}
-                        <li>
-                            {% if is_enrolled or request.user == course.instructor %}
-                                <!-- ✅ 수강 신청한 학생 또는 강사만 레슨 링크 클릭 가능 -->
-                                {% if lesson.id in completed_lessons %}
-                                    ✅
-                                {% endif %}
-                                <a href="{% url 'courses:lesson_detail' lesson.id %}">{{ lesson.title }}</a>
-                            {% else %}
-                                <!-- ❌ 수강 신청하지 않은 학생은 링크 비활성화 -->
-                                📖 <span class="text-muted">🔒 {{ lesson.title }} (수강 후 시청 가능)</span>
-                            {% endif %}
-                        </li>
-                    {% endfor %}
-                </ul>
-            </li>
-        {% empty %}
-            <p>등록된 섹션이 없습니다.</p>
-        {% endfor %}
-    </ul>
-
-    <h3>강의 리뷰</h3>
-
-    <!-- ✅ 리뷰 입력 폼 (수강 신청한 학생만 리뷰 가능) -->
-    {% if user.is_authenticated and not user.is_instructor %}
-        {% if is_enrolled and not has_reviewed %}
-            <form action="{% url 'reviews:review_add' course.id %}" method="post">
-                {% csrf_token %}
-                <label for="rating">별점:</label>
-                <select name="rating" class="form-select">
-                    <option value="5">⭐⭐⭐⭐⭐</option>
-                    <option value="4">⭐⭐⭐⭐☆</option>
-                    <option value="3">⭐⭐⭐☆☆</option>
-                    <option value="2">⭐⭐☆☆☆</option>
-                    <option value="1">⭐☆☆☆☆</option>
-                </select>
-                <textarea name="comment" class="form-control mt-2" placeholder="강의에 대한 의견을 남겨주세요."></textarea>
-                <button type="submit" class="btn btn-primary mt-2">리뷰 작성</button>
-            </form>
-        {% elif not is_enrolled %}
-            <p class="text-danger">수강 신청 후 리뷰를 작성할 수 있습니다.</p>
-        {% elif has_reviewed %}
-            <p class="text-muted">이미 이 강의에 대한 리뷰를 남기셨습니다.</p>
-        {% endif %}
-    {% endif %}
-
-    <!-- ✅ 리뷰 목록 (별표 추가) -->
-    <div class="mt-6">
-        {% for review in course.reviews.all %}
-            <div class="p-4 border rounded-md mb-4">
-                <strong>{{ review.user.username }}</strong> -
-                <!-- ⭐ 별점 표시 -->
-                <span class="text-yellow-500">
-                    {% for _ in "x"|rjust:review.rating %}
-                        ⭐
-                    {% endfor %}
-                </span>
-                <span class="ml-2 text-gray-700">{{ review.rating }}점</span>
-                <p class="text-gray-700 mt-2">{{ review.comment }}</p>
-
-                {% if review.user == request.user %}
-                    <form action="{% url 'reviews:review_delete' review.id %}" method="post" class="mt-2">
-                        {% csrf_token %}
-                        <button type="submit" class="text-red-500 hover:underline">삭제</button>
-                    </form>
-                {% endif %}
+  <div class="row">
+    <div class="col-lg-8">
+      <h1 class="display-5 fw-bold mb-4">{{ course.title }}</h1>
+      
+      {% if request.user == course.instructor %}
+        <div class="alert alert-info mb-4">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-info-circle-fill me-2 fs-4"></i>
+            <div>
+              <p class="mb-1">🔹 이 강의는 내가 개설한 강의입니다.</p>
+              <p class="mb-1">👥 현재 수강생 수: {{ course.enrollments.count }}명</p>
+              <p class="mb-0">⭐ 평균 별점: {% if average_rating > 0 %}{{ average_rating|floatformat:1 }}/5.0{% else %}아직 별점이 없습니다.{% endif %}</p>
             </div>
-        {% empty %}
-            <p class="text-gray-500">아직 리뷰가 없습니다.</p>
-        {% endfor %}
+          </div>
+          <div class="mt-3">
+            <a href="{% url 'courses:instructor_dashboard' %}" class="btn btn-primary">
+              <i class="bi bi-speedometer2"></i> 강사 대시보드로 이동
+            </a>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <i class="bi bi-person-circle fs-4 me-2"></i>
+            <span>강사: <strong>{{ course.instructor.username }}</strong></span>
+          </div>
+          <p class="card-text">{{ course.description|linebreaks }}</p>
+          <div class="d-flex align-items-center">
+            <i class="bi bi-tag-fill me-2 text-primary"></i>
+            <span class="fw-bold me-2">가격:</span>
+            {% if course.price == 0 %}
+              <span class="badge bg-success">무료</span>
+            {% else %}
+              <span class="badge bg-primary">₩{{ course.price }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- 로그인하지 않은 경우 -->
+      {% if not request.user.is_authenticated %}
+        <div class="alert alert-warning">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          로그인 후 수강 신청하세요.
+          <a href="{% url 'account_login' %}" class="btn btn-sm btn-primary ms-2">로그인</a>
+        </div>
+      <!-- 강사가 아닌 경우 (수강 신청 / 진행률 표시) -->
+      {% elif request.user != course.instructor %}
+        {% if not is_enrolled %}
+          <!-- 수강 신청 버튼 -->
+          <form action="{% url 'enrollments:enroll_course' course.id %}" method="POST" class="mb-4">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-lg btn-success w-100">
+              <i class="bi bi-book"></i> 수강 신청
+            </button>
+          </form>
+        {% else %}
+          <!-- 진행률 표시 -->
+          <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">내 학습 진행률</h5>
+              <div class="progress mb-3" style="height: 20px;">
+                <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress|floatformat:2 }}%;" 
+                     aria-valuenow="{{ progress|floatformat:2 }}" aria-valuemin="0" aria-valuemax="100">
+                  {{ progress|floatformat:2 }}%
+                </div>
+              </div>
+              
+              {% if progress == 100 %}
+                <div class="alert alert-success mb-0">
+                  <i class="bi bi-trophy-fill me-2"></i>
+                  <strong>🎉 강의를 완료했습니다!</strong>
+                </div>
+              {% endif %}
+
+              <div class="d-flex justify-content-between mt-3">
+                <a href="{% url 'enrollments:student_dashboard' %}" class="btn btn-primary">
+                  <i class="bi bi-house-door"></i> 내 강의실
+                </a>
+                <form action="{% url 'enrollments:cancel_enrollment' course.id %}" method="POST">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-outline-danger" onclick="return confirm('정말로 수강을 취소하시겠습니까?');">
+                    <i class="bi bi-x-circle"></i> 수강 취소
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endif %}
     </div>
 
-    <a href="{% url 'courses:course_list' %}">강의 목록으로 돌아가기</a>
-</body>
+    <div class="col-lg-4">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-journal-text me-2"></i> 커리큘럼</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="accordion" id="courseAccordion">
+            {% for section in sections %}
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ section.id }}">
+                  <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" 
+                          data-bs-toggle="collapse" data-bs-target="#collapse{{ section.id }}" 
+                          aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" 
+                          aria-controls="collapse{{ section.id }}">
+                    {{ section.title }}
+                  </button>
+                </h2>
+                <div id="collapse{{ section.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" 
+                     aria-labelledby="heading{{ section.id }}" data-bs-parent="#courseAccordion">
+                  <div class="accordion-body p-0">
+                    <ul class="list-group list-group-flush">
+                      {% for lesson in section.lessons_detail %}
+                        <li class="list-group-item d-flex align-items-center">
+                          {% if is_enrolled or request.user == course.instructor %}
+                            <!-- 수강 신청한 학생 또는 강사만 레슨 링크 클릭 가능 -->
+                            {% if lesson.id in completed_lessons %}
+                              <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            {% else %}
+                              <i class="bi bi-circle text-muted me-2"></i>
+                            {% endif %}
+                            <a href="{% url 'courses:lesson_detail' lesson.id %}" class="text-decoration-none text-dark">
+                              {{ lesson.title }}
+                            </a>
+                          {% else %}
+                            <!-- 수강 신청하지 않은 학생은 링크 비활성화 -->
+                            <i class="bi bi-lock-fill text-muted me-2"></i>
+                            <span class="text-muted">{{ lesson.title }} (수강 후 시청 가능)</span>
+                          {% endif %}
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            {% empty %}
+              <div class="alert alert-info m-3">등록된 섹션이 없습니다.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 리뷰 섹션 -->
+  <div class="row mt-5">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-star-fill me-2"></i> 강의 리뷰</h5>
+        </div>
+        <div class="card-body">
+          <!-- 리뷰 입력 폼 (수강 신청한 학생만 리뷰 가능) -->
+          {% if user.is_authenticated and not user.is_instructor %}
+            {% if is_enrolled and not has_reviewed %}
+              <form action="{% url 'reviews:review_add' course.id %}" method="post" class="mb-4">
+                {% csrf_token %}
+                <div class="mb-3">
+                  <label for="rating" class="form-label">별점:</label>
+                  <select name="rating" class="form-select">
+                    <option value="5">⭐⭐⭐⭐⭐</option>
+                    <option value="4">⭐⭐⭐⭐</option>
+                    <option value="3">⭐⭐⭐</option>
+                    <option value="2">⭐⭐</option>
+                    <option value="1">⭐</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <textarea name="comment" class="form-control" placeholder="강의에 대한 의견을 남겨주세요." rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-pencil"></i> 리뷰 작성
+                </button>
+              </form>
+            {% elif not is_enrolled %}
+              <div class="alert alert-warning mb-4">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                수강 신청 후 리뷰를 작성할 수 있습니다.
+              </div>
+            {% elif has_reviewed %}
+              <div class="alert alert-info mb-4">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                이미 이 강의에 대한 리뷰를 남기셨습니다.
+              </div>
+            {% endif %}
+          {% endif %}
+
+          <!-- 리뷰 목록 -->
+          <div class="reviews">
+            {% for review in course.reviews.all %}
+              <div class="card mb-3">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="card-subtitle">
+                      <i class="bi bi-person-circle me-2"></i>
+                      {{ review.user.username }}
+                    </h6>
+                    <div class="text-warning">
+                      {% for _ in "x"|rjust:review.rating %}
+                        <i class="bi bi-star-fill"></i>
+                      {% endfor %}
+                      {% for _ in "x"|rjust:5|slice:review.rating %}
+                        <i class="bi bi-star"></i>
+                      {% endfor %}
+                      <small class="text-muted ms-1">{{ review.rating }}점</small>
+                    </div>
+                  </div>
+                  <p class="card-text">{{ review.comment|linebreaks }}</p>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">{{ review.created_at|date:"Y.m.d" }}</small>
+                    {% if review.user == request.user %}
+                      <form action="{% url 'reviews:review_delete' review.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('정말로 리뷰를 삭제하시겠습니까?');">
+                          <i class="bi bi-trash"></i> 삭제
+                        </button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            {% empty %}
+              <div class="alert alert-secondary">
+                <i class="bi bi-chat"></i> 아직 리뷰가 없습니다.
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

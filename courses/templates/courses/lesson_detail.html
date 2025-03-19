@@ -3,60 +3,182 @@
 {% block title %} {{ lesson.title }} {% endblock %}
 
 {% block content %}
-<body>
-    <header>
-        <a href="{% url 'courses:course_detail' lesson.section.course.id %}">← 강의로 돌아가기</a>
-    </header>
+<div class="container py-5">
+  <div class="row mb-4">
+    <div class="col-12">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{% url 'courses:course_list' %}" class="text-decoration-none">강의 목록</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'courses:course_detail' lesson.section.course.id %}" class="text-decoration-none">{{ lesson.section.course.title }}</a></li>
+          <li class="breadcrumb-item active" aria-current="page">{{ lesson.title }}</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
 
-    <h1>{{ lesson.title }}</h1>
-
-    <!-- ✅ 유튜브 영상이 있을 경우 -->
-    {% if lesson.video_url %}
-        <iframe width="560" height="315" src="{{ lesson.video_url }}" frameborder="0" allowfullscreen></iframe>
-    {% else %}
-        <p>⚠️ 이 레슨에는 등록된 영상이 없습니다.</p>
-    {% endif %}
-
-    <!-- ✅ 퀴즈가 있는 경우 (학생만 표시) -->
-    {% if request.user.is_authenticated and request.user.role == "Student" %}
-        {% if lesson_quizzes %}
-            <div>
-                <h3>📌 이 레슨과 관련된 퀴즈</h3>
-                {% for quiz in lesson_quizzes %}
-                    <a href="{% url 'quizzes:quiz_detail' quiz.id %}" class="button">
-                        📝 {{ quiz.title }} 풀기
-                    </a>
-                {% endfor %}
-            </div>
+  <div class="row">
+    <div class="col-lg-8">
+      <h1 class="mb-4">{{ lesson.title }}</h1>
+      
+      <!-- 유튜브 영상 -->
+      <div class="ratio ratio-16x9 mb-4 shadow">
+        {% if lesson.video_url %}
+          <iframe src="{{ lesson.video_url }}" title="{{ lesson.title }}" allowfullscreen></iframe>
         {% else %}
-            <p>❌ 이 레슨과 관련된 퀴즈가 없습니다.</p>
+          <div class="d-flex align-items-center justify-content-center bg-light">
+            <div class="text-center text-muted">
+              <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
+              <p class="fs-4">⚠️ 이 레슨에는 등록된 영상이 없습니다.</p>
+            </div>
+          </div>
         {% endif %}
-    {% endif %}
-
-    <!-- ✅ 수강 완료 버튼 -->
-    {% if request.user != lesson.section.course.instructor %}
-        <form id="complete-form" action="{% url 'enrollments:lesson_complete' lesson.id %}" method="POST">
+      </div>
+      
+      <!-- 퀴즈 섹션 (학생만 표시) -->
+      {% if request.user.is_authenticated and request.user.role == "Student" %}
+        {% if lesson_quizzes %}
+          <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0"><i class="bi bi-question-circle me-2"></i> 이 레슨과 관련된 퀴즈</h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                {% for quiz in lesson_quizzes %}
+                  <div class="col-md-6 mb-2">
+                    <a href="{% url 'quizzes:quiz_detail' quiz.id %}" class="btn btn-outline-primary w-100">
+                      <i class="bi bi-pencil-square me-2"></i> {{ quiz.title }} 풀기
+                    </a>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        {% else %}
+          <div class="alert alert-info mb-4">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            이 레슨과 관련된 퀴즈가 없습니다.
+          </div>
+        {% endif %}
+      {% endif %}
+      
+      <!-- 수강 완료 버튼 -->
+      {% if request.user != lesson.section.course.instructor %}
+        <div class="mb-4">
+          <form id="complete-form" action="{% url 'enrollments:lesson_complete' lesson.id %}" method="POST">
             {% csrf_token %}
-            <button type="submit" class="button" onclick="return confirm('정말 이 레슨을 완료하셨습니까?');">
-                ✅ 수강 완료
+            <button type="submit" class="btn btn-success w-100" onclick="return confirm('정말 이 레슨을 완료하셨습니까?');">
+              <i class="bi bi-check-circle me-2"></i> 수강 완료
             </button>
-        </form>
-    {% endif %}
-
-
-    <!-- ✅ 이전/다음 레슨 이동 버튼 -->
-    {% if previous_lesson %}
-        <a href="{% url 'courses:lesson_detail' previous_lesson.id %}" class="button">이전 영상으로 이동</a>
-    {% endif %}
-
-    {% if next_lesson %}
-        <a href="{% url 'courses:lesson_detail' next_lesson.id %}" class="button">다음 영상으로 이동</a>
-    {% endif %}
-
-    <!-- ✅ 모든 레슨 완료 여부 확인 -->
-    {% if not next_lesson and lesson.id in completed_lessons %}
-        <p>🎉 이 강의의 모든 레슨을 완료했습니다!</p>
-    {% endif %}
-
-</body>
+          </form>
+        </div>
+      {% endif %}
+      
+      <!-- 이전/다음 레슨 네비게이션 -->
+      <div class="d-flex justify-content-between mb-4">
+        {% if previous_lesson %}
+          <a href="{% url 'courses:lesson_detail' previous_lesson.id %}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left me-2"></i> 이전 영상
+          </a>
+        {% else %}
+          <div></div>
+        {% endif %}
+        
+        {% if next_lesson %}
+          <a href="{% url 'courses:lesson_detail' next_lesson.id %}" class="btn btn-outline-primary">
+            다음 영상 <i class="bi bi-arrow-right ms-2"></i>
+          </a>
+        {% else %}
+          {% if lesson.id in completed_lessons %}
+            <div class="alert alert-success mb-0">
+              <i class="bi bi-trophy me-2"></i> 🎉 이 강의의 모든 레슨을 완료했습니다!
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+    
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-journal-text me-2"></i> 강의 콘텐츠</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="accordion" id="lessonAccordion">
+            {% with current_section=lesson.section %}
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ current_section.id }}">
+                  <button class="accordion-button" type="button" 
+                          data-bs-toggle="collapse" data-bs-target="#collapse{{ current_section.id }}" 
+                          aria-expanded="true" aria-controls="collapse{{ current_section.id }}">
+                    {{ current_section.title }}
+                  </button>
+                </h2>
+                <div id="collapse{{ current_section.id }}" class="accordion-collapse collapse show" 
+                     aria-labelledby="heading{{ current_section.id }}">
+                  <div class="accordion-body p-0">
+                    <ul class="list-group list-group-flush">
+                      {% for section_lesson in current_section.lessons.all|dictsort:"order" %}
+                        <li class="list-group-item d-flex align-items-center {% if section_lesson.id == lesson.id %}active bg-light{% endif %}">
+                          {% if section_lesson.id in completed_lessons %}
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                          {% else %}
+                            <i class="bi bi-circle text-muted me-2"></i>
+                          {% endif %}
+                          
+                          <a href="{% url 'courses:lesson_detail' section_lesson.id %}" 
+                             class="text-decoration-none {% if section_lesson.id == lesson.id %}fw-bold{% else %}text-dark{% endif %}">
+                            {{ section_lesson.title }}
+                          </a>
+                          
+                          {% if section_lesson.id == lesson.id %}
+                            <span class="badge bg-primary ms-auto">현재 시청 중</span>
+                          {% endif %}
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            {% endwith %}
+            
+            <!-- 다른 섹션들 -->
+            {% for section in lesson.section.course.sections.all %}
+              {% if section.id != lesson.section.id %}
+                <div class="accordion-item">
+                  <h2 class="accordion-header" id="heading{{ section.id }}">
+                    <button class="accordion-button collapsed" type="button" 
+                            data-bs-toggle="collapse" data-bs-target="#collapse{{ section.id }}" 
+                            aria-expanded="false" aria-controls="collapse{{ section.id }}">
+                      {{ section.title }}
+                    </button>
+                  </h2>
+                  <div id="collapse{{ section.id }}" class="accordion-collapse collapse" 
+                       aria-labelledby="heading{{ section.id }}">
+                    <div class="accordion-body p-0">
+                      <ul class="list-group list-group-flush">
+                        {% for section_lesson in section.lessons.all|dictsort:"order" %}
+                          <li class="list-group-item d-flex align-items-center">
+                            {% if section_lesson.id in completed_lessons %}
+                              <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            {% else %}
+                              <i class="bi bi-circle text-muted me-2"></i>
+                            {% endif %}
+                            
+                            <a href="{% url 'courses:lesson_detail' section_lesson.id %}" class="text-decoration-none text-dark">
+                              {{ section_lesson.title }}
+                            </a>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
