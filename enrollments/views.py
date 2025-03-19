@@ -84,21 +84,6 @@ class MarkLessonCompletedView(LoginRequiredMixin, View):
         return redirect("courses:lesson_detail", lesson.id)
 
 
-class CancelEnrollmentView(LoginRequiredMixin, View):
-    """✅ 수강 취소 기능 (진행률 초기화 및 학습 데이터 삭제)"""
-
-    def post(self, request, *args, **kwargs):
-        course = get_object_or_404(Course, id=self.kwargs["course_id"])
-        enrollment = get_object_or_404(Enrollment, student=request.user, course=course)
-
-        # ✅ 해당 강의의 LessonProgress 데이터 삭제 (수강 취소 시)
-        LessonProgress.objects.filter(student=request.user, lesson__section__course=course).delete()
-
-        enrollment.delete()
-        messages.success(request, f"'{course.title}' 강의 수강을 취소했습니다.")
-        return redirect("courses:course_detail", pk=course.id)
-
-
 class StudentDashboardView(LoginRequiredMixin, View):
     """✅ 학생 대시보드 (진행 중인 강의, 완료된 강의, 이어보기 제공)"""
 
@@ -261,3 +246,68 @@ class LessonCompleteView(LoginRequiredMixin, View):
         enrollment.update_progress()
 
         return JsonResponse({"success": True})
+
+
+class CartView(LoginRequiredMixin, ListView):
+    """✅ 장바구니 보기 (로그인 필수)"""
+
+    template_name = "enrollments/cart.html"
+    context_object_name = "courses"
+    login_url = "/accounts/login/"  # 로그인 페이지로 리디렉션
+
+    def get_queryset(self):
+        """세션에서 장바구니 가져오기"""
+        cart = self.request.session.get("cart", [])
+        return Course.objects.filter(id__in=cart)
+
+
+class AddToCartView(LoginRequiredMixin, View):
+    """✅ 장바구니에 강의 추가 (로그인 필수)"""
+
+    login_url = "/accounts/login/"
+
+    def post(self, request, course_id):
+        course = get_object_or_404(Course, id=course_id)
+
+        cart = request.session.get("cart", [])
+        if str(course_id) not in cart:
+            cart.append(str(course_id))
+            request.session["cart"] = cart  # ✅ 세션 업데이트
+            request.session.modified = True  # ✅ 장바구니 개수 즉시 반영
+            messages.success(request, f'"{course.title}" 강의가 장바구니에 추가되었습니다.')
+        else:
+            messages.warning(request, "이미 장바구니에 있는 강의입니다.")
+
+        return redirect("courses:course_list")
+
+
+class EnrollFromCartView(LoginRequiredMixin, View):
+    """✅ 장바구니에서 선택한 강의 수강 신청 (중복 방지)"""
+
+    login_url = "/accounts/login/"
+
+    def post(self, request):
+        selected_courses = request.POST.getlist("selected_courses")  # ✅ 선택한 강의 가져오기
+        if not selected_courses:
+            messages.warning(request, "수강 신청할 강의를 선택해주세요.")
+            return redirect("enrollments:cart")
+
+        student = request.user
+        enrolled_courses = []
+
+        for course_id in selected_courses:
+            course = Course.objects.get(id=course_id)
+            enrollment, created = Enrollment.objects.get_or_create(student=student, course=course)
+
+            if created:
+                enrolled_courses.append(course_id)
+                messages.success(request, f'"{course.title}" 강의가 수강 신청되었습니다.')
+            else:
+                messages.warning(request, f'"{course.title}" 강의는 이미 수강 신청한 상태입니다.')
+
+        # ✅ 수강 신청한 강의만 장바구니에서 삭제
+        cart = request.session.get("cart", [])
+        request.session["cart"] = [str(course_id) for course_id in cart if str(course_id) not in selected_courses]
+        request.session.modified = True  # ✅ 세션 변경 감지
+
+        return redirect("enrollments:student_dashboard")
