@@ -1,0 +1,115 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}내 프로필 - DevRunDev{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white py-3">
+          <h3 class="mb-0"><i class="bi bi-person-circle me-2"></i> 내 프로필</h3>
+        </div>
+        <div class="card-body p-4">
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+          
+          <div class="row">
+            <div class="col-md-4 text-center mb-4 mb-md-0">
+              <div class="avatar-circle mb-3">
+                <i class="bi bi-person-circle" style="font-size: 5rem;"></i>
+              </div>
+              <h5 class="mb-0">{{ user.get_full_name|default:user.username }}</h5>
+              <p class="text-muted">{{ user.get_role_display }}</p>
+            </div>
+            
+            <div class="col-md-8">
+              <div class="list-group">
+                <div class="list-group-item">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">이메일</h6>
+                  </div>
+                  <p class="mb-1">{{ user.email }}</p>
+                </div>
+                
+                <div class="list-group-item">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">사용자 이름</h6>
+                  </div>
+                  <p class="mb-1">{{ user.username|default:"미설정" }}</p>
+                </div>
+                
+                <div class="list-group-item">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">역할</h6>
+                  </div>
+                  <p class="mb-1">
+                    {% if user.role == "Student" %}
+                      <span class="badge bg-primary">{{ user.get_role_display }}</span>
+                    {% elif user.role == "Instructor" %}
+                      <span class="badge bg-success">{{ user.get_role_display }}</span>
+                    {% else %}
+                      <span class="badge bg-danger">{{ user.get_role_display }}</span>
+                    {% endif %}
+                  </p>
+                </div>
+                
+                <div class="list-group-item">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">가입일</h6>
+                  </div>
+                  <p class="mb-1">{{ user.date_joined|date:"Y년 m월 d일" }}</p>
+                </div>
+              </div>
+              
+              <div class="d-grid gap-2 mt-4">
+                {% if user.is_student %}
+                  <a href="{% url 'accounts:instructor_apply' %}" class="btn btn-primary">
+                    <i class="bi bi-mortarboard-fill me-2"></i> 강사 신청하기
+                  </a>
+                {% elif user.is_instructor %}
+                  <a href="{% url 'courses:instructor_dashboard' %}" class="btn btn-success">
+                    <i class="bi bi-speedometer2 me-2"></i> 강사 대시보드
+                  </a>
+                {% endif %}
+                
+                <a href="{% url 'enrollments:student_dashboard' %}" class="btn btn-outline-primary">
+                  <i class="bi bi-book me-2"></i> 내 강의실
+                </a>
+                
+                <a href="{% url 'account_email' %}" class="btn btn-outline-secondary">
+                  <i class="bi bi-envelope me-2"></i> 이메일 관리
+                </a>
+                
+                <a href="{% url 'account_change_password' %}" class="btn btn-outline-secondary">
+                  <i class="bi bi-key me-2"></i> 비밀번호 변경
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .avatar-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    border: 3px solid #dee2e6;
+  }
+</style>
+{% endblock %}

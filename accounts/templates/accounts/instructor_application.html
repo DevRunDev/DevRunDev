@@ -1,0 +1,92 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}강사 신청 - DevRunDev{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row mb-4">
+    <div class="col-md-8 offset-md-2">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/accounts/profile/" class="text-decoration-none">내 프로필</a></li>
+          <li class="breadcrumb-item active" aria-current="page">강사 신청</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0"><i class="bi bi-person-badge me-2"></i> 강사 신청</h3>
+        </div>
+        <div class="card-body p-4">
+          <div class="alert alert-info mb-4">
+            <div class="d-flex">
+              <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+              <div>
+                <p class="mb-1"><strong>강사 신청 안내</strong></p>
+                <p class="mb-0">DevRunDev에서 강사가 되어 자신만의 강의를 제작하고 공유해보세요. 
+                   승인 과정에는 1-3일이 소요될 수 있습니다.</p>
+              </div>
+            </div>
+          </div>
+          
+          <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+              <label for="{{ form.qualifications.id_for_label }}" class="form-label fw-bold">자격 사항</label>
+              <textarea name="qualifications" id="{{ form.qualifications.id_for_label }}" rows="5" class="form-control" placeholder="자격 사항을 입력하세요.">{{ form.qualifications.value|default:'' }}</textarea>
+              {% if form.qualifications.errors %}
+                <div class="text-danger mt-1">
+                  {% for error in form.qualifications.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+              <div class="form-text">관련 학위, 자격증, 경력 등을 기재해주세요.</div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="{{ form.experience.id_for_label }}" class="form-label fw-bold">강의 경험</label>
+              <textarea name="experience" id="{{ form.experience.id_for_label }}" rows="5" class="form-control" placeholder="강의 경험을 입력하세요.">{{ form.experience.value|default:'' }}</textarea>
+              {% if form.experience.errors %}
+                <div class="text-danger mt-1">
+                  {% for error in form.experience.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+              <div class="form-text">이전 강의 경험 또는 관련 경력을 자세히 기재해주세요.</div>
+            </div>
+            
+            <div class="mb-4">
+              <label for="{{ form.sample_video_url.id_for_label }}" class="form-label fw-bold">샘플 강의 영상 URL</label>
+              <input type="url" name="sample_video_url" id="{{ form.sample_video_url.id_for_label }}" class="form-control" placeholder="샘플 강의 영상 URL을 입력하세요." value="{{ form.sample_video_url.value|default:'' }}">
+              {% if form.sample_video_url.errors %}
+                <div class="text-danger mt-1">
+                  {% for error in form.sample_video_url.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+              <div class="form-text">YouTube 또는 기타 플랫폼에 업로드된 샘플 강의 영상 URL을 입력해주세요. (선택사항)</div>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+              <a href="/accounts/profile/" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i> 돌아가기
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle me-2"></i> 신청하기
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

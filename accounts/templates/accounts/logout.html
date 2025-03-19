@@ -1,0 +1,40 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}로그아웃 - DevRunDev{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row">
+    <div class="col-md-6 offset-md-3">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white py-3">
+          <h3 class="mb-0"><i class="bi bi-box-arrow-right me-2"></i> 로그아웃</h3>
+        </div>
+        <div class="card-body p-4 text-center">
+          <div class="mb-4">
+            <i class="bi bi-question-circle text-warning" style="font-size: 5rem;"></i>
+          </div>
+          
+          <h4 class="mb-4">정말 로그아웃 하시겠습니까?</h4>
+          
+          <form method="post" action="{% url 'account_logout' %}">
+            {% csrf_token %}
+            {% if redirect_field_value %}
+              <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+            {% endif %}
+            
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-box-arrow-right me-2"></i> 로그아웃
+              </button>
+              <a href="{% url 'courses:course_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i> 취소
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
