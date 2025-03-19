@@ -3,71 +3,97 @@
 {% block title %}강의 목록 - DevRunDev{% endblock %}
 
 {% block content %}
-<body>
-    <h1>강의 목록</h1>
+<div class="container mt-4">
+    <h1 class="mb-4 text-center">강의 목록</h1>
 
-    <!-- ✅ 로그인한 경우 학생/강사 대시보드 접근 링크 추가 -->
-    {% if request.user.is_authenticated %}
-        {% if request.user.role == "Instructor" %}
-            <p><a href="{% url 'courses:instructor_dashboard' %}">강사 대시보드로 이동</a></p>
-        {% else %}
-            <p><a href="{% url 'enrollments:student_dashboard' %}">내 강의실</a></p>
-        {% endif %}
-    {% endif %}
+    <!-- ✅ 검색 및 필터링 UI -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-6">
+            <form method="GET" class="input-group">
+                <input type="text" name="q" class="form-control" placeholder="강의 검색" value="{{ request.GET.q }}">
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-search"></i> 검색
+                </button>
+            </form>
+        </div>
+    </div>
 
-    {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-                <li class="{{ message.tags }}">{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+    <!-- ✅ 정렬 기능 -->
+    <div class="d-flex justify-content-end mb-3">
+        <form method="GET" class="d-flex">
+            <input type="hidden" name="q" value="{{ request.GET.q }}">  <!-- 검색어 유지 -->
+            <select name="sort" class="form-select me-2" onchange="this.form.submit()">
+                <option value="" {% if not sort %}selected{% endif %}>정렬 선택</option>
+                <option value="latest" {% if sort == "latest" %}selected{% endif %}>최신순</option>
+                <option value="popular" {% if sort == "popular" %}selected{% endif %}>인기순</option>
+                <option value="price_low" {% if sort == "price_low" %}selected{% endif %}>가격 낮은 순</option>
+                <option value="price_high" {% if sort == "price_high" %}selected{% endif %}>가격 높은 순</option>
+            </select>
+        </form>
+    </div>
 
-    <form method="GET">
-        <input type="text" name="q" placeholder="강의 검색" value="{{ request.GET.q }}">
-        <button type="submit">검색</button>
-    </form>
+<!-- ✅ 강의 리스트 (카드 스타일 적용) -->
+<div class="row">
+    {% for course in courses %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <!-- ✅ 썸네일 (기본 이미지 적용) -->
+            <img src="{{ course.thumbnail.url|default:'/media/default.jpg' }}"
+                class="card-img-top" alt="{{ course.title }}"
+                style="height: 200px; object-fit: cover;"
+                onerror="this.src='/media/default.jpg';">
 
-    <ul>
-        {% for course in courses %}
-            <li>
-                <h2>
-                    <a href="{% url 'courses:course_detail' pk=course.id %}">{{ course.title }}</a>
-                </h2>
-                <p>강사: {{ course.instructor.username }}</p>
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a href="{% url 'courses:course_detail' course.id %}" class="text-dark">
+                        {{ course.title }}
+                    </a>
+                </h5>
+                <p class="text-muted">강사: {{ course.instructor.username }}</p>
 
-                <p>⭐ 평균 별점: {{ course.avg_rating|default:"0.0"|floatformat:1 }} / 5.0</p>
+                <!-- ⭐ 평균 별점 -->
+                <p class="mb-2">
+                    ⭐ {{ course.avg_rating|default:"0.0"|floatformat:1 }} / 5.0
+                </p>
 
-                <p>
-                    가격:
+                <!-- 가격 표시 (무료 강의 강조) -->
+                <p class="fw-bold">
                     {% if course.price == 0 %}
-                        <strong>무료</strong>
+                        <span class="badge bg-success">무료</span>
                     {% else %}
-                        <strong>₩{{ course.price }}</strong>
+                        ₩{{ course.price }}
                     {% endif %}
                 </p>
 
-                {% if request.user == course.instructor and course.status == "not_approved" %}
-                    <a href="{% url 'courses:course_edit' course.id %}" class="button">수정</a>
-                {% endif %}
-            </li>
-        {% empty %}
-            <p>등록된 강의가 없습니다.</p>
-        {% endfor %}
+                <!-- 강의 상세 페이지 이동 버튼 -->
+                <a href="{% url 'courses:course_detail' course.id %}"
+                class="btn btn-primary w-100">자세히 보기</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-center">등록된 강의가 없습니다.</p>
+    {% endfor %}
+</div>
 
-        <div class="pagination">
+
+    <!-- ✅ 페이지네이션 (부트스트랩 스타일 적용) -->
+    <nav>
+        <ul class="pagination justify-content-center">
             {% if page_obj.has_previous %}
-                <a href="?page=1">« 처음</a>
-                <a href="?page={{ page_obj.previous_page_number }}">‹ 이전</a>
+                <li class="page-item"><a class="page-link" href="?page=1">처음</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">이전</a></li>
             {% endif %}
 
-            <span>페이지 {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            <li class="page-item active">
+                <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            </li>
 
             {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}">다음 ›</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}">마지막 »</a>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">다음</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">마지막</a></li>
             {% endif %}
-        </div>
-    </ul>
-</body>
+        </ul>
+    </nav>
+</div>
 {% endblock %}
