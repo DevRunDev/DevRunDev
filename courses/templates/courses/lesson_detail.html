@@ -34,31 +34,29 @@
         {% endif %}
       </div>
       
-      <!-- 퀴즈 섹션 (학생만 표시) -->
-      {% if request.user.is_authenticated and request.user.role == "Student" %}
-        {% if lesson_quizzes %}
-          <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-primary text-white">
-              <h5 class="mb-0"><i class="bi bi-question-circle me-2"></i> 이 레슨과 관련된 퀴즈</h5>
-            </div>
-            <div class="card-body">
-              <div class="row">
-                {% for quiz in lesson_quizzes %}
-                  <div class="col-md-6 mb-2">
-                    <a href="{% url 'quizzes:quiz_detail' quiz.id %}" class="btn btn-outline-primary w-100">
-                      <i class="bi bi-pencil-square me-2"></i> {{ quiz.title }} 풀기
-                    </a>
-                  </div>
-                {% endfor %}
-              </div>
+      <!-- 퀴즈 섹션 수정 -->
+      {% if lesson_quizzes %}
+        <div class="card mb-4 shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-question-circle me-2"></i> 이 레슨과 관련된 퀴즈</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              {% for quiz in lesson_quizzes %}
+                <div class="col-md-6 mb-2">
+                  <a href="{% url 'quizzes:quiz_detail' quiz.id %}" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-pencil-square me-2"></i> {{ quiz.title }} 풀기
+                  </a>
+                </div>
+              {% endfor %}
             </div>
           </div>
-        {% else %}
-          <div class="alert alert-info mb-4">
-            <i class="bi bi-info-circle-fill me-2"></i>
-            이 레슨과 관련된 퀴즈가 없습니다.
-          </div>
-        {% endif %}
+        </div>
+      {% else %}
+        <div class="alert alert-info mb-4">
+          <i class="bi bi-info-circle-fill me-2"></i>
+          이 레슨과 관련된 퀴즈가 없습니다.
+        </div>
       {% endif %}
       
       <!-- 수강 완료 버튼 -->
