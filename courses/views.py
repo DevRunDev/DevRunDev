@@ -19,17 +19,37 @@ class CourseListView(ListView):
     model = Course
     template_name = "courses/course_list.html"
     context_object_name = "courses"
-    ordering = ["-created_at"]
-    paginate_by = 10
+    paginate_by = 12
 
     def get_queryset(self):
-        """✅ 승인된 강의만 조회하고, 평균 별점 계산"""
-        queryset = Course.objects.filter(status="approved").annotate(avg_rating=Avg("reviews__rating"))
-        queryset = queryset.order_by("-created_at")
+        """✅ 승인된 강의만 조회하고, 정렬 기능 추가 (모델 수정 없이)"""
+        queryset = Course.objects.filter(status="approved")  # 승인된 강의만 가져오기
+
+        # ✅ 정렬 기능 추가 (기존 `avg_rating` 필드 사용)
+        sort = self.request.GET.get("sort", "")
+        if sort == "latest":
+            queryset = queryset.order_by("-created_at")  # 최신순
+        elif sort == "popular":
+            queryset = queryset.order_by("-avg_rating")  # ⭐ `avg_rating` 필드 직접 사용
+        elif sort == "price_low":
+            queryset = queryset.order_by("price")  # 가격 낮은 순
+        elif sort == "price_high":
+            queryset = queryset.order_by("-price")  # 가격 높은 순
+        else:
+            queryset = queryset.order_by("-created_at")  # 기본값 (최신순)
+
+        # ✅ 검색 기능 유지
         search_query = self.request.GET.get("q")
         if search_query:
             queryset = queryset.filter(title__icontains=search_query)
+
         return queryset
+
+    def get_context_data(self, **kwargs):
+        """✅ 현재 정렬 값을 템플릿에 전달"""
+        context = super().get_context_data(**kwargs)
+        context["sort"] = self.request.GET.get("sort", "")
+        return context
 
 
 class CourseDetailView(DetailView):
