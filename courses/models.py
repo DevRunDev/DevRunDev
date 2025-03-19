@@ -1,6 +1,7 @@
 import re
 
 from django.db import models
+from django.db.models import Avg
 
 from accounts.models import User
 
@@ -19,6 +20,14 @@ class Course(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="review")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    avg_rating = models.FloatField(default=0.0)
+    thumbnail = models.ImageField(upload_to="courses/", null=True, blank=True, default="default.jpg")
+
+    def update_avg_rating(self):
+        """리뷰 점수의 평균을 계산하여 업데이트하는 메서드"""
+        avg = self.reviews.aggregate(avg_rating=Avg("rating"))["avg_rating"]
+        self.avg_rating = round(avg, 1) if avg else 0.0  # ⭐ 없으면 0으로 설정
+        self.save()
 
     class Meta:
         ordering = ["-created_at"]

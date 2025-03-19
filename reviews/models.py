@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.db import models
-from django.db.models import Avg
 
 from courses.models import Course
 
@@ -23,8 +22,12 @@ class Review(models.Model):
     def __str__(self):
         return f"{self.course.title} - {self.user.username} ({self.rating}점)"
 
-    @staticmethod
-    def get_average_rating(course):
-        """강의의 평균 별점을 계산 (최적화)"""
-        avg_rating = course.reviews.aggregate(avg_rating=Avg("rating"))["avg_rating"]
-        return round(avg_rating, 1) if avg_rating else 0  # ⭐ 별점 없을 경우 0 반환
+    def save(self, *args, **kwargs):
+        """리뷰 저장 후, 강의의 평균 별점 업데이트"""
+        super().save(*args, **kwargs)
+        self.course.update_avg_rating()  # ⭐ 강의 평균 별점 업데이트
+
+    def delete(self, *args, **kwargs):
+        """리뷰 삭제 후, 강의의 평균 별점 업데이트"""
+        super().delete(*args, **kwargs)
+        self.course.update_avg_rating()  # ⭐ 강의 평균 별점 업데이트

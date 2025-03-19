@@ -8,7 +8,7 @@ from .models import Course, Lesson, Section
 class CourseForm(forms.ModelForm):
     class Meta:
         model = Course
-        fields = ["title", "description", "price"]
+        fields = ["title", "description", "price", "thumbnail"]
         widgets = {
             "description": forms.Textarea(
                 attrs={
