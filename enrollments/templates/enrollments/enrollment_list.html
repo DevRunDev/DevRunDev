@@ -1,74 +1,108 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>내 수강 목록</title>
-</head>
-<body>
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-10 offset-md-1">
-                <h2 class="mb-4">내 수강 목록</h2>
+{% extends 'courses/base.html' %}
 
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
+{% block title %}내 수강 목록 - DevRunDev{% endblock %}
 
-                {% if enrollments %}
-                    <div class="card">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">내 강의 ({{ enrollments|length }}개)</h5>
-                        </div>
-                        <div class="list-group list-group-flush">
-                            {% for enrollment in enrollments %}
-                                <a href="{% url 'enrollments:enrollment_detail' enrollment.id %}" class="list-group-item list-group-item-action">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h5 class="mb-1">{{ enrollment.course.title }}</h5>
-                                            <p class="mb-1 text-muted">강사: {{ enrollment.course.instructor.username }}</p>
-                                            <small>
-                                                수강 신청일: {{ enrollment.enrolled_at|date:"Y-m-d" }} |
-                                                진행률: {{ enrollment.progress|floatformat:1 }}%
-                                            </small>
-                                        </div>
-                                        <div>
-                                            {% if enrollment.status == 'completed' %}
-                                                <span class="badge bg-success">수료 완료</span>
-                                            {% elif enrollment.progress >= 90 %}
-                                                <span class="badge bg-info">거의 완료됨</span>
-                                            {% elif enrollment.progress >= 50 %}
-                                                <span class="badge bg-primary">진행 중</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary">시작됨</span>
-                                            {% endif %}
-
-                                            {% if enrollment.certificate %}
-                                                <span class="badge bg-warning text-dark">수료증 발급됨</span>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </a>
-                            {% endfor %}
-                        </div>
-                    </div>
-                {% else %}
-                    <div class="alert alert-info">
-                        <p>아직 수강 중인 강의가 없습니다.</p>
-                        <a href="{% url 'courses:course_list' %}" class="btn btn-primary">강의 찾아보기</a>
-                    </div>
-                {% endif %}
-
-                <div class="mt-3">
-                    <a href="{% url 'courses:course_list' %}" class="btn btn-secondary">강의 목록으로</a>
-                </div>
-            </div>
-        </div>
+{% block content %}
+<div class="container py-5">
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <h1 class="display-5 fw-bold">내 수강 목록</h1>
+      <p class="lead text-muted">등록한 모든 강의를 한눈에 확인하세요.</p>
     </div>
-</body>
-</html>
+    <div class="col-md-4 d-flex align-items-center justify-content-md-end">
+      <a href="{% url 'courses:course_list' %}" class="btn btn-outline-primary">
+        <i class="bi bi-search me-2"></i> 새 강의 찾아보기
+      </a>
+    </div>
+  </div>
+
+  {% if messages %}
+    <div class="row mb-4">
+      <div class="col-12">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="row">
+    <div class="col-12">
+      {% if enrollments %}
+        <div class="card shadow-sm">
+          <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">내 강의 ({{ enrollments|length }}개)</h5>
+            <span class="badge bg-primary rounded-pill">{{ enrollments|length }}</span>
+          </div>
+          <div class="list-group list-group-flush">
+            {% for enrollment in enrollments %}
+              <a href="{% url 'enrollments:enrollment_detail' enrollment.id %}" class="list-group-item list-group-item-action">
+                <div class="row align-items-center">
+                  <div class="col-md-7">
+                    <h5 class="mb-1">{{ enrollment.course.title }}</h5>
+                    <p class="mb-1 text-muted small">
+                      <i class="bi bi-person-circle me-1"></i> 강사: {{ enrollment.course.instructor.username }}
+                    </p>
+                    <p class="mb-0 text-muted small">
+                      <i class="bi bi-calendar me-1"></i> 수강 신청일: {{ enrollment.enrolled_at|date:"Y-m-d" }}
+                    </p>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="progress mb-2" style="height: 8px;">
+                      <div class="progress-bar 
+                        {% if enrollment.status == 'completed' %}bg-success
+                        {% elif enrollment.progress >= 90 %}bg-info
+                        {% elif enrollment.progress >= 50 %}bg-primary
+                        {% else %}bg-secondary{% endif %}" 
+                        role="progressbar" style="width: {{ enrollment.progress|floatformat:1 }}%;" 
+                        aria-valuenow="{{ enrollment.progress|floatformat:1 }}" aria-valuemin="0" aria-valuemax="100">
+                      </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <small class="text-muted">진행률: {{ enrollment.progress|floatformat:1 }}%</small>
+                    </div>
+                  </div>
+                  <div class="col-md-2 text-end">
+                    {% if enrollment.status == 'completed' %}
+                      <span class="badge bg-success">수료 완료</span>
+                    {% elif enrollment.progress >= 90 %}
+                      <span class="badge bg-info">거의 완료됨</span>
+                    {% elif enrollment.progress >= 50 %}
+                      <span class="badge bg-primary">진행 중</span>
+                    {% else %}
+                      <span class="badge bg-secondary">시작됨</span>
+                    {% endif %}
+
+                    {% if enrollment.certificate %}
+                      <span class="badge bg-warning text-dark mt-1">수료증 발급됨</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      {% else %}
+        <div class="card shadow-sm">
+          <div class="card-body text-center py-5">
+            <i class="bi bi-journal-x text-muted mb-3" style="font-size: 3rem;"></i>
+            <h4 class="text-muted mb-3">아직 수강 중인 강의가 없습니다.</h4>
+            <a href="{% url 'courses:course_list' %}" class="btn btn-primary">
+              <i class="bi bi-search me-2"></i> 강의 찾아보기
+            </a>
+          </div>
+        </div>
+      {% endif %}
+      
+      <div class="mt-4">
+        <a href="{% url 'enrollments:student_dashboard' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left me-2"></i> 내 강의실로 돌아가기
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

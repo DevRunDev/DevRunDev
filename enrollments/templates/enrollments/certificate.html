@@ -1,163 +1,97 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>수료증 - {{ certificate.enrollment.course.title }}</title>
-    <style>
-        body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            color: #333;
-            background-color: #f5f5f5;
-        }
-        .container {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background-color: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border-radius: 5px;
-        }
-        .certificate-container {
-            width: 100%;
-            position: relative;
-            margin: 0 auto;
-            padding: 2cm;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-            background-color: white;
-        }
-        .border-pattern {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 20px solid #f5f5f5;
-            pointer-events: none;
-        }
-        .header {
-            text-align: center;
-            padding-top: 1cm;
-        }
-        .title {
-            font-size: 36px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 0.5cm;
-        }
-        .subtitle {
-            font-size: 20px;
-            color: #7f8c8d;
-            margin-bottom: 2cm;
-        }
-        .content {
-            text-align: center;
-            margin-bottom: 2cm;
-        }
-        .recipient {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 1cm;
-        }
-        .statement {
-            font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 1cm;
-        }
-        .course-title {
-            font-size: 22px;
-            font-weight: bold;
-            color: #2980b9;
-            margin: 0.5cm 0;
-        }
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 3cm;
-            padding-top: 1cm;
-            border-top: 1px solid #eee;
-        }
-        .date, .signature, .certificate-id {
-            font-size: 14px;
-        }
-        .signature {
-            text-align: center;
-        }
-        .signature img {
-            max-height: 2cm;
-            margin-bottom: 0.5cm;
-        }
-        .certificate-id {
-            text-align: right;
-        }
-        .btn {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            margin: 0.5rem;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .btn-primary {
-            background-color: #3498db;
-            color: white;
-            border: none;
-        }
-        .btn-secondary {
-            background-color: #7f8c8d;
-            color: white;
-            border: none;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>수료증</h1>
-        <p>
-            {{ certificate.enrollment.course.title }} 과정을 성공적으로 수료하셨습니다.
-            아래에서 수료증을 확인하고 인쇄할 수 있습니다.
-        </p>
+{% extends 'courses/base.html' %}
 
-        <div class="button-group">
-            <a href="{% url 'enrollments:download_certificate' certificate_id=certificate.certificate_id %}" class="btn btn-primary">수료증 인쇄하기</a>
-            <a href="{% url 'enrollments:student_dashboard' %}" class="btn btn-secondary">내 강의실로 돌아가기</a>
-        </div>
+{% block title %}수료증 - {{ certificate.enrollment.course.title }}{% endblock %}
 
-        <div class="certificate-container">
-            <div class="border-pattern"></div>
-            <div class="header">
-                <div class="title">수료증</div>
-                <div class="subtitle">Certificate of Completion</div>
-            </div>
-
-            <div class="content">
-                <div class="recipient">{{ certificate.enrollment.student.username }}</div>
-                <div class="statement">
-                    위 학습자는 DevRunDev 플랫폼에서 제공하는<br>
-                    다음 과정을 성공적으로 이수하였음을 증명합니다.
-                </div>
-                <div class="course-title">
-                    {{ certificate.enrollment.course.title }}
-                </div>
-            </div>
-
-            <div class="footer">
-                <div class="date">
-                    발급일: {{ certificate.issued_at|date:"Y년 m월 d일" }}
-                </div>
-                <div class="signature">
-                    <div>{{ certificate.enrollment.course.instructor.username }}</div>
-                    <div>강사</div>
-                </div>
-                <div class="certificate-id">
-                    증명서 ID: {{ certificate.certificate_id }}
-                </div>
-            </div>
-        </div>
+{% block content %}
+<div class="container py-5">
+  <div class="row mb-4">
+    <div class="col-12">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{% url 'enrollments:student_dashboard' %}" class="text-decoration-none">내 강의실</a></li>
+          <li class="breadcrumb-item active" aria-current="page">수료증</li>
+        </ol>
+      </nav>
     </div>
-</body>
-</html>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-8 offset-md-2">
+      <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0"><i class="bi bi-award me-2"></i> 수료증</h3>
+        </div>
+        <div class="card-body p-4">
+          <h4 class="text-center mb-4">{{ certificate.enrollment.course.title }} 과정을 성공적으로 수료하셨습니다.</h4>
+          <p class="text-center mb-4">아래에서 수료증을 확인하고 인쇄할 수 있습니다.</p>
+
+          <div class="d-flex justify-content-center mb-4">
+            <a href="{% url 'enrollments:download_certificate' certificate_id=certificate.certificate_id %}" class="btn btn-primary me-2">
+              <i class="bi bi-printer me-2"></i> 수료증 인쇄하기
+            </a>
+            <a href="{% url 'enrollments:student_dashboard' %}" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-left me-2"></i> 내 강의실로 돌아가기
+            </a>
+          </div>
+
+          <!-- 수료증 미리보기 -->
+          <div class="certificate-container border border-3 p-5 position-relative bg-white shadow">
+            <div class="position-absolute top-0 start-0 end-0 bottom-0 border border-5 border-light m-2"></div>
+            
+            <div class="text-center mb-5">
+              <h2 class="display-4 mb-2 fw-bold text-primary">수료증</h2>
+              <h5 class="text-muted">Certificate of Completion</h5>
+            </div>
+
+            <div class="text-center mb-5">
+              <h3 class="fw-bold mb-4">{{ certificate.enrollment.student.username }}</h3>
+              <p class="fs-5">
+                위 학습자는 DevRunDev 플랫폼에서 제공하는<br>
+                다음 과정을 성공적으로 이수하였음을 증명합니다.
+              </p>
+              <h4 class="text-primary mt-4 fw-bold">
+                {{ certificate.enrollment.course.title }}
+              </h4>
+            </div>
+
+            <div class="d-flex justify-content-between mt-5 pt-4 border-top">
+              <div>
+                <p class="mb-0 text-muted">발급일: {{ certificate.issued_at|date:"Y년 m월 d일" }}</p>
+              </div>
+              <div class="text-center">
+                <p class="mb-0 fw-bold">{{ certificate.enrollment.course.instructor.username }}</p>
+                <p class="mb-0 text-muted">강사</p>
+              </div>
+              <div>
+                <p class="mb-0 text-muted">증명서 ID: {{ certificate.certificate_id }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .certificate-container {
+    aspect-ratio: 1.414 / 1; /* A4 비율 */
+  }
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    .certificate-container, .certificate-container * {
+      visibility: visible;
+    }
+    .certificate-container {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      border: none !important;
+    }
+  }
+</style>
+{% endblock %}

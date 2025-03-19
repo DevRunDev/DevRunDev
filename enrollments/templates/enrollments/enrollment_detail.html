@@ -1,83 +1,157 @@
 {% extends 'courses/base.html' %}
 
-{% block title %} {{ enrollment.course.title }} {% endblock %}
+{% block title %}{{ enrollment.course.title }} - 등록 정보{% endblock %}
 
 {% block content %}
-
-<body>
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-10 offset-md-1">
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="mb-0">{{ enrollment.course.title }}</h3>
-                    </div>
-                    <div class="card-body">
-                        <p>{{ enrollment.course.description|linebreaks }}</p>
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <strong>강사:</strong> {{ enrollment.course.instructor.username }}
-                                <br><strong>수강 신청일:</strong> {{ enrollment.enrolled_at|date:"Y-m-d" }}
-                                <br><strong>진행률:</strong> {{ enrollment.progress|floatformat:1 }}%
-                            </div>
-                            <div>
-                                <strong>상태:</strong> {{ enrollment.get_status_display }}
-                            </div>
-                        </div>
-
-                        <div class="mt-4">
-                            {% if is_completed %}
-                                <div class="alert alert-success">
-                                    <h5 class="alert-heading">강의 수료 완료!</h5>
-                                    <p>축하합니다! 이 강의의 모든 내용을 성공적으로 수료하셨습니다.</p>
-
-                                    {% if certificate %}
-                                        <hr>
-                                        <p>수료증 번호: {{ certificate.certificate_id }}</p>
-                                        <p>발급일: {{ certificate.issued_at|date:"Y-m-d" }}</p>
-                                        <div class="mt-2">
-                                            <a href="{% url 'enrollments:view_certificate' certificate_id=certificate.certificate_id %}" class="btn btn-info">
-                                                수료증 보기
-                                            </a>
-                                            <a href="{% url 'enrollments:download_certificate' certificate_id=certificate.certificate_id %}" class="btn btn-primary">
-                                                수료증 인쇄하기
-                                            </a>
-                                        </div>
-                                    {% else %}
-                                        <a href="{% url 'enrollments:generate_certificate' enrollment_id=enrollment.id %}" class="btn btn-primary">
-                                            수료증 발급받기
-                                        </a>
-                                    {% endif %}
-                                </div>
-                            {% else %}
-                                <div class="alert alert-warning">
-                                    <h5 class="alert-heading">아직 완료되지 않았습니다</h5>
-                                    <p>수료증을 발급받으려면 모든 강의 영상을 시청하고 모든 퀴즈를 완료해야 합니다.</p>
-                                    <p><strong>완료된 강의:</strong> {{ enrollment.progress|floatformat:1 }}%</p>
-                                    <a href="{% url 'courses:course_detail' enrollment.course.id %}" class="btn btn-primary">
-                                        계속 학습하기
-                                    </a>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-4">
-                    <a href="{% url 'enrollments:student_dashboard' %}" class="btn btn-secondary">내 강의실로 돌아가기</a>
-                    <a href="{% url 'courses:course_detail' enrollment.course.id %}" class="btn btn-primary">강의 페이지로 이동</a>
-                </div>
-            </div>
-        </div>
+<div class="container py-5">
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{% url 'enrollments:student_dashboard' %}" class="text-decoration-none">내 강의실</a></li>
+          <li class="breadcrumb-item active" aria-current="page">{{ enrollment.course.title }}</li>
+        </ol>
+      </nav>
     </div>
-</body>
+  </div>
+
+  {% if messages %}
+    <div class="row mb-4">
+      <div class="col-md-10 offset-md-1">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="row">
+    <div class="col-md-10 offset-md-1">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0">{{ enrollment.course.title }}</h3>
+        </div>
+        <div class="card-body">
+          <div class="row mb-4">
+            <div class="col-md-8">
+              <div class="course-description mb-4">
+                {{ enrollment.course.description|linebreaks }}
+              </div>
+              
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-person-fill me-2 text-primary"></i>
+                    <div>
+                      <small class="text-muted d-block">강사</small>
+                      <strong>{{ enrollment.course.instructor.username }}</strong>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-calendar-check me-2 text-primary"></i>
+                    <div>
+                      <small class="text-muted d-block">수강 신청일</small>
+                      <strong>{{ enrollment.enrolled_at|date:"Y-m-d" }}</strong>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-bar-chart-fill me-2 text-primary"></i>
+                    <div>
+                      <small class="text-muted d-block">진행률</small>
+                      <strong>{{ enrollment.progress|floatformat:1 }}%</strong>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill me-2 text-primary"></i>
+                    <div>
+                      <small class="text-muted d-block">상태</small>
+                      <strong>{{ enrollment.get_status_display }}</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="progress mb-3" style="height: 20px;">
+                <div class="progress-bar 
+                  {% if enrollment.progress == 0 %}bg-danger
+                  {% elif enrollment.progress > 0 and enrollment.progress <= 50 %}bg-warning
+                  {% elif enrollment.progress > 50 and enrollment.progress < 100 %}bg-info
+                  {% elif enrollment.progress == 100 %}bg-success{% endif %}" 
+                  role="progressbar" style="width: {{ enrollment.progress|floatformat:1 }}%;" 
+                  aria-valuenow="{{ enrollment.progress|floatformat:1 }}" aria-valuemin="0" aria-valuemax="100">
+                  {{ enrollment.progress|floatformat:1 }}%
+                </div>
+              </div>
+              
+              <div class="card mb-3">
+                <div class="card-body text-center p-3">
+                  {% if is_completed %}
+                    <div class="mb-3">
+                      <i class="bi bi-trophy text-success" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="card-title text-success">강의 수료 완료!</h5>
+                    <p class="card-text">축하합니다! 이 강의의 모든 내용을 성공적으로 수료하셨습니다.</p>
+                    
+                    {% if certificate %}
+                      <div class="certificate-info p-3 bg-light rounded mb-3">
+                        <p class="mb-1"><small>수료증 번호: {{ certificate.certificate_id }}</small></p>
+                        <p class="mb-2"><small>발급일: {{ certificate.issued_at|date:"Y-m-d" }}</small></p>
+                        <div class="d-grid gap-2">
+                          <a href="{% url 'enrollments:view_certificate' certificate_id=certificate.certificate_id %}" class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-award me-1"></i> 수료증 보기
+                          </a>
+                          <a href="{% url 'enrollments:download_certificate' certificate_id=certificate.certificate_id %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-printer me-1"></i> 수료증 인쇄하기
+                          </a>
+                        </div>
+                      </div>
+                    {% else %}
+                      <div class="d-grid">
+                        <a href="{% url 'enrollments:generate_certificate' enrollment_id=enrollment.id %}" class="btn btn-success">
+                          <i class="bi bi-award me-2"></i> 수료증 발급받기
+                        </a>
+                      </div>
+                    {% endif %}
+                  {% else %}
+                    <div class="mb-3">
+                      <i class="bi bi-hourglass-split text-warning" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="card-title text-warning">아직 완료되지 않았습니다</h5>
+                    <p class="card-text">수료증을 발급받으려면 모든 강의 영상을 시청하고 모든 퀴즈를 완료해야 합니다.</p>
+                    <p class="card-text"><strong>완료된 강의:</strong> {{ enrollment.progress|floatformat:1 }}%</p>
+                    <div class="d-grid">
+                      <a href="{% url 'courses:course_detail' enrollment.course.id %}" class="btn btn-primary">
+                        <i class="bi bi-play-circle me-2"></i> 계속 학습하기
+                      </a>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <a href="{% url 'enrollments:student_dashboard' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left me-2"></i> 내 강의실로 돌아가기
+        </a>
+        <a href="{% url 'courses:course_detail' enrollment.course.id %}" class="btn btn-primary">
+          <i class="bi bi-book me-2"></i> 강의 페이지로 이동
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

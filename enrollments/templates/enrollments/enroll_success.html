@@ -1,28 +1,37 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>수강 신청 완료</title>
-</head>
-<body>
-    <header>
-        <h1>✅ 수강 신청이 완료되었습니다!</h1>
-    </header>
+{% extends 'courses/base.html' %}
 
-    <main>
-        <p>강의 <strong>{{ course.title }}</strong>에 대한 수강 신청이 성공적으로 완료되었습니다.</p>
-        <p>이제 강의를 학습할 수 있습니다.</p>
+{% block title %}수강 신청 완료 - {{ course.title }}{% endblock %}
 
-        <!-- ✅ 강의 상세 페이지 링크 -->
-        <a href="{% url 'courses:course_detail' course.id %}">강의 상세 페이지로 이동</a>
-
-        <!-- ✅ 수강생 대시보드로 이동 버튼 -->
-        <a href="{% url 'enrollments:student_dashboard' %}" class="button">| 내 강의실로 이동</a>
-    </main>
-
-    <footer>
-        <p>🎉 즐겁게 학습하세요!</p>
-    </footer>
-</body>
-</html>
+{% block content %}
+<div class="container py-5">
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+          <h3 class="mb-0"><i class="bi bi-check-circle me-2"></i> 수강 신청이 완료되었습니다!</h3>
+        </div>
+        <div class="card-body p-4">
+          <div class="text-center mb-4">
+            <i class="bi bi-mortarboard-fill text-success" style="font-size: 5rem;"></i>
+          </div>
+          
+          <h4 class="text-center mb-3">강의 <strong>{{ course.title }}</strong>에 대한 수강 신청이 성공적으로 완료되었습니다.</h4>
+          <p class="text-center mb-4">이제 강의를 학습할 수 있습니다. 좋은 학습 되세요!</p>
+          
+          <div class="d-grid gap-2 col-md-8 mx-auto">
+            <a href="{% url 'courses:course_detail' course.id %}" class="btn btn-primary">
+              <i class="bi bi-book me-2"></i> 강의 상세 페이지로 이동
+            </a>
+            <a href="{% url 'enrollments:student_dashboard' %}" class="btn btn-outline-primary">
+              <i class="bi bi-house-door me-2"></i> 내 강의실로 이동
+            </a>
+          </div>
+        </div>
+        <div class="card-footer text-center bg-light">
+          <p class="mb-0 text-success"><i class="bi bi-emoji-smile me-2"></i> 즐겁게 학습하세요!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
