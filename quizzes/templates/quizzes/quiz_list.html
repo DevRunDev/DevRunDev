@@ -1,70 +1,135 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <div class="container mt-4">
-        <div class="row">
-          <div class="col-md-10 offset-md-1">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-              <h2>{{ course.title }} - 퀴즈 목록</h2>
+{% extends 'courses/base.html' %}
 
-              {% if is_instructor %}
-                <a href="{% url 'quizzes:quiz_create' course.id %}" class="btn btn-primary">
-                  <i class="fas fa-plus"></i> 새 퀴즈 만들기
-                </a>
-              {% endif %}
-            </div>
+{% block title %}퀴즈 목록 - {{ course.title }}{% endblock %}
 
-            {% if messages %}
-              {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                  {{ message }}
-                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-              {% endfor %}
-            {% endif %}
-
-            {% if quizzes %}
-              <div class="card">
-                <div class="card-header bg-light">
-                  <h5 class="mb-0">사용 가능한 퀴즈 ({{ quizzes|length }}개)</h5>
-                </div>
-                <div class="list-group list-group-flush">
-                  {% for quiz in quizzes %}
-                    <a href="{% url 'quizzes:quiz_detail' quiz.id %}" class="list-group-item list-group-item-action">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                          <h5 class="mb-1">{{ quiz.title }}</h5>
-                          <p class="mb-1 text-muted">{{ quiz.description|truncatechars:100 }}</p>
-                          <small>
-                            문제 수: {{ quiz.questions.count }}개 |
-                            생성일: {{ quiz.created_at|date:"Y-m-d" }}
-                          </small>
-                        </div>
-                        <span class="badge bg-primary rounded-pill">자세히 보기</span>
-                      </div>
-                    </a>
-                  {% endfor %}
-                </div>
-              </div>
-            {% else %}
-              <div class="alert alert-info">
-                <p>이 강의에는 아직 퀴즈가 없습니다.</p>
-                {% if is_instructor %}
-                  <p>위의 '새 퀴즈 만들기' 버튼을 클릭하여 첫 번째 퀴즈를 생성해보세요.</p>
-                {% endif %}
-              </div>
-            {% endif %}
-
-            <div class="mt-3">
-              <a href="javascript:history.back()" class="btn btn-secondary">뒤로 가기</a>
-            </div>
-          </div>
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'courses:course_list' %}" class="text-decoration-none">강의 목록</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'courses:course_detail' course.id %}" class="text-decoration-none">{{ course.title }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">퀴즈 목록</li>
+                </ol>
+            </nav>
         </div>
-      </div>
-</body>
-</html>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold"><i class="bi bi-question-diamond me-2"></i> {{ course.title }} - 퀴즈 목록</h2>
+            <p class="lead text-muted">학습 이해도를 확인하는 퀴즈입니다.</p>
+        </div>
+        <div class="col-md-4 d-flex align-items-center justify-content-md-end">
+            {% if is_instructor %}
+                <a href="{% url 'quizzes:quiz_create' course.id %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i> 새 퀴즈 만들기
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if messages %}
+        <div class="row mb-4">
+            <div class="col-12">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-12">
+            {% if quizzes %}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {% for quiz in quizzes %}
+                        <div class="col">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-header bg-primary bg-opacity-10 py-3">
+                                    <h5 class="mb-0 fw-bold text-primary">{{ quiz.title }}</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text mb-3">{{ quiz.description|truncatechars:100 }}</p>
+                                    <div class="d-flex mb-3">
+                                        {% if quiz.questions.count > 0 %}
+                                            <span class="badge bg-success me-2">
+                                                <i class="bi bi-list-check me-1"></i> {{ quiz.questions.count }}개 문제
+                                            </span>
+                                        {% else %}
+                <div class="card shadow-sm">
+                    <div class="card-body p-5 text-center">
+                        <i class="bi bi-question-circle text-muted mb-3" style="font-size: 3rem;"></i>
+                        <h4 class="text-muted mb-3">이 강의에는 아직 퀴즈가 없습니다.</h4>
+                        {% if is_instructor %}
+                            <p class="mb-4">학생들의 이해도를 확인하기 위한 퀴즈를 만들어보세요.</p>
+                            <a href="{% url 'quizzes:quiz_create' course.id %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i> 첫 번째 퀴즈 만들기
+                            </a>
+                        {% else %}
+                            <p class="mb-0">강사가 퀴즈를 준비 중입니다. 나중에 다시 확인해주세요.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                                            <span class="badge bg-warning text-dark me-2">
+                                                <i class="bi bi-exclamation-triangle me-1"></i> 문제 없음
+                                            </span>
+                                        {% endif %}
+                                        
+                                        <span class="badge bg-info text-dark">
+                                            <i class="bi bi-calendar me-1"></i> {{ quiz.created_at|date:"Y.m.d" }}
+                                        </span>
+                                    </div>
+                                    
+                                    {% if quiz.section %}
+                                        <p class="mb-2 small text-muted">
+                                            <i class="bi bi-bookmark me-1"></i> 섹션: {{ quiz.section.title }}
+                                        </p>
+                                    {% endif %}
+                                    
+                                    {% if quiz.lesson %}
+                                        <p class="mb-0 small text-muted">
+                                            <i class="bi bi-play-circle me-1"></i> 레슨: {{ quiz.lesson.title }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <a href="{% url 'quizzes:quiz_detail' quiz.id %}" class="btn btn-outline-primary w-100">
+                                        <i class="bi bi-eye me-2"></i> 상세 보기
+                                    </a>
+                                  </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="card shadow-sm">
+                    <div class="card-body p-5 text-center">
+                        <i class="bi bi-question-circle text-muted mb-3" style="font-size: 3rem;"></i>
+                        <h4 class="text-muted mb-3">이 강의에는 아직 퀴즈가 없습니다.</h4>
+                        {% if is_instructor %}
+                            <p class="mb-4">학생들의 이해도를 확인하기 위한 퀴즈를 만들어보세요.</p>
+                            <a href="{% url 'quizzes:quiz_create' course.id %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i> 첫 번째 퀴즈 만들기
+                            </a>
+                        {% else %}
+                            <p class="mb-0">강사가 퀴즈를 준비 중입니다. 나중에 다시 확인해주세요.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="mt-4">
+                <a href="{% url 'courses:course_detail' course.id %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i> 강의 상세 페이지로 돌아가기
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

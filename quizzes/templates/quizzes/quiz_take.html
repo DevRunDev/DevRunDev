@@ -1,88 +1,401 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <div class="container mt-4">
-        <div class="row">
-          <div class="col-md-10 offset-md-1">
-            {% if messages %}
-              {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                  {{ message }}
-                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-              {% endfor %}
-            {% endif %}
+{% extends 'courses/base.html' %}
 
-            <div class="card mb-4">
-              <div class="card-header bg-primary text-white">
-                <h3 class="mb-0">{{ quiz.title }}</h3>
-              </div>
-              <div class="card-body">
-                <p>{{ quiz.description|linebreaks }}</p>
-                <div class="d-flex justify-content-between">
-                  <div>
-                    <strong>강의:</strong> {{ quiz.course.title }}
-                    <br><strong>문제 수:</strong> {{ answer_forms|length }}개
-                  </div>
-                  <div>
-                    <strong>시작 시간:</strong> {{ attempt.started_at|date:"Y-m-d H:i" }}
-                  </div>
+{% block title %}퀴즈 응시 - {{ quiz.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .question-card {
+        transition: all 0.3s ease;
+    }
+    .question-card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+    .choice-item {
+        border-radius: 0.375rem;
+        transition: all 0.2s ease;
+        border-left: 3px solid transparent;
+    }
+    .choice-item:hover {
+        background-color: #f8f9fa;
+        border-left-color: #0d6efd;
+    }
+    .choice-item.selected {
+        background-color: rgba(13, 110, 253, 0.1);
+        border-left-color: #0d6efd;
+    }
+    .progress-tracker {
+        position: sticky;
+        top: 1rem;
+        z-index: 100;
+    }
+    .btn-floating {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 1000;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'courses:course_list' %}" class="text-decoration-none">강의 목록</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'courses:course_detail' quiz.course.id %}" class="text-decoration-none">{{ quiz.course.title }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'quizzes:quiz_list' quiz.course.id %}" class="text-decoration-none">퀴즈 목록</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'quizzes:quiz_detail' quiz.id %}" class="text-decoration-none">{{ quiz.title }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">퀴즈 응시</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    {% if messages %}
+        <div class="row mb-4">
+            <div class="col-12">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- 퀴즈 콘텐츠 -->
+        <div class="col-lg-8">
+            <!-- 퀴즈 헤더 정보 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white py-3">
+                    <h3 class="mb-0"><i class="bi bi-pencil-square me-2"></i> {{ quiz.title }}</h3>
                 </div>
-              </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        {{ quiz.description|linebreaks }}
+                    </div>
+                    
+                    <div class="d-flex flex-wrap justify-content-between text-muted">
+                        <div>
+                            <i class="bi bi-book me-1"></i> 강의: <strong>{{ quiz.course.title }}</strong>
+                        </div>
+                        <div>
+                            <i class="bi bi-list-check me-1"></i> 문제 수: <strong>{{ answer_forms|length }}개</strong>
+                        </div>
+                        <div>
+                            <i class="bi bi-clock me-1"></i> 시작 시간: <strong>{{ attempt.started_at|date:"Y.m.d H:i" }}</strong>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <form method="post">
-              {% csrf_token %}
-
-              {% for item in answer_forms %}
-                <div class="card mb-4 question-card" id="question-{{ item.question.id }}">
-                  <div class="card-header bg-light">
-                    <h5 class="mb-0">문제 {{ item.question.order }}: {{ item.question.text }}</h5>
-                  </div>
-                  <div class="card-body">
-                    <div class="list-group">
-                      {% for choice in item.question.choices.all %}
-                        <div class="list-group-item">
-                          <div class="form-check">
-                            <input
-                              class="form-check-input"
-                              type="radio"
-                              name="question_{{ item.question.id }}-selected_choice"
-                              id="choice_{{ choice.id }}"
-                              value="{{ choice.id }}"
-                              {% if item.form.instance.selected_choice.id == choice.id %}checked{% endif %}
-                            >
-                            <label class="form-check-label" for="choice_{{ choice.id }}">
-                              {{ choice.text }}
-                            </label>
-                          </div>
-                        </div>
-                      {% endfor %}
+            <!-- 퀴즈 문제 폼 -->
+            <form method="post" id="quizForm">
+                {% csrf_token %}
+                
+                <div class="mb-4">
+                    <!-- 문제 네비게이션 -->
+                    <div class="d-flex flex-wrap mb-3 p-2 bg-light rounded">
+                        {% for item in answer_forms %}
+                            <a href="#question-{{ item.question.id }}" class="btn btn-sm btn-outline-primary m-1 question-nav" data-question-id="{{ item.question.id }}">
+                                {{ forloop.counter }}
+                            </a>
+                        {% endfor %}
                     </div>
-                  </div>
                 </div>
-              {% endfor %}
 
-              <div class="d-flex justify-content-between mb-4">
-                <button type="submit" name="save_answers" class="btn btn-info">임시 저장</button>
-                <button type="submit" name="submit_quiz" class="btn btn-primary">제출 완료</button>
-              </div>
+                <!-- 문제 목록 -->
+                {% for item in answer_forms %}
+                    <div class="card mb-4 shadow-sm question-card" id="question-{{ item.question.id }}">
+                        <div class="card-header bg-primary bg-opacity-10 d-flex align-items-center">
+                            <span class="badge bg-primary me-3">{{ forloop.counter }}</span>
+                            <h5 class="mb-0">{{ item.question.text }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group question-choices" data-question-id="{{ item.question.id }}">
+                                {% for choice in item.question.choices.all %}
+                                    <div class="list-group-item choice-item p-3 mb-2 {% if item.form.instance.selected_choice.id == choice.id %}selected{% endif %}">
+                                        <div class="form-check">
+                                            <input
+                                                class="form-check-input question-choice"
+                                                type="radio"
+                                                name="question_{{ item.question.id }}-selected_choice"
+                                                id="choice_{{ choice.id }}"
+                                                value="{{ choice.id }}"
+                                                data-question-id="{{ item.question.id }}"
+                                                {% if item.form.instance.selected_choice.id == choice.id %}checked{% endif %}
+                                            >
+                                            <label class="form-check-label" for="choice_{{ choice.id }}">
+                                                {{ choice.text }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
 
-              <div class="alert alert-warning">
-                <strong>주의:</strong> '제출 완료' 버튼을 누르면 더 이상 답변을 수정할 수 없으며, 결과가 즉시 제출됩니다.
-              </div>
+                <!-- 저장 및 제출 버튼 -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" name="save_answers" class="btn btn-info btn-lg">
+                                <i class="bi bi-save me-2"></i> 임시 저장
+                            </button>
+                            <button type="button" id="preSubmitBtn" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check2-circle me-2"></i> 제출하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-              <div class="mb-4">
-                <a href="{% url 'quizzes:quiz_detail' quiz.id %}" class="btn btn-secondary">퀴즈 상세 페이지로 돌아가기</a>
-              </div>
+                <!-- 경고 메시지 -->
+                <div class="alert alert-warning">
+                    <div class="d-flex">
+                        <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+                        <div>
+                            <strong>제출 시 주의사항:</strong>
+                            <p class="mb-0">퀴즈를 제출하면 더 이상 답변을 수정할 수 없으며, 결과가 즉시 저장됩니다. 모든 문제에 답변했는지 확인해주세요.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 퀴즈 페이지 하단 내비게이션 -->
+                <div class="mt-4">
+                    <a href="{% url 'quizzes:quiz_detail' quiz.id %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-2"></i> 응시 취소하고 돌아가기
+                    </a>
+                </div>
             </form>
-          </div>
         </div>
-      </div>
-</body>
-</html>
+
+        <!-- 사이드바 -->
+        <div class="col-lg-4">
+            <!-- 진행 상황 카드 -->
+            <div class="card shadow-sm mb-4 progress-tracker">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-check2-square me-2"></i> 진행 상황</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">총 <strong>{{ answer_forms|length }}개</strong> 문제 중 <strong id="answeredCount">0</strong>개 답변 완료</p>
+                    
+                    <div class="progress mb-3" style="height: 10px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    
+                    <div id="questionStatus" class="mb-3">
+                        {% for item in answer_forms %}
+                            <span class="badge bg-secondary me-1 mb-1 question-badge" data-question-id="{{ item.question.id }}">{{ forloop.counter }}</span>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between text-muted small">
+                        <div><i class="bi bi-circle-fill text-secondary me-1"></i> 미답변</div>
+                        <div><i class="bi bi-circle-fill text-success me-1"></i> 답변 완료</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 도움말 카드 -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-question-circle me-2"></i> 퀴즈 응시 도움말</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item ps-0 border-0">
+                            <i class="bi bi-1-circle-fill me-2 text-primary"></i>
+                            각 문제에 하나의 답변만 선택할 수 있습니다.
+                        </li>
+                        <li class="list-group-item ps-0 border-0">
+                            <i class="bi bi-2-circle-fill me-2 text-primary"></i>
+                            언제든지 임시 저장 버튼을 눌러 현재까지의 답변을 저장할 수 있습니다.
+                        </li>
+                        <li class="list-group-item ps-0 border-0">
+                            <i class="bi bi-3-circle-fill me-2 text-primary"></i>
+                            모든 문제에 답변한 후 제출 버튼을 클릭하세요.
+                        </li>
+                        <li class="list-group-item ps-0 border-0">
+                            <i class="bi bi-4-circle-fill me-2 text-primary"></i>
+                            제출 후에는 결과 페이지에서 정답과 오답을 확인할 수 있습니다.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 제출 확인 모달 -->
+<div class="modal fade" id="submitConfirmModal" tabindex="-1" aria-labelledby="submitConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="submitConfirmModalLabel">퀴즈 제출 확인</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalContent">
+                    <p>정말 퀴즈를 제출하시겠습니까?</p>
+                    <p class="text-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        제출 후에는 답변을 수정할 수 없습니다.
+                    </p>
+                    <div id="unansweredWarning" class="alert alert-danger" style="display: none;">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        아직 답변하지 않은 문제가 있습니다!
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="finalSubmitBtn">제출 완료</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 플로팅 버튼 -->
+<button type="button" class="btn btn-primary btn-lg btn-floating shadow" id="scrollToTop">
+    <i class="bi bi-arrow-up"></i>
+</button>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 변수 초기화
+        const totalQuestions = {{ answer_forms|length }};
+        const quizForm = document.getElementById('quizForm');
+        const submitBtn = document.getElementById('preSubmitBtn');
+        const finalSubmitBtn = document.getElementById('finalSubmitBtn');
+        const progressBar = document.getElementById('progressBar');
+        const answeredCount = document.getElementById('answeredCount');
+        const questionBadges = document.querySelectorAll('.question-badge');
+        const unansweredWarning = document.getElementById('unansweredWarning');
+        const scrollToTopBtn = document.getElementById('scrollToTop');
+        
+        // 부트스트랩 모달 설정
+        const submitModal = new bootstrap.Modal(document.getElementById('submitConfirmModal'));
+        
+        // 현재 답변 상태 업데이트
+        function updateProgress() {
+            const inputs = document.querySelectorAll('.question-choice:checked');
+            const answered = inputs.length;
+            const percentage = Math.round((answered / totalQuestions) * 100);
+            
+            // 진행바 및 카운터 업데이트
+            progressBar.style.width = percentage + '%';
+            progressBar.setAttribute('aria-valuenow', percentage);
+            answeredCount.textContent = answered;
+            
+            // 개별 문제 배지 업데이트
+            inputs.forEach(input => {
+                const questionId = input.dataset.questionId;
+                const badge = document.querySelector(`.question-badge[data-question-id="${questionId}"]`);
+                if (badge) {
+                    badge.classList.remove('bg-secondary');
+                    badge.classList.add('bg-success');
+                }
+            });
+            
+            return answered;
+        }
+        
+        // 선택지 클릭 이벤트
+        document.querySelectorAll('.choice-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const questionId = this.closest('.question-choices').dataset.questionId;
+                const radio = this.querySelector('input[type="radio"]');
+                
+                // 라디오 버튼 선택
+                radio.checked = true;
+                
+                // 같은 문제의 다른 선택지 스타일 제거
+                document.querySelectorAll(`.question-choices[data-question-id="${questionId}"] .choice-item`).forEach(choice => {
+                    choice.classList.remove('selected');
+                });
+                
+                // 선택된 항목 스타일 적용
+                this.classList.add('selected');
+                
+                // 진행 상태 업데이트
+                updateProgress();
+            });
+        });
+        
+        // 문제 내비게이션 클릭 이벤트
+        document.querySelectorAll('.question-nav').forEach(nav => {
+            nav.addEventListener('click', function(e) {
+                e.preventDefault();
+                const questionId = this.dataset.questionId;
+                const questionElement = document.getElementById(`question-${questionId}`);
+                
+                // 스크롤 이동
+                questionElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            });
+        });
+        
+        // 제출 버튼 클릭 이벤트
+        submitBtn.addEventListener('click', function() {
+            const answered = updateProgress();
+            
+            // 모달 내용 업데이트
+            if (answered < totalQuestions) {
+                unansweredWarning.style.display = 'block';
+                unansweredWarning.innerHTML = `
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    ${totalQuestions - answered}개의 문제에 아직 답변하지 않았습니다!
+                `;
+            } else {
+                unansweredWarning.style.display = 'none';
+            }
+            
+            // 모달 표시
+            submitModal.show();
+        });
+        
+        // 최종 제출 버튼 클릭 이벤트
+        finalSubmitBtn.addEventListener('click', function() {
+            // 제출 폼에 히든 필드 추가
+            const submitInput = document.createElement('input');
+            submitInput.type = 'hidden';
+            submitInput.name = 'submit_quiz';
+            submitInput.value = 'true';
+            quizForm.appendChild(submitInput);
+            
+            // 폼 제출
+            quizForm.submit();
+        });
+        
+        // 맨 위로 스크롤 버튼
+        scrollToTopBtn.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // 스크롤 이벤트 처리 (맨 위로 버튼 표시/숨김)
+        window.addEventListener('scroll', function() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                scrollToTopBtn.style.display = 'block';
+            } else {
+                scrollToTopBtn.style.display = 'none';
+            }
+        });
+        
+        // 페이지 로드 시 초기 상태 업데이트
+        scrollToTopBtn.style.display = 'none';
+        updateProgress();
+    });
+</script>
+{% endblock %}
