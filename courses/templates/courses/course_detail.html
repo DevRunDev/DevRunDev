@@ -18,7 +18,7 @@
   <div class="row">
     <div class="col-lg-8">
       <h1 class="display-5 fw-bold mb-4">{{ course.title }}</h1>
-      
+
       {% if request.user == course.instructor %}
         <div class="alert alert-info mb-4">
           <div class="d-flex align-items-center">
@@ -65,26 +65,34 @@
         </div>
       <!-- 강사가 아닌 경우 (수강 신청 / 진행률 표시) -->
       {% elif request.user != course.instructor %}
-        {% if not is_enrolled %}
-          <!-- 수강 신청 버튼 -->
-          <form action="{% url 'enrollments:enroll_course' course.id %}" method="POST" class="mb-4">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-lg btn-success w-100">
-              <i class="bi bi-book"></i> 수강 신청
-            </button>
-          </form>
-        {% else %}
+          {% if not is_enrolled %}
+            <!-- ✅ 수강 신청 버튼 -->
+            <form action="{% url 'enrollments:enroll_course' course.id %}" method="POST" class="mb-2">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-lg btn-success w-100">
+                <i class="bi bi-book"></i> 수강 신청
+              </button>
+            </form>
+
+            <!-- ✅ 장바구니 추가 버튼 (수강 신청 버튼 아래) -->
+            <form action="{% url 'enrollments:add_to_cart' course.id %}" method="POST" class="mb-4">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-lg btn-outline-primary w-100">
+                <i class="bi bi-cart-plus"></i> 장바구니 담기
+              </button>
+            </form>
+          {% else %}
           <!-- 진행률 표시 -->
           <div class="card mb-4 shadow-sm">
             <div class="card-body">
               <h5 class="card-title">내 학습 진행률</h5>
               <div class="progress mb-3" style="height: 20px;">
-                <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress|floatformat:2 }}%;" 
+                <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress|floatformat:2 }}%;"
                      aria-valuenow="{{ progress|floatformat:2 }}" aria-valuemin="0" aria-valuemax="100">
                   {{ progress|floatformat:2 }}%
                 </div>
               </div>
-              
+
               {% if progress == 100 %}
                 <div class="alert alert-success mb-0">
                   <i class="bi bi-trophy-fill me-2"></i>
@@ -96,12 +104,6 @@
                 <a href="{% url 'enrollments:student_dashboard' %}" class="btn btn-primary">
                   <i class="bi bi-house-door"></i> 내 강의실
                 </a>
-                <form action="{% url 'enrollments:cancel_enrollment' course.id %}" method="POST">
-                  {% csrf_token %}
-                  <button type="submit" class="btn btn-outline-danger" onclick="return confirm('정말로 수강을 취소하시겠습니까?');">
-                    <i class="bi bi-x-circle"></i> 수강 취소
-                  </button>
-                </form>
               </div>
             </div>
           </div>
@@ -119,14 +121,14 @@
             {% for section in sections %}
               <div class="accordion-item">
                 <h2 class="accordion-header" id="heading{{ section.id }}">
-                  <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" 
-                          data-bs-toggle="collapse" data-bs-target="#collapse{{ section.id }}" 
-                          aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" 
+                  <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button"
+                          data-bs-toggle="collapse" data-bs-target="#collapse{{ section.id }}"
+                          aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
                           aria-controls="collapse{{ section.id }}">
                     {{ section.title }}
                   </button>
                 </h2>
-                <div id="collapse{{ section.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" 
+                <div id="collapse{{ section.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
                      aria-labelledby="heading{{ section.id }}" data-bs-parent="#courseAccordion">
                   <div class="accordion-body p-0">
                     <ul class="list-group list-group-flush">
@@ -216,11 +218,13 @@
                       {{ review.user.username }}
                     </h6>
                     <div class="text-warning">
-                      {% for _ in "x"|rjust:review.rating %}
-                        <i class="bi bi-star-fill"></i>
-                      {% endfor %}
-                      {% for _ in "x"|rjust:5|slice:review.rating %}
-                        <i class="bi bi-star"></i>
+                      <!-- ✅ 5개 만점 기준으로 별표 출력 -->
+                      {% for _ in "12345" %}
+                        {% if forloop.counter <= review.rating %}
+                          <i class="bi bi-star-fill"></i> <!-- ⭐ 선택된 별 -->
+                        {% else %}
+                          <i class="bi bi-star"></i> <!-- ☆ 빈 별 -->
+                        {% endif %}
                       {% endfor %}
                       <small class="text-muted ms-1">{{ review.rating }}점</small>
                     </div>

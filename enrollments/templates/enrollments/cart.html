@@ -1,0 +1,57 @@
+{% extends 'enrollments/base.html' %}
+
+{% block title %}장바구니{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="mb-4">장바구니</h1>
+
+  {% if courses %}
+    <form method="post" action="{% url 'enrollments:enroll_from_cart' %}">
+        {% csrf_token %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="select-all"></th> <!-- ✅ 전체 선택 -->
+                    <th>강의명</th>
+                    <th>강사</th>
+                    <th>가격</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in courses %}
+                <tr>
+                    <td><input type="checkbox" name="selected_courses" value="{{ course.id }}"></td>
+                    <td>{{ course.title }}</td>
+                    <td>{{ course.instructor.username }}</td>
+                    <td>
+                        {% if course.price == 0 %}
+                            <span class="badge bg-success">무료</span>
+                        {% else %}
+                            ₩{{ course.price }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <button type="submit" class="btn btn-primary">선택한 강의 수강 신청</button>
+    </form>
+
+  {% else %}
+    <p class="text-center">장바구니에 담긴 강의가 없습니다.</p>
+  {% endif %}
+
+</div>
+
+<script>
+    // ✅ 전체 선택 기능 추가
+    document.getElementById("select-all").addEventListener("change", function() {
+        let checkboxes = document.querySelectorAll("input[name='selected_courses']");
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+</script>
+{% endblock %}
