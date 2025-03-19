@@ -207,51 +207,101 @@
             {% endif %}
           {% endif %}
 
-          <!-- 리뷰 목록 -->
-          <div class="reviews">
-            {% for review in course.reviews.all %}
-              <div class="card mb-3">
-                <div class="card-body">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="card-subtitle">
-                      <i class="bi bi-person-circle me-2"></i>
-                      {{ review.user.username }}
-                    </h6>
-                    <div class="text-warning">
-                      <!-- ✅ 5개 만점 기준으로 별표 출력 -->
-                      {% for _ in "12345" %}
-                        {% if forloop.counter <= review.rating %}
-                          <i class="bi bi-star-fill"></i> <!-- ⭐ 선택된 별 -->
-                        {% else %}
-                          <i class="bi bi-star"></i> <!-- ☆ 빈 별 -->
-                        {% endif %}
-                      {% endfor %}
-                      <small class="text-muted ms-1">{{ review.rating }}점</small>
-                    </div>
-                  </div>
-                  <p class="card-text">{{ review.comment|linebreaks }}</p>
-                  <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-muted">{{ review.created_at|date:"Y.m.d" }}</small>
-                    {% if review.user == request.user %}
-                      <form action="{% url 'reviews:review_delete' review.id %}" method="post">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('정말로 리뷰를 삭제하시겠습니까?');">
-                          <i class="bi bi-trash"></i> 삭제
-                        </button>
-                      </form>
-                    {% endif %}
-                  </div>
-                </div>
-              </div>
-            {% empty %}
-              <div class="alert alert-secondary">
-                <i class="bi bi-chat"></i> 아직 리뷰가 없습니다.
-              </div>
+<!-- 리뷰 목록 -->
+<div class="reviews">
+  {% for review in course.reviews.all %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="card-subtitle">
+            <i class="bi bi-person-circle me-2"></i>
+            {{ review.user.username }}
+          </h6>
+          <div class="text-warning">
+            <!-- ✅ 5개 만점 기준으로 별표 출력 -->
+            {% for _ in "12345" %}
+              {% if forloop.counter <= review.rating %}
+                <i class="bi bi-star-fill"></i> <!-- ⭐ 선택된 별 -->
+              {% else %}
+                <i class="bi bi-star"></i> <!-- ☆ 빈 별 -->
+              {% endif %}
             {% endfor %}
+            <small class="text-muted ms-1">{{ review.rating }}점</small>
           </div>
+        </div>
+
+        <!-- ✅ 리뷰 수정 폼 (현재 로그인한 사용자만 수정 가능) -->
+        {% if review.user == request.user %}
+          <form action="{% url 'reviews:review_edit' review.id %}" method="post" class="review-edit-form d-none">
+            {% csrf_token %}
+            <div class="mb-2">
+              <label for="rating" class="form-label">별점 수정:</label>
+              <select name="rating" class="form-select">
+                <option value="5" {% if review.rating == 5 %}selected{% endif %}>⭐⭐⭐⭐⭐</option>
+                <option value="4" {% if review.rating == 4 %}selected{% endif %}>⭐⭐⭐⭐</option>
+                <option value="3" {% if review.rating == 3 %}selected{% endif %}>⭐⭐⭐</option>
+                <option value="2" {% if review.rating == 2 %}selected{% endif %}>⭐⭐</option>
+                <option value="1" {% if review.rating == 1 %}selected{% endif %}>⭐</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <textarea name="comment" class="form-control">{{ review.comment }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-sm btn-primary">
+              <i class="bi bi-save"></i> 저장
+            </button>
+            <button type="button" class="btn btn-sm btn-secondary cancel-edit">
+              취소
+            </button>
+          </form>
+        {% endif %}
+
+        <p class="card-text review-text">{{ review.comment|linebreaks }}</p>
+
+        <div class="d-flex justify-content-between align-items-center">
+          <small class="text-muted">{{ review.created_at|date:"Y.m.d" }}</small>
+          {% if review.user == request.user %}
+            <div>
+              <!-- ✅ 수정 버튼 -->
+              <button class="btn btn-sm btn-outline-secondary edit-review">
+                <i class="bi bi-pencil"></i> 수정
+              </button>
+
+              <!-- ✅ 삭제 버튼 -->
+              <form action="{% url 'reviews:review_delete' review.id %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('정말로 리뷰를 삭제하시겠습니까?');">
+                  <i class="bi bi-trash"></i> 삭제
+                </button>
+              </form>
+            </div>
+          {% endif %}
         </div>
       </div>
     </div>
-  </div>
+  {% empty %}
+    <div class="alert alert-secondary">
+      <i class="bi bi-chat"></i> 아직 리뷰가 없습니다.
+    </div>
+  {% endfor %}
 </div>
+
+<!-- ✅ JavaScript로 수정 버튼 클릭 시 폼 표시 -->
+<script>
+  document.querySelectorAll(".edit-review").forEach(button => {
+    button.addEventListener("click", function() {
+      let card = this.closest(".card-body");
+      card.querySelector(".review-text").classList.add("d-none");
+      card.querySelector(".review-edit-form").classList.remove("d-none");
+    });
+  });
+
+  document.querySelectorAll(".cancel-edit").forEach(button => {
+    button.addEventListener("click", function() {
+      let card = this.closest(".card-body");
+      card.querySelector(".review-text").classList.remove("d-none");
+      card.querySelector(".review-edit-form").classList.add("d-none");
+    });
+  });
+</script>
 {% endblock %}
