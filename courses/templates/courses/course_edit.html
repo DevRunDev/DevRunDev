@@ -74,6 +74,67 @@
             </button>
           </form>
 
+          <!-- 퀴즈 목록 및 관리 섹션 추가 -->
+          <div class="card mt-4 shadow-sm">
+            <div class="card-header bg-light">
+              <h5 class="mb-0"><i class="bi bi-question-diamond me-2"></i> 퀴즈 관리</h5>
+            </div>
+            <div class="card-body">
+              {% with quizzes=course.quizzes.all %}
+                {% if quizzes %}
+                  <div class="table-responsive">
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>퀴즈 제목</th>
+                          <th>문제 수</th>
+                          <th>연결된 레슨</th>
+                          <th>관리</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for quiz in quizzes %}
+                          <tr>
+                            <td>{{ quiz.title }}</td>
+                            <td>{{ quiz.questions.count }}</td>
+                            <td>
+                              {% if quiz.lesson %}
+                                {{ quiz.lesson.title }}
+                              {% else %}
+                                -
+                              {% endif %}
+                            </td>
+                            <td>
+                              <a href="{% url 'quizzes:quiz_detail' quiz.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                <i class="bi bi-eye"></i> 보기
+                              </a>
+                              <a href="{% url 'quizzes:question_create' quiz.id %}" class="btn btn-sm btn-outline-success me-1">
+                                <i class="bi bi-plus-lg"></i> 문제 추가
+                              </a>
+                              <a href="{% url 'quizzes:quiz_edit' quiz.id %}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil"></i> 수정
+                              </a>
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i> 이 강의에는 아직 퀴즈가 없습니다.
+                  </div>
+                {% endif %}
+              {% endwith %}
+              
+              <div class="d-flex justify-content-end mt-3">
+                <a href="{% url 'quizzes:quiz_create' course.id %}" class="btn btn-success">
+                  <i class="bi bi-plus-circle me-2"></i> 새 퀴즈 만들기
+                </a>
+              </div>
+            </div>
+          </div>
+
           <div class="card mt-4">
             <div class="card-header bg-light">
               <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i> 섹션 및 레슨 관리</h5>
@@ -114,6 +175,15 @@
                                 {% else %}
                                   <span class="badge bg-warning text-dark ms-2">영상 없음</span>
                                 {% endif %}
+                                
+                                <!-- 연결된 퀴즈 정보 추가 -->
+                                {% with lesson_quizzes=lesson.quizzes.all %}
+                                  {% if lesson_quizzes %}
+                                    <span class="badge bg-info text-white ms-2">
+                                      <i class="bi bi-question-circle me-1"></i> 퀴즈 {{ lesson_quizzes.count }}개
+                                    </span>
+                                  {% endif %}
+                                {% endwith %}
                               </div>
                               <div>
                                 <a href="{% url 'courses:lesson_edit' lesson.id %}" class="btn btn-sm btn-outline-primary me-1">
