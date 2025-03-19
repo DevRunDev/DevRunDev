@@ -1,90 +1,202 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <div class="container mt-4">
-        <div class="row">
-          <div class="col-md-8 offset-md-2">
-            <div class="card">
-              <div class="card-header bg-primary text-white">
-                {% if is_update %}
-                  <h4>퀴즈 수정</h4>
-                {% else %}
-                  <h4>새 퀴즈 만들기</h4>
-                {% endif %}
-              </div>
-              <div class="card-body">
-                <h5 class="card-title mb-3">강의: {{ course.title }}</h5>
+{% extends 'courses/base.html' %}
 
-                <form method="post" novalidate>
-                  {% csrf_token %}
+{% block title %}{% if is_update %}퀴즈 수정{% else %}새 퀴즈 만들기{% endif %} - {{ course.title }}{% endblock %}
 
-                  <div class="mb-3">
-                    <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }}</label>
-                    {{ form.title }}
-                    {% if form.title.errors %}
-                      <div class="text-danger">
-                        {% for error in form.title.errors %}
-                          {{ error }}
-                        {% endfor %}
-                      </div>
-                    {% endif %}
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
-                    {{ form.description }}
-                    {% if form.description.errors %}
-                      <div class="text-danger">
-                        {% for error in form.description.errors %}
-                          {{ error }}
-                        {% endfor %}
-                      </div>
-                    {% endif %}
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="{{ form.section.id_for_label }}" class="form-label">{{ form.section.label }}</label>
-                    {{ form.section }}
-                    {% if form.section.errors %}
-                      <div class="text-danger">
-                        {% for error in form.section.errors %}
-                          {{ error }}
-                        {% endfor %}
-                      </div>
-                    {% endif %}
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="{{ form.lesson.id_for_label }}" class="form-label">{{ form.lesson.label }}</label>
-                    {{ form.lesson }}
-                    {% if form.lesson.errors %}
-                      <div class="text-danger">
-                        {% for error in form.lesson.errors %}
-                          {{ error }}
-                        {% endfor %}
-                      </div>
-                    {% endif %}
-                  </div>
-
-                  <div class="d-flex justify-content-between">
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'courses:course_list' %}" class="text-decoration-none">강의 목록</a></li>
                     {% if is_update %}
-                      <a href="{% url 'quizzes:quiz_detail' form.instance.id %}" class="btn btn-secondary">취소</a>
-                      <button type="submit" class="btn btn-primary">수정 완료</button>
+                        <li class="breadcrumb-item"><a href="{% url 'courses:course_detail' form.instance.course.id %}" class="text-decoration-none">{{ form.instance.course.title }}</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'quizzes:quiz_list' form.instance.course.id %}" class="text-decoration-none">퀴즈 목록</a></li>
                     {% else %}
-                      <a href="{% url 'quizzes:quiz_list' course.id %}" class="btn btn-secondary">취소</a>
-                      <button type="submit" class="btn btn-primary">다음: 문제 추가하기</button>
+                        <li class="breadcrumb-item"><a href="{% url 'courses:course_detail' course.id %}" class="text-decoration-none">{{ course.title }}</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'quizzes:quiz_list' course.id %}" class="text-decoration-none">퀴즈 목록</a></li>
                     {% endif %}
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
+                    <li class="breadcrumb-item active" aria-current="page">{% if is_update %}퀴즈 수정{% else %}새 퀴즈 만들기{% endif %}</li>
+                </ol>
+            </nav>
         </div>
-      </div>
-</body>
-</html>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0">
+                        <i class="bi {% if is_update %}bi-pencil-square{% else %}bi-plus-circle{% endif %} me-2"></i>
+                        {% if is_update %}퀴즈 수정{% else %}새 퀴즈 만들기{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                            <div>
+                                <h5 class="mb-1">강의: {{ course.title }}</h5>
+                                <p class="mb-0">퀴즈의 기본 정보를 입력해주세요. 다음 단계에서 문제를 추가할 수 있습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+                            <label for="{{ form.title.id_for_label }}" class="form-label fw-bold">퀴즈 제목</label>
+                            <input type="text" name="title" id="{{ form.title.id_for_label }}" 
+                                   class="form-control form-control-lg {% if form.title.errors %}is-invalid{% endif %}" 
+                                   value="{{ form.title.value|default:'' }}" 
+                                   placeholder="예: 자바스크립트 기초 개념 퀴즈" required>
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.title.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">퀴즈 설명</label>
+                            <textarea name="description" id="{{ form.description.id_for_label }}" 
+                                      class="form-control {% if form.description.errors %}is-invalid{% endif %}" 
+                                      rows="4" placeholder="이 퀴즈의 목적과 포함된 내용에 대해 설명해주세요.">{{ form.description.value|default:'' }}</textarea>
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="{{ form.section.id_for_label }}" class="form-label fw-bold">{{ form.section.label }}</label>
+                                <select name="section" id="{{ form.section.id_for_label }}" 
+                                        class="form-select {% if form.section.errors %}is-invalid{% endif %}">
+                                    <option value="">섹션을 선택하세요 (선택사항)</option>
+                                    {% for section_choice in form.section.field.queryset %}
+                                        <option value="{{ section_choice.id }}" 
+                                            {% if form.section.value|stringformat:"s" == section_choice.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ section_choice.title }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.section.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.section.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="form-text">특정 섹션과 연결하려면 선택하세요</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.lesson.id_for_label }}" class="form-label fw-bold">{{ form.lesson.label }}</label>
+                                <select name="lesson" id="{{ form.lesson.id_for_label }}" 
+                                        class="form-select {% if form.lesson.errors %}is-invalid{% endif %}">
+                                    <option value="">강의 영상을 선택하세요 (선택사항)</option>
+                                    {% for lesson_choice in form.lesson.field.queryset %}
+                                        <option value="{{ lesson_choice.id }}" 
+                                            {% if form.lesson.value|stringformat:"s" == lesson_choice.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ lesson_choice.title }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.lesson.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.lesson.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="form-text">특정 강의 영상과 연결하려면 선택하세요</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            {% if is_update %}
+                                <a href="{% url 'quizzes:quiz_detail' form.instance.id %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle me-2"></i> 취소
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle me-2"></i> 수정 완료
+                                </button>
+                            {% else %}
+                                <a href="{% url 'quizzes:quiz_list' course.id %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle me-2"></i> 취소
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-arrow-right me-2"></i> 다음: 문제 추가하기
+                                </button>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if not is_update %}
+                <div class="card mt-4 border-info">
+                    <div class="card-header bg-info bg-opacity-10">
+                        <h5 class="mb-0"><i class="bi bi-lightbulb me-2"></i> 퀴즈 작성 팁</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="mb-0">
+                            <li class="mb-2">명확하고 직관적인 퀴즈 제목을 사용하세요.</li>
+                            <li class="mb-2">퀴즈 설명에는 학생들이 무엇을 준비해야 하는지 안내해주세요.</li>
+                            <li class="mb-2">특정 섹션이나 강의 영상과 연결하면 학생들이 관련 내용을 복습하기 쉽습니다.</li>
+                            <li>다음 단계에서 문제와 선택지를 추가할 수 있습니다.</li>
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 섹션 선택 시 해당 섹션의 레슨만 표시
+    document.addEventListener('DOMContentLoaded', function() {
+        const sectionSelect = document.getElementById('{{ form.section.id_for_label }}');
+        const lessonSelect = document.getElementById('{{ form.lesson.id_for_label }}');
+        const originalLessons = Array.from(lessonSelect.options);
+        
+        sectionSelect.addEventListener('change', function() {
+            const selectedSectionId = sectionSelect.value;
+            
+            // 모든 옵션 제거
+            while (lessonSelect.options.length > 0) {
+                lessonSelect.remove(0);
+            }
+            
+            // 첫 번째 기본 옵션 추가
+            lessonSelect.add(new Option('강의 영상을 선택하세요 (선택사항)', ''));
+            
+            // 선택된 섹션의 레슨만 추가
+            if (selectedSectionId) {
+                originalLessons.forEach(option => {
+                    if (option.value === '' || option.dataset.sectionId === selectedSectionId) {
+                        lessonSelect.add(new Option(option.text, option.value));
+                    }
+                });
+            } else {
+                // 섹션을 선택하지 않은 경우 모든 레슨 표시
+                originalLessons.forEach(option => {
+                    if (option.value !== '') {
+                        lessonSelect.add(new Option(option.text, option.value));
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

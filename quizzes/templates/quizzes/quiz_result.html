@@ -1,105 +1,359 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <div class="container mt-4">
-        <div class="row">
-          <div class="col-md-10 offset-md-1">
-            {% if messages %}
-              {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                  {{ message }}
-                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-              {% endfor %}
-            {% endif %}
+{% extends 'courses/base.html' %}
 
-            <div class="card mb-4">
-              <div class="card-header bg-primary text-white">
-                <h3 class="mb-0">퀴즈 결과 - {{ attempt.quiz.title }}</h3>
-              </div>
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-md-8">
-                    <p>{{ attempt.quiz.description|linebreaks }}</p>
-                    <div>
-                      <strong>강의:</strong> {{ attempt.quiz.course.title }}
-                      <br><strong>총 문제 수:</strong> {{ attempt.total_questions }}개
-                      <br><strong>응시 일시:</strong> {{ attempt.started_at|date:"Y-m-d H:i" }}
-                      <br><strong>완료 일시:</strong> {{ attempt.completed_at|date:"Y-m-d H:i" }}
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="card text-center">
-                      <div class="card-body">
-                        <h1 class="display-4">{{ attempt.score }}</h1>
-                        <p class="lead">총점</p>
-                        <div class="mt-2">
-                          <span class="badge bg-success">{{ attempt.correct_answers }}개 정답</span>
-                          <span class="badge bg-danger">{{ attempt.total_questions|add:"-"|add:attempt.correct_answers }}개 오답</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+{% block title %}퀴즈 결과 - {{ attempt.quiz.title }}{% endblock %}
 
-            <div class="card">
-              <div class="card-header bg-light">
-                <h5 class="mb-0">문제별 결과</h5>
-              </div>
-              <div class="list-group list-group-flush">
-                {% for qa in question_answers %}
-                  <div class="list-group-item">
-                    <h5 class="mb-3">
-                      문제 {{ qa.question.order }}: {{ qa.question.text }}
-                      {% if qa.is_correct %}
-                        <span class="badge bg-success">정답</span>
-                      {% else %}
-                        <span class="badge bg-danger">오답</span>
-                      {% endif %}
-                    </h5>
+{% block extra_css %}
+<style>
+    .result-summary {
+        position: relative;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    .result-summary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+        z-index: 0;
+    }
+    .result-content {
+        position: relative;
+        z-index: 1;
+    }
+    .question-card {
+        border-left: 5px solid #6c757d;
+        transition: all 0.3s ease;
+    }
+    .question-card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+    }
+    .question-card.correct {
+        border-left-color: #198754;
+    }
+    .question-card.incorrect {
+        border-left-color: #dc3545;
+    }
+    .choice-item {
+        border-radius: 0.375rem;
+        transition: all 0.2s ease;
+        margin-bottom: 0.5rem;
+        padding: 0.75rem 1rem;
+    }
+    .choice-correct {
+        background-color: rgba(25, 135, 84, 0.1);
+        border: 1px solid rgba(25, 135, 84, 0.3);
+    }
+    .choice-incorrect {
+        background-color: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+    .choice-neutral {
+        background-color: rgba(108, 117, 125, 0.1);
+        border: 1px solid rgba(108, 117, 125, 0.2);
+    }
+    .choice-item .icon {
+        min-width: 24px;
+    }
+    .score-circle {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        position: relative;
+        background: #f8f9fa;
+        border: 8px solid;
+    }
+    .score-circle.excellent {
+        border-color: #198754;
+    }
+    .score-circle.good {
+        border-color: #0d6efd;
+    }
+    .score-circle.average {
+        border-color: #ffc107;
+    }
+    .score-circle.poor {
+        border-color: #dc3545;
+    }
+</style>
+{% endblock %}
 
-                    <div class="ms-3">
-                      <p><strong>선택한 답:</strong></p>
-                      <ul class="list-group">
-                        {% for choice in qa.question.choices.all %}
-                          <li class="list-group-item
-                            {% if choice.id == qa.selected_choice.id and qa.is_correct %}list-group-item-success{% endif %}
-                            {% if choice.id == qa.selected_choice.id and not qa.is_correct %}list-group-item-danger{% endif %}
-                            {% if choice.is_correct and choice.id != qa.selected_choice.id %}list-group-item-success{% endif %}
-                          ">
-                            {{ choice.text }}
-                            {% if choice.id == qa.selected_choice.id %}
-                              {% if qa.is_correct %}
-                                <span class="badge bg-success">선택 (정답)</span>
-                              {% else %}
-                                <span class="badge bg-danger">선택 (오답)</span>
-                              {% endif %}
-                            {% endif %}
-                            {% if choice.is_correct and choice.id != qa.selected_choice.id %}
-                              <span class="badge bg-info">정답</span>
-                            {% endif %}
-                          </li>
-                        {% endfor %}
-                      </ul>
-                    </div>
-                  </div>
-                {% endfor %}
-              </div>
-            </div>
-
-            <div class="mt-4 d-flex justify-content-between">
-              <a href="{% url 'quizzes:quiz_detail' attempt.quiz.id %}" class="btn btn-secondary">퀴즈 상세 페이지로</a>
-              <a href="{% url 'quizzes:quiz_take' attempt.quiz.id %}" class="btn btn-primary">다시 응시하기</a>
-            </div>
-          </div>
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'courses:course_list' %}" class="text-decoration-none">강의 목록</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'courses:course_detail' attempt.quiz.course.id %}" class="text-decoration-none">{{ attempt.quiz.course.title }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'quizzes:quiz_list' attempt.quiz.course.id %}" class="text-decoration-none">퀴즈 목록</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'quizzes:quiz_detail' attempt.quiz.id %}" class="text-decoration-none">{{ attempt.quiz.title }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">퀴즈 결과</li>
+                </ol>
+            </nav>
         </div>
-      </div>
-</body>
-</html>
+    </div>
+
+    {% if messages %}
+        <div class="row mb-4">
+            <div class="col-12">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="row mb-4">
+        <!-- 퀴즈 정보 카드 -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white py-3">
+                    <h3 class="mb-0">
+                        <i class="bi bi-card-checklist me-2"></i> 
+                        퀴즈 결과 - {{ attempt.quiz.title }}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <!-- 퀴즈 설명 -->
+                            <p>{{ attempt.quiz.description|linebreaks }}</p>
+                            
+                            <!-- 기본 정보 -->
+                            <div class="d-flex flex-wrap gap-3 text-muted mb-3">
+                                <div>
+                                    <i class="bi bi-book me-1"></i> 강의: <strong>{{ attempt.quiz.course.title }}</strong>
+                                </div>
+                                <div>
+                                    <i class="bi bi-list-check me-1"></i> 총 문제 수: <strong>{{ attempt.total_questions }}개</strong>
+                                </div>
+                                <div>
+                                    <i class="bi bi-check2-circle me-1"></i> 정답 수: <strong>{{ attempt.correct_answers }}개</strong>
+                                </div>
+                            </div>
+                            
+                            <!-- 응시 시간 정보 -->
+                            <div class="d-flex flex-wrap gap-3 text-muted">
+                                <div>
+                                    <i class="bi bi-clock me-1"></i> 응시 시작: <strong>{{ attempt.started_at|date:"Y.m.d H:i" }}</strong>
+                                </div>
+                                <div>
+                                    <i class="bi bi-clock-history me-1"></i> 응시 완료: <strong>{{ attempt.completed_at|date:"Y.m.d H:i" }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <!-- 점수 표시 -->
+                            <div class="text-center">
+                                {% if attempt.score >= 90 %}
+                                    <div class="score-circle excellent">
+                                        <div>
+                                            <h1 class="display-4 fw-bold mb-0">{{ attempt.score }}</h1>
+                                            <p class="mb-0">점</p>
+                                        </div>
+                                    </div>
+                                    <h5 class="mt-3 text-success">최우수</h5>
+                                {% elif attempt.score >= 80 %}
+                                    <div class="score-circle good">
+                                        <div>
+                                            <h1 class="display-4 fw-bold mb-0">{{ attempt.score }}</h1>
+                                            <p class="mb-0">점</p>
+                                        </div>
+                                    </div>
+                                    <h5 class="mt-3 text-primary">우수</h5>
+                                {% elif attempt.score >= 60 %}
+                                    <div class="score-circle average">
+                                        <div>
+                                            <h1 class="display-4 fw-bold mb-0">{{ attempt.score }}</h1>
+                                            <p class="mb-0">점</p>
+                                        </div>
+                                    </div>
+                                    <h5 class="mt-3 text-warning">보통</h5>
+                                {% else %}
+                                    <div class="score-circle poor">
+                                        <div>
+                                            <h1 class="display-4 fw-bold mb-0">{{ attempt.score }}</h1>
+                                            <p class="mb-0">점</p>
+                                        </div>
+                                    </div>
+                                    <h5 class="mt-3 text-danger">노력 필요</h5>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 결과 요약 카드 -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i> 결과 분석</h5>
+                </div>
+                <div class="card-body p-0">
+                    <!-- 결과 요약 통계 -->
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item px-4 py-3">
+                            <h6 class="mb-2">정답률</h6>
+                            <div class="progress mb-2" style="height: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     style="width: {{ attempt.score }}%;" 
+                                     aria-valuenow="{{ attempt.score }}" 
+                                     aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <small>{{ attempt.correct_answers }}개 정답</small>
+                                <small>{{ attempt.score }}%</small>
+                            </div>
+                        </div>
+                        
+                        <div class="list-group-item px-4 py-3">
+                            <h6 class="mb-2">성적 평가</h6>
+                            <p class="mb-0">
+                                {% if attempt.score >= 90 %}
+                                    <span class="text-success"><i class="bi bi-emoji-laughing me-1"></i> 탁월한 이해도를 보여주셨습니다!</span>
+                                {% elif attempt.score >= 80 %}
+                                    <span class="text-primary"><i class="bi bi-emoji-smile me-1"></i> 우수한 이해도를 보여주셨습니다!</span>
+                                {% elif attempt.score >= 60 %}
+                                    <span class="text-warning"><i class="bi bi-emoji-neutral me-1"></i> 기본적인 이해는 되어 있습니다.</span>
+                                {% else %}
+                                    <span class="text-danger"><i class="bi bi-emoji-frown me-1"></i> 더 많은 학습이 필요합니다.</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        
+                        <div class="list-group-item px-4 py-3">
+                            <h6 class="mb-0">다음 단계 추천</h6>
+                            <ul class="mb-0 ps-3 pt-2">
+                                {% if attempt.score >= 80 %}
+                                    <li>다음 섹션으로 넘어가도 좋습니다.</li>
+                                    <li>관련 심화 학습을 해보세요.</li>
+                                {% else %}
+                                    <li>틀린 문제를 다시 확인해보세요.</li>
+                                    <li>관련 강의 내용을 복습하세요.</li>
+                                    <li>이해가 안 되는 내용은 강사에게 질문하세요.</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-grid">
+                        <a href="{% url 'quizzes:quiz_take' attempt.quiz.id %}" class="btn btn-primary">
+                            <i class="bi bi-arrow-repeat me-2"></i> 다시 응시하기
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 문제별 결과 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-list-check me-2"></i> 문제별 결과</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="accordion" id="questionResultAccordion">
+                        {% for qa in question_answers %}
+                            <div class="accordion-item question-card {% if qa.is_correct %}correct{% else %}incorrect{% endif %}">
+                                <h2 class="accordion-header" id="heading-{{ qa.question.id }}">
+                                    <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" 
+                                            data-bs-toggle="collapse" data-bs-target="#collapse-{{ qa.question.id }}" 
+                                            aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" 
+                                            aria-controls="collapse-{{ qa.question.id }}">
+                                        <div class="d-flex align-items-center w-100">
+                                            <span class="badge {% if qa.is_correct %}bg-success{% else %}bg-danger{% endif %} me-3">{{ forloop.counter }}</span>
+                                            <div class="me-auto">{{ qa.question.text }}</div>
+                                            <span class="badge {% if qa.is_correct %}bg-success{% else %}bg-danger{% endif %} ms-3">
+                                                {% if qa.is_correct %}
+                                                    <i class="bi bi-check-circle me-1"></i> 정답
+                                                {% else %}
+                                                    <i class="bi bi-x-circle me-1"></i> 오답
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </button>
+                                </h2>
+                                <div id="collapse-{{ qa.question.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" 
+                                     aria-labelledby="heading-{{ qa.question.id }}" data-bs-parent="#questionResultAccordion">
+                                    <div class="accordion-body">
+                                        <h6 class="mb-3">선택지:</h6>
+                                        
+                                        <div class="ms-3">
+                                            {% for choice in qa.question.choices.all %}
+                                                <div class="choice-item 
+                                                    {% if choice.id == qa.selected_choice.id and qa.is_correct %}choice-correct
+                                                    {% elif choice.id == qa.selected_choice.id and not qa.is_correct %}choice-incorrect
+                                                    {% elif choice.is_correct and choice.id != qa.selected_choice.id %}choice-correct
+                                                    {% else %}choice-neutral{% endif %}">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="icon me-3">
+                                                            {% if choice.id == qa.selected_choice.id and qa.is_correct %}
+                                                                <i class="bi bi-check-circle-fill text-success"></i>
+                                                            {% elif choice.id == qa.selected_choice.id and not qa.is_correct %}
+                                                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                                            {% elif choice.is_correct and choice.id != qa.selected_choice.id %}
+                                                                <i class="bi bi-check-circle text-success"></i>
+                                                            {% else %}
+                                                                <i class="bi bi-circle text-secondary"></i>
+                                                            {% endif %}
+                                                        </div>
+                                                        
+                                                        <div>{{ choice.text }}</div>
+                                                        
+                                                        <div class="ms-auto">
+                                                            {% if choice.id == qa.selected_choice.id and qa.is_correct %}
+                                                                <span class="badge bg-success">선택 (정답)</span>
+                                                            {% elif choice.id == qa.selected_choice.id and not qa.is_correct %}
+                                                                <span class="badge bg-danger">선택 (오답)</span>
+                                                            {% elif choice.is_correct and choice.id != qa.selected_choice.id %}
+                                                                <span class="badge bg-success">정답</span>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        
+                                        {% if not qa.is_correct %}
+                                            <div class="alert alert-warning mt-3">
+                                                <i class="bi bi-lightbulb me-2"></i>
+                                                <strong>학습 팁:</strong> 정답을 확인하고 관련 강의 내용을 다시 복습해보세요.
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 내비게이션 버튼 -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="{% url 'quizzes:quiz_detail' attempt.quiz.id %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i> 퀴즈 상세 페이지로
+        </a>
+        <a href="{% url 'quizzes:quiz_take' attempt.quiz.id %}" class="btn btn-primary">
+            <i class="bi bi-arrow-repeat me-2"></i> 다시 응시하기
+        </a>
+    </div>
+</div>
+{% endblock %}
