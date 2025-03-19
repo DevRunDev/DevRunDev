@@ -1,19 +1,60 @@
 {% extends 'courses/base.html' %}
 
-{% block title %} 섹션 수정 {% endblock %}
+{% block title %}섹션 수정 - {{ section.title }}{% endblock %}
 
 {% block content %}
-<body>
-    <h1>✏️ 섹션 수정</h1>
+<div class="container py-5">
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{% url 'courses:course_list' %}" class="text-decoration-none">강의 목록</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'courses:course_detail' pk=section.course.id %}" class="text-decoration-none">{{ section.course.title }}</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'courses:course_edit' section.course.id %}" class="text-decoration-none">강의 수정</a></li>
+          <li class="breadcrumb-item active" aria-current="page">섹션 수정</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
 
-    <form method="post">
-        {% csrf_token %}
-        <label for="id_title">섹션 제목</label>
-        <input type="text" name="title" id="id_title" value="{{ form.title.value }}" required>
-
-        <button type="submit">수정 완료</button>
-    </form>
-
-    <a href="{% url 'courses:course_detail' pk=section.course.id %}">🔙 강의 상세 페이지로 돌아가기</a>
-</body>
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0"><i class="bi bi-pencil-square me-2"></i> 섹션 수정</h4>
+        </div>
+        <div class="card-body p-4">
+          <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-4">
+              <label for="id_title" class="form-label fw-bold">섹션 제목</label>
+              <input type="text" name="title" id="id_title" value="{{ form.title.value }}" 
+                     class="form-control form-control-lg" required>
+              {% if form.title.errors %}
+                <div class="text-danger mt-1">
+                  {% for error in form.title.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+              <div class="form-text">
+                섹션 제목은 해당 섹션의 주제나 학습 목표를 나타내는 간결한 문구로 작성해주세요.
+              </div>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+              <a href="{% url 'courses:course_edit' pk=section.course.id %}" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle me-2"></i> 취소
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle me-2"></i> 수정 완료
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

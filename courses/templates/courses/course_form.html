@@ -1,30 +1,88 @@
 {% extends 'courses/base.html' %}
 
-{% block title %}강의 생성 {% endblock %}
+{% block title %}강의 생성 - DevRunDev{% endblock %}
 
 {% block content %}
-<body>
-    <header>
-        <a href="{% url 'courses:course_list' %}">강의 목록</a>
-    </header>
+<div class="container py-5">
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{% url 'courses:course_list' %}" class="text-decoration-none">강의 목록</a></li>
+          <li class="breadcrumb-item active" aria-current="page">강의 생성</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
 
-    <h1>강의 생성</h1>
-
-    <form method="post">
-        {% csrf_token %}
-
-        <label for="id_title">강의 제목</label>
-        <input type="text" name="title" id="id_title" value="{{ form.title.value|default:'' }}">
-
-        <label for="id_description">강의 설명</label>
-        <textarea name="description" id="id_description" rows="4" cols="40">{{ form.description.value|default:'' }}</textarea>
-
-        <label for="id_price">가격</label>
-        <input type="number" name="price" id="id_price" min="0" value="{{ form.price.value|default:'0' }}">
-
-        <button type="submit" class="button">강의 생성</button>
-    </form>
-
-    <a href="{% url 'courses:course_list' %}" class="button">강의 목록으로 돌아가기</a>
-</body>
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i> 강의 생성</h4>
+        </div>
+        <div class="card-body p-4">
+          <p class="lead mb-4">강의에 대한 기본 정보를 입력해주세요. 이후 단계에서 섹션과 레슨을 추가할 수 있습니다.</p>
+          
+          <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+              <label for="id_title" class="form-label fw-bold">강의 제목</label>
+              <input type="text" name="title" id="id_title" value="{{ form.title.value|default:'' }}" 
+                     class="form-control form-control-lg" placeholder="강의 제목을 입력하세요" required>
+              {% if form.title.errors %}
+                <div class="text-danger mt-1">
+                  {% for error in form.title.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+            
+            <div class="mb-3">
+              <label for="id_description" class="form-label fw-bold">강의 설명</label>
+              <textarea name="description" id="id_description" rows="6" class="form-control"
+                        placeholder="학습자들이 이 강의를 통해 무엇을 배울 수 있는지, 어떤 주제를 다루는지 상세히 설명해주세요.">{{ form.description.value|default:'' }}</textarea>
+              {% if form.description.errors %}
+                <div class="text-danger mt-1">
+                  {% for error in form.description.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+            
+            <div class="mb-4">
+              <label for="id_price" class="form-label fw-bold">가격 (원)</label>
+              <div class="input-group">
+                <span class="input-group-text">₩</span>
+                <input type="number" name="price" id="id_price" min="0" value="{{ form.price.value|default:'0' }}" 
+                       class="form-control" placeholder="가격 (0원은 무료 강의)">
+              </div>
+              {% if form.price.errors %}
+                <div class="text-danger mt-1">
+                  {% for error in form.price.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="form-text">0원으로 설정하면 무료 강의로 제공됩니다.</div>
+              {% endif %}
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class="bi bi-check-circle me-2"></i> 강의 생성
+              </button>
+              <a href="{% url 'courses:course_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle me-2"></i> 취소
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
