@@ -2,9 +2,9 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Avg, Count
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import DetailView, ListView, UpdateView
+from django.views.generic import DetailView, ListView, TemplateView, UpdateView
 
 from enrollments.models import Enrollment, LessonProgress
 from quizzes.forms import QuizForm
@@ -447,10 +447,16 @@ class CourseStep4View(LoginRequiredMixin, View):
             # 세션에서 강의 ID 삭제
             del request.session["created_course_id"]
             messages.success(request, "강의 생성이 완료되었습니다!")
-            return redirect("courses:course_detail", pk=course.id)
+            return redirect(reverse("courses:course_review_pending"))
 
         # 기본적으로 같은 페이지로 리다이렉트
         return redirect("courses:course_step4")
+
+
+class CourseReviewPendingView(TemplateView):
+    """✅ 강의 심사 중 안내 페이지"""
+
+    template_name = "courses/course_review_pending.html"
 
 
 class InstructorDashboardView(LoginRequiredMixin, View):

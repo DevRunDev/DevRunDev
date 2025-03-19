@@ -42,7 +42,7 @@
                             <i class="bi bi-person-circle"></i> {{ user.username|default:user.email }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{% url 'enrollments:student_dashboard' %}">수강 중인 강의</a></li>
+                            <li><a class="dropdown-item" href="{% url 'enrollments:student_dashboard' %}">내 강의실</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{% url 'account_logout' %}">로그아웃</a></li>
                         </ul>

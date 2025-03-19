@@ -16,6 +16,7 @@ from .views import (
     SectionCreateView,
     SectionDeleteView,
     SectionUpdateView,
+    TemplateView,
 )
 
 app_name = "courses"
@@ -32,6 +33,11 @@ urlpatterns = [
     path("create/step2/", CourseStep2View.as_view(), name="course_step2"),
     path("create/step3/", CourseStep3View.as_view(), name="course_step3"),
     path("create/step4/", CourseStep4View.as_view(), name="course_step4"),
+    path(
+        "course/review/",
+        TemplateView.as_view(template_name="courses/course_review_pending.html"),
+        name="course_review_pending",
+    ),
     # ✅ 강사 대시보드 및 강의 수정
     path("instructor/dashboard/", InstructorDashboardView.as_view(), name="instructor_dashboard"),
     path("course/<int:pk>/edit/", CourseUpdateView.as_view(), name="course_edit"),
