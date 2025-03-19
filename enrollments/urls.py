@@ -11,6 +11,7 @@ from .views import (
     EnrollView,
     GenerateCertificateView,
     MarkLessonCompletedView,
+    RemoveFromCartView,
     StudentDashboardView,
     ViewCertificateView,
 )
@@ -30,4 +31,5 @@ urlpatterns = [
     path("cart/", CartView.as_view(), name="cart"),
     path("cart/add/<int:course_id>/", AddToCartView.as_view(), name="add_to_cart"),
     path("cart/enroll/", EnrollFromCartView.as_view(), name="enroll_from_cart"),
+    path("cart/remove/<int:course_id>/", RemoveFromCartView.as_view(), name="remove_from_cart"),
 ]

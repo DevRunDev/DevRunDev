@@ -7,7 +7,8 @@
   <h1 class="mb-4">장바구니</h1>
 
   {% if courses %}
-    <form method="post" action="{% url 'enrollments:enroll_from_cart' %}">
+    <!-- ✅ 수강 신청 폼 (삭제 폼과 완전히 분리됨) -->
+    <form method="post" action="{% url 'enrollments:enroll_from_cart' %}" id="enroll-form">
         {% csrf_token %}
         <table class="table">
             <thead>
@@ -16,6 +17,7 @@
                     <th>강의명</th>
                     <th>강사</th>
                     <th>가격</th>
+                    <th>제거</th> <!-- ✅ 개별 제거 버튼 컬럼 -->
                 </tr>
             </thead>
             <tbody>
@@ -31,18 +33,24 @@
                             ₩{{ course.price }}
                         {% endif %}
                     </td>
+                    <td>
+                        <!-- ✅ 개별 제거 버튼 (폼을 감싸지 않음) -->
+                        <button type="button" class="btn btn-outline-danger btn-sm remove-btn"
+                                data-course-id="{{ course.id }}">
+                            <i class="bi bi-trash"></i> 제거
+                        </button>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
 
+        <!-- ✅ 수강 신청 버튼 -->
         <button type="submit" class="btn btn-primary">선택한 강의 수강 신청</button>
     </form>
-
   {% else %}
     <p class="text-center">장바구니에 담긴 강의가 없습니다.</p>
   {% endif %}
-
 </div>
 
 <script>
@@ -53,5 +61,32 @@
             checkbox.checked = this.checked;
         });
     });
+
+    // ✅ "제거(X)" 버튼 클릭 시, 개별 AJAX 요청으로 삭제
+    document.querySelectorAll(".remove-btn").forEach(button => {
+        button.addEventListener("click", function(event) {
+            event.preventDefault();  // ✅ 기본 폼 제출 동작 차단
+
+            let courseId = this.getAttribute("data-course-id");  // ✅ 강의 ID 가져오기
+            let csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;  // ✅ CSRF 토큰 가져오기
+
+            fetch(`/enrollments/cart/remove/${courseId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                    "Content-Type": "application/json"
+                },
+            }).then(response => {
+                if (response.ok) {
+                    window.location.reload();  // ✅ 페이지 새로고침하여 장바구니 업데이트
+                } else {
+                    alert("삭제 실패! 다시 시도해주세요.");
+                }
+            }).catch(error => {
+                console.error("Error:", error);
+            });
+        });
+    });
 </script>
+
 {% endblock %}
