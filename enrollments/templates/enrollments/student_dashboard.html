@@ -154,6 +154,48 @@
         </div>
       </div>
 
+      <!-- 강사 신청 카드 -->
+      {% if request.user.is_authenticated and request.user.is_student %}
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="bi bi-mortarboard-fill me-2"></i> 강사 되기</h5>
+          </div>
+          <div class="card-body">
+            {% with recent_application=request.user.instructor_applications.last %}
+              {% if recent_application %}
+                {% if recent_application.status == 'PENDING' %}
+                  <div class="alert alert-warning mb-0">
+                    <i class="bi bi-hourglass-split me-2"></i>
+                    <strong>강사 신청이 검토 중입니다.</strong>
+                    <p class="mb-0 mt-2">신청일: {{ recent_application.created_at|date:"Y년 m월 d일" }}</p>
+                  </div>
+                {% elif recent_application.status == 'APPROVED' %}
+                  <div class="alert alert-success mb-0">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <strong>강사 신청이 승인되었습니다!</strong>
+                    <p class="mb-0 mt-2">승인일: {{ recent_application.updated_at|date:"Y년 m월 d일" }}</p>
+                  </div>
+                {% elif recent_application.status == 'REJECTED' %}
+                  <div class="alert alert-danger mb-3">
+                    <i class="bi bi-x-circle me-2"></i>
+                    <strong>강사 신청이 거부되었습니다.</strong>
+                    <p class="mb-0 mt-2">거부일: {{ recent_application.updated_at|date:"Y년 m월 d일" }}</p>
+                  </div>
+                  <a href="/accounts/instructor/apply/" class="btn btn-primary w-100">
+                    <i class="bi bi-arrow-repeat me-2"></i> 다시 신청하기
+                  </a>
+                {% endif %}
+              {% else %}
+                <p>자신만의 강의를 제작하고 공유해보세요!</p>
+                <a href="/accounts/instructor/apply/" class="btn btn-primary w-100">
+                  <i class="bi bi-person-badge me-2"></i> 강사 신청하기
+                </a>
+              {% endif %}
+            {% endwith %}
+          </div>
+        </div>
+      {% endif %}
+
       <!-- 강사 전용 링크 -->
       {% if request.user.is_authenticated and request.user.role == "Instructor" %}
         <div class="card shadow-sm">

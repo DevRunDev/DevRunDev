@@ -1,0 +1,58 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'courses:course_list' %}">
+            DevRunDev
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'courses:course_list' %}">강의 목록</a>
+                </li>
+                {% if user.is_authenticated %}
+                    {% if user.is_instructor %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'courses:instructor_dashboard' %}">강사 대시보드</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'courses:course_step1' %}">강의 생성</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+
+            <ul class="navbar-nav align-items-center">
+                {% if user.is_authenticated %}
+                    <!-- ✅ 장바구니 버튼 -->
+                    <li class="nav-item me-3 position-relative">
+                        <a class="nav-link btn btn-outline-light px-3" href="{% url 'enrollments:cart' %}">
+                            <i class="bi bi-cart"></i>
+                            {% if cart_count > 0 %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {{ cart_count }}
+                                </span>
+                            {% endif %}
+                        </a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i> {{ user.username|default:user.email }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="{% url 'enrollments:student_dashboard' %}">수강 중인 강의</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'account_logout' %}">로그아웃</a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-light px-3" href="{% url 'account_login' %}">로그인</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
