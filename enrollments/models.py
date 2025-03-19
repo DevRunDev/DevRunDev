@@ -173,3 +173,17 @@ class Certificate(models.Model):
             # 'CERT-' 접두사와 UUID를 사용하여 고유한 ID 생성
             self.certificate_id = f"CERT-{uuid.uuid4().hex[:12].upper()}"
         super().save(*args, **kwargs)
+
+
+class CartItem(models.Model):
+    """✅ 장바구니에 담긴 강의 정보 저장"""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="cart_items")
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="cart_items")
+    added_at = models.DateTimeField(auto_now_add=True)  # ✅ 장바구니에 담은 시간
+
+    class Meta:
+        unique_together = ("user", "course")  # ✅ 중복 추가 방지
+
+    def __str__(self):
+        return f"{self.user.username} - {self.course.title}"

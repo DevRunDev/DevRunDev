@@ -1,4 +1,8 @@
+from .models import CartItem
+
+
 def cart_count(request):
-    """장바구니에 담긴 강의 개수를 반환"""
-    cart = request.session.get("cart", [])
-    return {"cart_count": len(cart)}
+    """✅ 로그인한 사용자의 장바구니 개수 반환"""
+    if request.user.is_authenticated:
+        return {"cart_count": CartItem.objects.filter(user=request.user).count()}
+    return {"cart_count": 0}

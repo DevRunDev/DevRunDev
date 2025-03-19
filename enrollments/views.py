@@ -8,7 +8,7 @@ from django.views.generic import DetailView, ListView
 
 from courses.models import Course, Lesson, Section
 
-from .models import Certificate, Enrollment, LessonProgress
+from .models import CartItem, Certificate, Enrollment, LessonProgress
 
 
 class EnrollView(LoginRequiredMixin, View):
@@ -248,46 +248,56 @@ class LessonCompleteView(LoginRequiredMixin, View):
         return JsonResponse({"success": True})
 
 
-class CartView(LoginRequiredMixin, ListView):
-    """✅ 장바구니 보기 (로그인 필수)"""
+class CartView(ListView):
+    """✅ DB 기반 장바구니 보기"""
 
     template_name = "enrollments/cart.html"
     context_object_name = "courses"
-    login_url = "/accounts/login/"  # 로그인 페이지로 리디렉션
 
     def get_queryset(self):
-        """세션에서 장바구니 가져오기"""
-        cart = self.request.session.get("cart", [])
-        return Course.objects.filter(id__in=cart)
+        """✅ DB에서 장바구니 데이터 가져오기"""
+        return Course.objects.filter(cart_items__user=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        """✅ 이미 수강한 강의 목록 추가"""
+        context = super().get_context_data(**kwargs)
+        context["enrolled_courses"] = Course.objects.filter(enrollments__student=self.request.user)
+        return context
 
 
-class AddToCartView(LoginRequiredMixin, View):
-    """✅ 장바구니에 강의 추가 (로그인 필수)"""
-
-    login_url = "/accounts/login/"
+class AddToCartView(View):
+    """✅ DB 기반 장바구니 추가"""
 
     def post(self, request, course_id):
         course = get_object_or_404(Course, id=course_id)
 
-        cart = request.session.get("cart", [])
-        if str(course_id) not in cart:
-            cart.append(str(course_id))
-            request.session["cart"] = cart  # ✅ 세션 업데이트
-            request.session.modified = True  # ✅ 장바구니 개수 즉시 반영
-            messages.success(request, f'"{course.title}" 강의가 장바구니에 추가되었습니다.')
-        else:
-            messages.warning(request, "이미 장바구니에 있는 강의입니다.")
+        # ✅ 이미 수강한 강의는 장바구니 추가 불가
+        if Enrollment.objects.filter(student=request.user, course=course).exists():
+            messages.warning(request, "이미 수강 중인 강의입니다.")
+            return redirect("courses:course_detail", pk=course.id)
 
-        return redirect("courses:course_list")
+        # ✅ 중복 추가 방지
+        CartItem.objects.get_or_create(user=request.user, course=course)
+        messages.success(request, f'"{course.title}" 강의가 장바구니에 추가되었습니다.')
+        return redirect("enrollments:cart")
 
 
-class EnrollFromCartView(LoginRequiredMixin, View):
-    """✅ 장바구니에서 선택한 강의 수강 신청 (중복 방지)"""
+class RemoveFromCartView(View):
+    """✅ DB 기반 장바구니에서 강의 삭제"""
 
-    login_url = "/accounts/login/"
+    def post(self, request, course_id):
+        course = get_object_or_404(Course, id=course_id)
+        CartItem.objects.filter(user=request.user, course=course).delete()
+        messages.success(request, f'"{course.title}" 강의가 장바구니에서 제거되었습니다.')
+        return redirect("enrollments:cart")
+
+
+class EnrollFromCartView(View):
+    """✅ 장바구니에서 수강 신청 및 강의 삭제"""
 
     def post(self, request):
-        selected_courses = request.POST.getlist("selected_courses")  # ✅ 선택한 강의 가져오기
+        selected_courses = request.POST.getlist("selected_courses")
+
         if not selected_courses:
             messages.warning(request, "수강 신청할 강의를 선택해주세요.")
             return redirect("enrollments:cart")
@@ -296,18 +306,14 @@ class EnrollFromCartView(LoginRequiredMixin, View):
         enrolled_courses = []
 
         for course_id in selected_courses:
-            course = Course.objects.get(id=course_id)
+            course = get_object_or_404(Course, id=course_id)
             enrollment, created = Enrollment.objects.get_or_create(student=student, course=course)
 
             if created:
-                enrolled_courses.append(course_id)
+                enrolled_courses.append(course.title)
                 messages.success(request, f'"{course.title}" 강의가 수강 신청되었습니다.')
-            else:
-                messages.warning(request, f'"{course.title}" 강의는 이미 수강 신청한 상태입니다.')
 
-        # ✅ 수강 신청한 강의만 장바구니에서 삭제
-        cart = request.session.get("cart", [])
-        request.session["cart"] = [str(course_id) for course_id in cart if str(course_id) not in selected_courses]
-        request.session.modified = True  # ✅ 세션 변경 감지
+        # ✅ 수강 신청한 강의는 장바구니에서 제거
+        CartItem.objects.filter(user=request.user, course__id__in=selected_courses).delete()
 
         return redirect("enrollments:student_dashboard")
