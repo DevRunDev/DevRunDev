@@ -32,10 +32,10 @@
 ### Environment
 ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-007ACC?style=for-the-badge&logo=Visual%20Studio%20Code&logoColor=white)
 ![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=Git&logoColor=white)
-![Github](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white)   
-![pytest](https://img.shields.io/badge/pytest-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)   
-![precommit](https://img.shields.io/badge/precommit-FAB040?style=for-the-badge&logo=precommit&logoColor=white) 
-![githubactions](https://img.shields.io/badge/githubactions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white) 
+![Github](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white)
+![pytest](https://img.shields.io/badge/pytest-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)
+![precommit](https://img.shields.io/badge/precommit-FAB040?style=for-the-badge&logo=precommit&logoColor=white)
+![githubactions](https://img.shields.io/badge/githubactions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
 
 ### 백엔드
 
@@ -115,13 +115,13 @@ python manage.py seed_data
 
 | 메서드 | URL패턴 | 기능 |
 |--------|-----|-------------|
-|POST | /accounts/login/ | 사용자 로그인|
-|POST | /accounts/logout/ | 사용자 로그아웃|
-|GET | /accounts/profile/ | 사용자 프로필 조회|
-|POST | /accounts/instructor/apply/ | 강사 신청|
-
+|POST | /accounts/login/ | 사용자 로그인 |
+|POST | /accounts/logout/ | 사용자 로그아웃 |
+|GET | /accounts/profile/ | 사용자 프로필 조회 |
+|POST | /accounts/instructor/apply/ | 강사 신청 |
 
 ### 강의 관리 API
+
 #### 강의 목록 및 상세
 
 | 메서드 | URL패턴 | 기능 |
@@ -134,67 +134,71 @@ python manage.py seed_data
 
 | 메서드 | URL패턴 | 기능 |
 |--------|-----|-------------|
-|GET,POST | /create/step1/ | 강의 생성 1단계 (기본 정보)|
-|GET,POST | /create/step2/ | 강의 생성 2단계 (섹션 구성)|
-|GET,POST | /create/step3/ | 강의 생성 3단계 (레슨 추가)|
-|GET,POST | /create/step4/ | 강의 생성 4단계 (퀴즈 추가)|
-|GET | /instructor/dashboard/ | 강사 대시보드|
-|GET,POST | /course/{id}/edit/ | 강의 수정|
-|GET,POST | /sections/{id}/add/ | 섹션 추가|
-|GET,POST | /sections/{id}/edit/ | 섹션 수정|
-|GET | /sections/{id}/delete/ | 섹션 삭제|
-|GET,POST | /lessons/{id}/add/ | 레슨 추가|
-|GET,POST | /lessons/{id}/edit/ | 레슨 수정|
-|GET | /lessons/{id}/delete/ | 레슨 삭제|
+|GET,POST | /create/step1/ | 강의 생성 1단계 (기본 정보) |
+|GET,POST | /create/step2/ | 강의 생성 2단계 (섹션 구성) |
+|GET,POST | /create/step3/ | 강의 생성 3단계 (레슨 추가) |
+|GET,POST | /create/step4/ | 강의 생성 4단계 (퀴즈 추가 및 강의 정보 검토) |
+|GET | /course/review/ | 강의 심사 대기 페이지 |
+|GET | /instructor/dashboard/ | 강사 대시보드 |
+|GET,POST | /course/{id}/edit/ | 강의 수정 |
+|POST | /sections/{id}/add/ | 섹션 추가 |
+|POST | /sections/{id}/edit/ | 섹션 수정 |
+|POST | /sections/{id}/delete/ | 섹션 삭제 |
+|POST | /lessons/{id}/add/ | 레슨 추가 |
+|POST | /lessons/{id}/edit/ | 레슨 수정 |
+|POST | /lessons/{id}/delete/ | 레슨 삭제 |
 
 ### 수강 관리 API
+
 #### 수강 신청 및 관리
 
 | 메서드 | URL패턴 | 기능 |
 |--------|-----|-------------|
-|POST | /enrollments/enroll/{course_id}/ | 강의 수강 신청|
-|POST | /enrollments/lesson/{lesson_id}/complete/ | 레슨 완료 처리|
-|GET | /enrollments/dashboard/ | 학생 대시보드|
-|GET | /enrollments/ | 수강 중인 강의 목록|
-|GET | /enrollments/{id}/ | 수강 상세 정보|
-|GET | /enrollments/{id}/generate-certificate/ | 수료증 발급|
-|GET | /enrollments/certificate/{id}/ | 수료증 조회|
-|GET | /enrollments/certificate/{id}/download/: 수료증 다운로드|
+|POST | /enrollments/enroll/{course_id}/ | 강의 수강 신청 |
+|GET | /enrollments/enroll/{course_id}/success/ | 수강 신청 성공 페이지 |
+|POST | /enrollments/lesson/{lesson_id}/complete/ | 레슨 완료 처리 |
+|GET | /enrollments/dashboard/ | 학생 대시보드 |
+|GET | /enrollments/ | 수강 중인 강의 목록 |
+|GET | /enrollments/{id}/ | 수강 상세 정보 |
+|GET | /enrollments/{id}/generate-certificate/ | 수료증 발급 |
+|GET | /enrollments/certificate/{id}/ | 수료증 조회 |
+|GET | /enrollments/certificate/{id}/download/ | 수료증 다운로드 |
 
 #### 장바구니 기능
 
 | 메서드 | URL패턴 | 기능 |
 |--------|-----|-------------|
-|GET | /enrollments/cart/ | 장바구니 조회|
-|POST | /enrollments/cart/add/{course_id}/ | 장바구니 추가|
-|POST | /enrollments/cart/enroll/ | 장바구니에서 수강 신청|
-|POST | /enrollments/cart/remove/{course_id}/ | 장바구니에서 제거|
+|GET | /enrollments/cart/ | 장바구니 조회 |
+|POST | /enrollments/cart/add/{course_id}/ | 장바구니 추가 |
+|POST | /enrollments/cart/enroll/ | 장바구니에서 수강 신청 |
+|POST | /enrollments/cart/remove/{course_id}/ | 장바구니에서 제거 |
 
 ### 퀴즈 API
+
 #### 퀴즈 관리
 
 | 메서드 | URL패턴 | 기능 |
 |--------|-----|-------------|
-|GET | /quizzes/course/{course_id}/quizzes/ | 퀴즈 목록
-|GET,POST | /quizzes/course/{course_id}/quizzes/create/ | 퀴즈 생성
-|GET | /quizzes/{id}/: 퀴즈 상세
-|GET,POST | /quizzes/{id}/edit/ | 퀴즈 수정
-|GET,POST | /quizzes/{id}/delete/ | 퀴즈 삭제
+|GET | /quizzes/course/{course_id}/quizzes/ | 퀴즈 목록 |
+|POST | /quizzes/course/{course_id}/quizzes/create/ | 퀴즈 생성 |
+|GET | /quizzes/{id}/ | 퀴즈 상세 |
+|POST | /quizzes/{id}/edit/ | 퀴즈 수정 |
+|POST | /quizzes/{id}/delete/ | 퀴즈 삭제 |
 
 #### 문제 관리
 
 | 메서드 | URL패턴 | 기능 |
 |--------|-----|-------------|
-| GET,POST | /quizzes/quizzes/{quiz_id}/questions/create/ | 문제 생성
-| GET,POST | /quizzes/questions/{id}/edit/ | 문제 수정
-| GET,POST | /quizzes/questions/{id}/delete/ | 문제 삭제
+|POST | /quizzes/quizzes/{quiz_id}/questions/create/ | 문제 생성 |
+|POST | /quizzes/questions/{id}/edit/ | 문제 수정 |
+|POST | /quizzes/questions/{id}/delete/ | 문제 삭제 |
 
 #### 퀴즈 응시
 
 | 메서드 | URL패턴 | 기능 |
 |--------|-----|-------------|
-| GET,POST | /quizzes/quizzes/{id}/take/ | 퀴즈 응시 |
-| GET | /quizzes/attempts/{id}/result/ | 퀴즈 결과 조회 |
+|POST | /quizzes/quizzes/{id}/take/ | 퀴즈 응시 |
+|GET | /quizzes/attempts/{id}/result/ | 퀴즈 결과 조회 |
 
 ### 리뷰 API
 
