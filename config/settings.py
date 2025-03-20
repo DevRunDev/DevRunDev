@@ -219,18 +219,26 @@ SOCIALACCOUNT_PROVIDERS = {
 
 LOGIN_REDIRECT_URL = "/"  # 로그인 성공 후 이동할 URL
 ACCOUNT_LOGOUT_REDIRECT_URL = "/"  # 로그아웃 후 이동할 URL
+ACCOUNT_SIGNUP_REDIRECT_URL = 'account_login'
+
+SOCIALACCOUNT_LOGIN_ON_GET = True  # 소셜 로그인 중간 페이지 건너뛰기
 
 # allauth 관련 설정 추가/수정
 ACCOUNT_LOGOUT_ON_GET = True
-ACCOUNT_EMAIL_VERIFICATION = "optional"
+ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_EMAIL_REQUIRED = True
 
 # 템플릿 오버라이드를 위한 추가 설정
 ACCOUNT_TEMPLATE_EXTENSION = "html"
 
-# 이메일 필수 설정 (이메일 인증 요구)
-ACCOUNT_EMAIL_VERIFICATION = "optional"  # (optional, mandatory, none)
-ACCOUNT_EMAIL_REQUIRED = True
+# 회원가입 후 자동 로그인 설정
+ACCOUNT_SESSION_REMEMBER = True  # 세션 유지
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True  # 회원가입 시 비밀번호 두 번 입력
+ACCOUNT_USERNAME_REQUIRED = True  # 사용자 이름 필수
+ACCOUNT_AUTHENTICATION_METHOD = "email"  # 이메일로 로그인
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True  # 이메일 확인 시 자동 로그인
+
+ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
 
 # 소셜 계정 이메일 검증 비활성화
 SOCIALACCOUNT_EMAIL_VERIFICATION = "none"

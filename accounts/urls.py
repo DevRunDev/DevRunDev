@@ -1,4 +1,4 @@
-from django.contrib.auth import views as auth_views
+from django.contrib.auth import views
 from django.urls import path
 
 from . import views
@@ -12,4 +12,5 @@ urlpatterns = [
         views.InstructorApplicationView.as_view(),
         name="instructor_apply",
     ),
+    path("signup/", views.CustomSignupView.as_view(), name="signup"),
 ]
