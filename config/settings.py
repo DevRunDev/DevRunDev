@@ -43,11 +43,7 @@ INSTALLED_APPS = [
     "courses",
     "enrollments",
     "videos",
-    "payments",
     "reviews",
-    "qna",
-    "notifications",
-    "admin_panel",
     "quizzes",
     "core",
 ]
