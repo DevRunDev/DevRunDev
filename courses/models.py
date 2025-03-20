@@ -1,5 +1,4 @@
 import os
-import re
 
 from django.conf import settings
 from django.db import models
@@ -28,16 +27,16 @@ class Course(models.Model):
     def update_avg_rating(self):
         """리뷰 점수의 평균을 계산하여 업데이트하는 메서드"""
         avg = self.reviews.aggregate(avg_rating=Avg("rating"))["avg_rating"]
-        self.avg_rating = round(avg, 1) if avg else 0.0  # ⭐ 없으면 0으로 설정
+        self.avg_rating = round(avg, 1) if avg else 0.0
         self.save()
 
     def get_thumbnail_url(self):
         """썸네일 파일이 존재하지 않으면 기본 썸네일 반환"""
         if self.thumbnail:
-            thumbnail_path = os.path.join(settings.MEDIA_ROOT, str(self.thumbnail))  # ✅ 실제 파일 경로 확인
-            if os.path.exists(thumbnail_path):  # ✅ 파일이 존재하면 해당 URL 반환
+            thumbnail_path = os.path.join(settings.MEDIA_ROOT, str(self.thumbnail))
+            if os.path.exists(thumbnail_path):
                 return self.thumbnail.url
-        return settings.MEDIA_URL + "default.jpg"  # ✅ 파일이 없으면 기본 썸네일 반환
+        return settings.MEDIA_URL + "default.jpg"
 
     class Meta:
         ordering = ["-created_at"]
@@ -71,18 +70,6 @@ class Lesson(models.Model):
         if not self.order:
             last_order = Lesson.objects.filter(section=self.section).count()
             self.order = last_order + 1
-
-        # ✅ 유튜브 URL이 이미 변환된 상태라면 다시 변환하지 않음
-        if self.video_url and "youtube.com/embed" not in self.video_url:
-            youtube_regex = (
-                r"(https?://)?(www\.)?"
-                r"(youtube|youtu|youtube-nocookie)\.(com|be)/"
-                r"(watch\?v=|embed/|v/|shorts/|v/|.+\?v=)?([^&=%\?]{11})"
-            )
-            match = re.search(youtube_regex, self.video_url)
-            if match:
-                video_id = match.group(6)
-                self.video_url = f"https://www.youtube.com/embed/{video_id}"
 
         super().save(*args, **kwargs)
 
