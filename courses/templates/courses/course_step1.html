@@ -26,7 +26,7 @@
     <div class="col-md-8 offset-md-2">
       <!-- 진행 상태 표시 -->
       <div class="progress mb-4" style="height: 30px;">
-        <div class="progress-bar bg-primary" role="progressbar" style="width: 25%;" 
+        <div class="progress-bar bg-primary" role="progressbar" style="width: 25%;"
              aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
           1/4 단계: 기본 정보
         </div>
@@ -37,12 +37,12 @@
           <h4 class="mb-0"><i class="bi bi-1-circle-fill me-2"></i> 1단계: 강의 기본 정보 입력</h4>
         </div>
         <div class="card-body p-4">
-          <form method="post">
+          <form method="post" enctype="multipart/form-data">  <!-- 🔹 파일 업로드 추가 -->
             {% csrf_token %}
-            
+
             <div class="mb-3">
               <label for="id_title" class="form-label">강의 제목</label>
-              <input type="text" name="title" id="id_title" class="form-control" 
+              <input type="text" name="title" id="id_title" class="form-control"
                      value="{{ form.title.value|default:'' }}" placeholder="강의 제목을 입력하세요" required>
               {% if form.title.errors %}
                 <div class="text-danger mt-1">
@@ -52,10 +52,10 @@
                 </div>
               {% endif %}
             </div>
-            
+
             <div class="mb-3">
               <label for="id_description" class="form-label">강의 설명</label>
-              <textarea name="description" id="id_description" class="form-control" rows="6" 
+              <textarea name="description" id="id_description" class="form-control" rows="6"
                        placeholder="강의에 대한 자세한 설명을 입력하세요">{{ form.description.value|default:'' }}</textarea>
               {% if form.description.errors %}
                 <div class="text-danger mt-1">
@@ -65,12 +65,12 @@
                 </div>
               {% endif %}
             </div>
-            
+
             <div class="mb-3">
               <label for="id_price" class="form-label">가격 (원)</label>
               <div class="input-group">
                 <span class="input-group-text">₩</span>
-                <input type="number" name="price" id="id_price" class="form-control" 
+                <input type="number" name="price" id="id_price" class="form-control"
                        value="{{ form.price.value|default:'0' }}" min="0" placeholder="0">
               </div>
               <div class="form-text">무료 강의는 0을 입력하세요.</div>
@@ -82,7 +82,21 @@
                 </div>
               {% endif %}
             </div>
-            
+
+            <!-- 🔹 썸네일 업로드 필드 추가 -->
+            <div class="mb-3">
+              <label for="id_thumbnail" class="form-label">썸네일 이미지</label>
+              <input type="file" name="thumbnail" id="id_thumbnail" class="form-control">
+              {% if form.thumbnail.errors %}
+                <div class="text-danger mt-1">
+                  {% for error in form.thumbnail.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+              <div class="form-text">JPG, PNG 파일을 업로드하세요. (최대 5MB)</div>
+            </div>
+
             <div class="d-flex justify-content-between mt-4">
               <a href="{% url 'courses:course_list' %}" class="btn btn-outline-secondary">
                 <i class="bi bi-x-circle me-2"></i> 취소

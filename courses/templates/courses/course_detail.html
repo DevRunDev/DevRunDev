@@ -19,6 +19,12 @@
     <div class="col-lg-8">
       <h1 class="display-5 fw-bold mb-4">{{ course.title }}</h1>
 
+      <!-- ✅ 강의 썸네일 추가 -->
+      <div class="mb-4 text-center">
+        <img src="{{ course.thumbnail.url }}" alt="{{ course.title }}" class="img-fluid rounded shadow-sm"
+             style="width: 100%; max-height: 300px; object-fit: contain; background-color: #ffffff;">
+      </div>
+
       {% if request.user == course.instructor %}
         <div class="alert alert-info mb-4">
           <div class="d-flex align-items-center">

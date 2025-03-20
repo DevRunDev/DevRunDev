@@ -23,12 +23,12 @@
           <h4 class="mb-0"><i class="bi bi-pencil-square me-2"></i> 강의 수정</h4>
         </div>
         <div class="card-body p-4">
-          <form method="post">
+          <form method="post" enctype="multipart/form-data">  <!-- ✅ 파일 업로드를 위해 enctype 추가 -->
             {% csrf_token %}
-            
+
             <div class="mb-3">
               <label for="id_title" class="form-label fw-bold">강의 제목</label>
-              <input type="text" name="title" id="id_title" value="{{ form.title.value }}" 
+              <input type="text" name="title" id="id_title" value="{{ form.title.value }}"
                      class="form-control form-control-lg" required>
               {% if form.title.errors %}
                 <div class="text-danger mt-1">
@@ -38,7 +38,7 @@
                 </div>
               {% endif %}
             </div>
-            
+
             <div class="mb-3">
               <label for="id_description" class="form-label fw-bold">강의 설명</label>
               <textarea name="description" id="id_description" rows="6" class="form-control">{{ form.description.value|default:'' }}</textarea>
@@ -50,12 +50,12 @@
                 </div>
               {% endif %}
             </div>
-            
+
             <div class="mb-4">
               <label for="id_price" class="form-label fw-bold">가격 (원)</label>
               <div class="input-group">
                 <span class="input-group-text">₩</span>
-                <input type="number" name="price" id="id_price" min="0" value="{{ form.price.value }}" 
+                <input type="number" name="price" id="id_price" min="0" value="{{ form.price.value }}"
                        class="form-control" required>
               </div>
               {% if form.price.errors %}
@@ -68,7 +68,27 @@
                 <div class="form-text">0원으로 설정하면 무료 강의로 제공됩니다.</div>
               {% endif %}
             </div>
-            
+
+            <!-- ✅ 썸네일 미리보기 및 업로드 필드 추가 -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">현재 썸네일</label>
+              <div class="mb-3 text-center">
+                <img src="{{ course.thumbnail.url }}" alt="{{ course.title }}" class="img-fluid rounded shadow-sm"
+                     style="width: 100%; max-height: 400px; object-fit: contain;">
+              </div>
+
+              <label for="id_thumbnail" class="form-label fw-bold">새로운 썸네일 업로드</label>
+              <input type="file" name="thumbnail" id="id_thumbnail" class="form-control">
+              {% if form.thumbnail.errors %}
+                <div class="text-danger mt-1">
+                  {% for error in form.thumbnail.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+              <div class="form-text">JPG, PNG 파일을 업로드하세요. (최대 5MB)</div>
+            </div>
+
             <button type="submit" class="btn btn-primary mb-4">
               <i class="bi bi-check-circle me-2"></i> 수정 완료
             </button>
@@ -126,7 +146,7 @@
                   </div>
                 {% endif %}
               {% endwith %}
-              
+
               <div class="d-flex justify-content-end mt-3">
                 <a href="{% url 'quizzes:quiz_create' course.id %}" class="btn btn-success">
                   <i class="bi bi-plus-circle me-2"></i> 새 퀴즈 만들기
@@ -144,8 +164,8 @@
                 {% for section in course.sections.all %}
                   <div class="accordion-item">
                     <h2 class="accordion-header" id="heading-{{ section.id }}">
-                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-                              data-bs-target="#collapse-{{ section.id }}" aria-expanded="false" 
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                              data-bs-target="#collapse-{{ section.id }}" aria-expanded="false"
                               aria-controls="collapse-{{ section.id }}">
                         <div class="d-flex justify-content-between align-items-center w-100 me-3">
                           <span><i class="bi bi-journal-text me-2"></i> {{ section.title }}</span>
@@ -153,7 +173,7 @@
                             <a href="{% url 'courses:section_edit' section.id %}" class="btn btn-sm btn-outline-primary me-1">
                               <i class="bi bi-pencil"></i> 수정
                             </a>
-                            <a href="{% url 'courses:section_delete' section.id %}" 
+                            <a href="{% url 'courses:section_delete' section.id %}"
                                class="btn btn-sm btn-outline-danger"
                                onclick="return confirm('이 섹션을 삭제하시겠습니까? 섹션에 포함된 모든 레슨도 함께 삭제됩니다.');">
                               <i class="bi bi-trash"></i> 삭제
@@ -162,7 +182,7 @@
                         </div>
                       </button>
                     </h2>
-                    <div id="collapse-{{ section.id }}" class="accordion-collapse collapse" 
+                    <div id="collapse-{{ section.id }}" class="accordion-collapse collapse"
                          aria-labelledby="heading-{{ section.id }}" data-bs-parent="#sectionAccordion">
                       <div class="accordion-body p-0">
                         <div class="list-group list-group-flush">
@@ -175,7 +195,7 @@
                                 {% else %}
                                   <span class="badge bg-warning text-dark ms-2">영상 없음</span>
                                 {% endif %}
-                                
+
                                 <!-- 연결된 퀴즈 정보 추가 -->
                                 {% with lesson_quizzes=lesson.quizzes.all %}
                                   {% if lesson_quizzes %}
@@ -189,7 +209,7 @@
                                 <a href="{% url 'courses:lesson_edit' lesson.id %}" class="btn btn-sm btn-outline-primary me-1">
                                   <i class="bi bi-pencil"></i> 수정
                                 </a>
-                                <a href="{% url 'courses:lesson_delete' lesson.id %}" 
+                                <a href="{% url 'courses:lesson_delete' lesson.id %}"
                                    class="btn btn-sm btn-outline-danger"
                                    onclick="return confirm('이 레슨을 삭제하시겠습니까?');">
                                   <i class="bi bi-trash"></i> 삭제
@@ -227,7 +247,7 @@
             <div class="card-body">
               <form method="post" action="{% url 'courses:section_add' course.id %}" class="d-flex">
                 {% csrf_token %}
-                <input type="text" name="section_title" placeholder="새 섹션 제목" 
+                <input type="text" name="section_title" placeholder="새 섹션 제목"
                       class="form-control me-2" required>
                 <button type="submit" class="btn btn-success">
                   <i class="bi bi-plus-lg me-1"></i> 섹션 추가
@@ -255,12 +275,12 @@
                   </div>
                   <div class="col-md-8">
                     <label for="lesson_title" class="form-label">레슨 제목</label>
-                    <input type="text" name="lesson_title" id="lesson_title" class="form-control" 
+                    <input type="text" name="lesson_title" id="lesson_title" class="form-control"
                           placeholder="새 레슨 제목" required>
                   </div>
                   <div class="col-12">
                     <label for="lesson_video_url" class="form-label">동영상 URL</label>
-                    <input type="url" name="lesson_video_url" id="lesson_video_url" class="form-control" 
+                    <input type="url" name="lesson_video_url" id="lesson_video_url" class="form-control"
                           placeholder="YouTube URL을 입력하세요">
                     <div class="form-text">YouTube 영상 URL을 입력하세요. 다양한 형식(일반, 단축 URL 등)이 지원됩니다.</div>
                   </div>
@@ -292,20 +312,20 @@
     const addLessonBtns = document.querySelectorAll('.add-lesson-btn');
     const sectionSelect = document.getElementById('section_id');
     const addLessonCard = document.getElementById('addLessonCard');
-    
+
     addLessonBtns.forEach(btn => {
       btn.addEventListener('click', function(e) {
         e.preventDefault();
         const sectionId = this.getAttribute('data-section-id');
-        
+
         // 섹션 선택 값 변경
         if (sectionSelect) {
           sectionSelect.value = sectionId;
         }
-        
+
         // 레슨 추가 카드로 스크롤
         addLessonCard.scrollIntoView({ behavior: 'smooth' });
-        
+
         // 레슨 제목 입력 필드에 포커스
         document.getElementById('lesson_title').focus();
       });

@@ -83,9 +83,11 @@
                 {% endif %}
               </div>
               <div class="col-md-2 text-end">
-                <a href="{% url 'courses:course_edit' course.id %}" class="btn btn-sm btn-outline-primary">
-                  <i class="bi bi-pencil-square"></i> 수정
-                </a>
+                {% if course.status != "review" %}
+                  <a href="{% url 'courses:course_edit' course.id %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-pencil-square"></i> 수정
+                  </a>
+                {% endif %}
               </div>
             </div>
           </div>
@@ -112,13 +114,13 @@
           {% for course in my_courses %}
             <div class="accordion-item">
               <h2 class="accordion-header" id="heading-{{ course.id }}">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-                        data-bs-target="#collapse-{{ course.id }}" aria-expanded="false" 
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapse-{{ course.id }}" aria-expanded="false"
                         aria-controls="collapse-{{ course.id }}">
                   {{ course.title }} (수강생 {{ course.enrollments.count }}명)
                 </button>
               </h2>
-              <div id="collapse-{{ course.id }}" class="accordion-collapse collapse" 
+              <div id="collapse-{{ course.id }}" class="accordion-collapse collapse"
                    aria-labelledby="heading-{{ course.id }}">
                 <div class="accordion-body p-0">
                   <div class="table-responsive">
@@ -136,12 +138,12 @@
                             <td>{{ enrollment.student.username }}</td>
                             <td>
                               <div class="progress" style="height: 10px;">
-                                <div class="progress-bar 
+                                <div class="progress-bar
                                   {% if enrollment.progress == 0 %}bg-danger
                                   {% elif enrollment.progress > 0 and enrollment.progress <= 50 %}bg-warning
                                   {% elif enrollment.progress > 50 and enrollment.progress < 100 %}bg-info
-                                  {% elif enrollment.progress == 100 %}bg-success{% endif %}" 
-                                  role="progressbar" style="width: {{ enrollment.progress|floatformat:1 }}%;" 
+                                  {% elif enrollment.progress == 100 %}bg-success{% endif %}"
+                                  role="progressbar" style="width: {{ enrollment.progress|floatformat:1 }}%;"
                                   aria-valuenow="{{ enrollment.progress|floatformat:1 }}" aria-valuemin="0" aria-valuemax="100">
                                 </div>
                               </div>

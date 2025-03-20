@@ -1,5 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.db.models import Avg, Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -181,10 +183,24 @@ class CourseStep1View(LoginRequiredMixin, View):
         return render(request, "courses/course_step1.html", {"form": form})
 
     def post(self, request):
-        form = CourseForm(request.POST)
+        """폼 데이터와 파일 데이터 함께 처리"""
+        form = CourseForm(request.POST, request.FILES)
+
         if form.is_valid():
-            request.session["course_data"] = form.cleaned_data
+            course_data = form.cleaned_data
+
+            # ✅ 썸네일 파일이 업로드되었을 경우, 임시 저장 후 경로만 세션에 저장
+            if "thumbnail" in request.FILES:
+                thumbnail_file = request.FILES["thumbnail"]
+                file_path = f"temp_thumbnails/{request.user.id}_{thumbnail_file.name}"
+
+                # ✅ Django의 기본 저장소를 사용하여 파일 저장 (MEDIA_ROOT/temp_thumbnails/)
+                saved_path = default_storage.save(file_path, ContentFile(thumbnail_file.read()))
+                course_data["thumbnail"] = saved_path  # ✅ 파일 경로만 저장 (JSON 직렬화 가능)
+
+            request.session["course_data"] = course_data  # ✅ JSON 직렬화 가능하도록 변경
             return redirect("courses:course_step2")
+
         return render(request, "courses/course_step1.html", {"form": form})
 
 
@@ -224,27 +240,48 @@ class CourseStep2View(LoginRequiredMixin, View):
                 messages.success(request, "섹션이 삭제되었습니다.")
             return redirect("courses:course_step2")
 
-        # ✅ 다음 단계로 이동
-        return redirect("courses:course_step3")
+        # ✅ 강의 데이터 저장 (썸네일 포함)
+        course_data = request.session.get("course_data", {})
+
+        course = Course.objects.create(
+            instructor=request.user,
+            title=course_data["title"],
+            description=course_data["description"],
+            price=course_data["price"],
+            status="review",
+        )
+
+        # ✅ 썸네일 저장 (세션에서 경로 가져오기)
+        thumbnail_path = course_data.get("thumbnail", None)
+        if thumbnail_path:
+            course.thumbnail = thumbnail_path  # ✅ 저장된 썸네일 파일 경로를 Course 모델에 반영
+        course.save()
+
+        # ✅ 강의 생성 후 created_course_id를 세션에 저장
+        request.session["created_course_id"] = course.id
+        request.session.modified = True
+
+        messages.success(request, "강의 기본 정보가 저장되었습니다.")
+        return redirect("courses:course_step3")  # ✅ 다음 단계로 이동
 
 
 class CourseStep3View(LoginRequiredMixin, View):
     """레슨 정보 입력 및 강의 저장 (3단계)"""
 
     def dispatch(self, request, *args, **kwargs):
-        if "course_data" not in request.session or "section_data" not in request.session:
+        # ✅ `created_course_id`가 없으면 2단계로 이동 (기존: 1단계로 이동)
+        if "created_course_id" not in request.session:
+            return redirect("courses:course_step2")
+        if "section_data" not in request.session:
             return redirect("courses:course_step1")
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
         form = LessonForm()
-
-        # ✅ sections를 리스트로 변환하여 템플릿에서 쉽게 사용 가능하도록 변경
         sections_with_titles = [
             {"id": str(i), "title": sec["title"]} for i, sec in enumerate(request.session.get("section_data", []))
         ]
 
-        # ✅ lessons_by_section을 리스트 형태로 변환하여 템플릿에서 쉽게 접근 가능하도록 변경
         lessons_by_section = [
             {
                 "section_id": section["id"],
@@ -258,13 +295,12 @@ class CourseStep3View(LoginRequiredMixin, View):
             "courses/course_step3.html",
             {
                 "form": form,
-                "sections_with_titles": sections_with_titles,  # ✅ 리스트로 변환하여 템플릿에서 쉽게 접근 가능
-                "lessons_by_section": lessons_by_section,  # ✅ 섹션별 레슨 리스트 변환
+                "sections_with_titles": sections_with_titles,
+                "lessons_by_section": lessons_by_section,
             },
         )
 
     def post(self, request):
-        # ✅ sections 리스트를 다시 정의하여 post()에서도 접근 가능하도록 수정
         sections_with_titles = [
             {"id": str(i), "title": sec["title"]} for i, sec in enumerate(request.session.get("section_data", []))
         ]
@@ -275,7 +311,7 @@ class CourseStep3View(LoginRequiredMixin, View):
             lesson_video_url = request.POST.get("lesson_video_url")
 
             if section_id and lesson_title and lesson_video_url:
-                section_id = str(section_id)  # ✅ 문자열로 변환하여 일관성 유지
+                section_id = str(section_id)
 
                 if "lesson_data" not in request.session:
                     request.session["lesson_data"] = {}
@@ -313,20 +349,14 @@ class CourseStep3View(LoginRequiredMixin, View):
             messages.warning(request, "최소한 하나의 레슨을 추가해야 합니다.")
             return redirect("courses:course_step3")
 
-        course_data = request.session["course_data"]
-        section_data = request.session["section_data"]
+        # ✅ 기존에 생성된 강의를 가져옴 (새로 생성하지 않음)
+        course_id = request.session["created_course_id"]
+        course = get_object_or_404(Course, id=course_id, instructor=request.user)
 
-        course = Course.objects.create(
-            instructor=request.user,
-            title=course_data["title"],
-            description=course_data["description"],
-            price=course_data["price"],
-            status="review",
-        )
-
+        # ✅ 기존 강의에 섹션 및 레슨 추가 (강의 중복 생성 방지)
         section_id_map = {}
-        for index, section in enumerate(section_data):
-            sec = Section.objects.create(course=course, title=section["title"])
+        for index, section in enumerate(request.session["section_data"]):
+            sec, created = Section.objects.get_or_create(course=course, title=section["title"])
             section_id_map[str(index)] = sec.id
 
         for section_index, lessons in lesson_data.items():
@@ -344,12 +374,8 @@ class CourseStep3View(LoginRequiredMixin, View):
         if "lesson_data" in request.session:
             del request.session["lesson_data"]
 
-        # 생성된 강의 ID를 세션에 저장 (CourseStep4View에서 사용)
-        request.session["created_course_id"] = course.id
-        request.session.modified = True
-
         messages.success(request, "강의 기본 정보가 저장되었습니다. 퀴즈를 추가해 강의를 완성하세요.")
-        return redirect("courses:course_step4")  # 퀴즈 생성 페이지로 이동
+        return redirect("courses:course_step4")  # ✅ 퀴즈 생성 페이지로 이동
 
 
 class CourseStep4View(LoginRequiredMixin, View):
@@ -511,6 +537,11 @@ class CourseUpdateView(LoginRequiredMixin, UpdateView):
         # ✅ 강의 작성자가 아닌 경우 접근 제한
         if course.instructor != request.user:
             messages.error(request, "본인의 강의만 수정할 수 있습니다.")
+            return redirect("courses:instructor_dashboard")
+
+        # ✅ 심사 중인 강의는 수정할 수 없음
+        if course.status == "review":
+            messages.error(request, "현재 심사 중인 강의는 수정할 수 없습니다.")
             return redirect("courses:instructor_dashboard")
 
         return super().dispatch(request, *args, **kwargs)
