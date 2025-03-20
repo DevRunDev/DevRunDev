@@ -207,3 +207,109 @@ python manage.py seed_data
 |POST | /reviews/course/{course_id}/add/ | 리뷰 작성 |
 |POST | /reviews/review/{review_id}/edit/ | 리뷰 수정 |
 |POST | /reviews/review/{review_id}/delete/ | 리뷰 삭제 |
+
+
+## 소셜 로그인 설정
+
+### Google OAuth 설정
+1. [Google Cloud Console](https://console.cloud.google.com/)에서 새 프로젝트 생성
+2. OAuth 2.0 클라이언트 ID 생성
+   - 승인된 리디렉션 URI: `http://localhost:8000/accounts/google/login/callback/`
+3. 발급받은 클라이언트 ID와 시크릿을 `.env`에 설정
+   ```
+   GOOGLE_CLIENT_ID=your-client-id
+   GOOGLE_CLIENT_SECRET=your-client-secret
+   ```
+### Kakao OAuth 설정
+1. [Kakap Developers](https://developers.kakao.com/)에서 애플리케이션 추가
+2. 카카오 로그인 활성화 및 Redirect URI 설정, 동의 항목 설정
+   - Redirect URI: `http://localhost:8000/accounts/kakao/login/callback/`, `http://localhost:8000/oauth`
+3. 발급받은 REST API 키를 `.env`에 설정
+   ```
+   KAKAO_CLIENT_ID=Your REST API KEY
+   KAKAO_CLIENT_SECRET= 'None'
+   ```
+
+### Naver OAuth 설정
+1. [Naver Developers](https://developers.naver.com/products/login/api/api.md)에서 오픈 API 이용 신청
+2. 사용 API를 네이버 로그인으로 설정 및 제공 정보 설정
+3. 로그인 오픈 API 서비스 환경 설정
+   - 서비스 URL : `http://localhost:8000/`
+   - 네이버 로그인 Callback URL : `http://localhost:8000/accounts/naver/login/callback/`
+4. 발급받은 클라이언트 ID와 시크릿을 `.env`에 설정
+   ```
+   Naver_CLIENT_ID=your-client-id
+   Naver_CLIENT_SECRET=your-client-secret
+   ```
+
+
+### Django Admin 설정
+소셜 로그인을 사용하기 위해서는 Django Admin에서 추가 설정이 필요합니다:
+
+1. 관리자 계정으로 Django Admin (`http://localhost:8000/admin`) 접속
+2. Sites 섹션에서 기본 사이트의 도메인을 "localhost:8000"으로 변경
+3. Social Applications 섹션에서 소셜 앱 추가
+   - Google 설정:
+     - Provider: Google
+     - Name: Google
+     - Client ID: .env의 GOOGLE_CLIENT_ID 값
+     - Secret key: .env의 GOOGLE_CLIENT_SECRET 값
+     - Sites: localhost:8000 선택
+    
+   - Kakao 설정:
+     - Provider: Kakao
+     - Name: Kakao
+     - Client ID: .env의 Kakao_CLIENT_ID 값
+     - Secret key: .env의 Kakao_CLIENT_SECRET 값
+     - Sites: localhost:8000 선택
+  
+   - Naver 설정:
+     - Provider: Naver
+     - Name: Naver
+     - Client ID: .env의 Naver_CLIENT_ID 값
+     - Secret key: .env의 Naver_CLIENT_SECRET 값
+     - Sites: localhost:8000 선택
+
+## 📁프로젝트 구조
+```
+📁DevRunDev/
+├── 📁 .github/ # GitHub 워크플로우 설정
+├── 📁 accounts/ # 사용자 관리 앱
+│     ├─migrations
+│     │  └─__pycache__
+│     └─__pycache__
+├── 📁 courses/ # 강의 관리 앱
+│     ├─migrations
+│     │  └─__pycache__
+│     └─__pycache__
+├── 📁 enrollments/ # 수강 신청 및 관리 앱
+│     ├─migrations
+│     │  └─__pycache__
+│     └─__pycache__
+├── 📁 quizzes/ # 퀴즈 앱
+│     ├─migrations
+│     │  └─__pycache__
+│     └─__pycache__
+├── 📁 reviews/ # 리뷰 앱
+│     ├─migrations
+│     │  └─__pycache__
+│     └─__pycache__
+├── 📁 core/ # 공통 기능 앱
+│      └── management/ # 커스텀 관리 명령어
+├── 📁 config/ # 프로젝트 설정
+│      ├── settings.py
+│      ├── urls.py
+│      └── wsgi.py
+├── 📁 docs/ # 문서 파일
+├── 📁 static/ # 정적 파일 (CSS, JS, 이미지)
+├── 📁 templates/ # 공통 템플릿
+│      └── 📁 account
+│
+├── 📄 .env.dev.example        # 환경 변수 예시
+├── 📄 .gitignore
+├── 📄 .pre-commit-config.yaml # pre-commit 설정
+├── 📄 manage.py               # Django 관리 명령어
+├── 📄 pytest.ini              # pytest 설정
+└── 📄 requirements.txt        # 의존성 패키지 목록
+
+```
