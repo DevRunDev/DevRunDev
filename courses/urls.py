@@ -25,7 +25,7 @@ urlpatterns = [
     # ✅ 강의 목록 조회
     path("", CourseListView.as_view(), name="course_list"),
     # ✅ 강의 상세 조회
-    path("course/<int:pk>/", CourseDetailView.as_view(), name="course_detail"),
+    path("<int:pk>/", CourseDetailView.as_view(), name="course_detail"),
     # ✅ 레슨 상세 조회
     path("lesson/<int:pk>/", LessonDetailView.as_view(), name="lesson_detail"),
     # ✅ 강의 생성 (단계별)
@@ -34,13 +34,13 @@ urlpatterns = [
     path("create/step3/", CourseStep3View.as_view(), name="course_step3"),
     path("create/step4/", CourseStep4View.as_view(), name="course_step4"),
     path(
-        "course/review/",
+        "review/",
         TemplateView.as_view(template_name="courses/course_review_pending.html"),
         name="course_review_pending",
     ),
     # ✅ 강사 대시보드 및 강의 수정
     path("instructor/dashboard/", InstructorDashboardView.as_view(), name="instructor_dashboard"),
-    path("course/<int:pk>/edit/", CourseUpdateView.as_view(), name="course_edit"),
+    path("<int:pk>/edit/", CourseUpdateView.as_view(), name="course_edit"),
     # ✅ 섹션 관련 URL
     path("sections/<int:pk>/add/", SectionCreateView.as_view(), name="section_add"),
     path("sections/<int:pk>/edit/", SectionUpdateView.as_view(), name="section_edit"),

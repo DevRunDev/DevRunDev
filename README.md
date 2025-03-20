@@ -129,25 +129,25 @@ python manage.py seed_data
 |:-|:-|:-|:-:|:-:|
 |GET | / | 강의 목록 조회 | ✅ | |
 |GET | /course/{id}/ | 강의 상세 조회 | ✅ | |
-|GET | /lesson/{id}/ | 레슨 상세 조회 | ✅ | |
+|GET | /courses/lesson/{id}/ | 레슨 상세 조회 | ✅ | |
 
 #### 강의 생성 및 관리
 
 | 메서드 | URL패턴 | 기능 | 학생 권한 필요 | 강사 권한 필요 |
 |:-|:-|:-|:-:|:-:|
-|GET,POST | /create/step1/ | 강의 생성 1단계 (기본 정보) | | ✅ |
-|GET,POST | /create/step2/ | 강의 생성 2단계 (섹션 구성) | | ✅ |
-|GET,POST | /create/step3/ | 강의 생성 3단계 (레슨 추가) | | ✅ |
-|GET,POST | /create/step4/ | 강의 생성 4단계 (퀴즈 추가 및 강의 정보 검토) | | ✅ |
+|GET,POST | /courses/create/step1/ | 강의 생성 1단계 (기본 정보) | | ✅ |
+|GET,POST | /courses/create/step2/ | 강의 생성 2단계 (섹션 구성) | | ✅ |
+|GET,POST | /courses/create/step3/ | 강의 생성 3단계 (레슨 추가) | | ✅ |
+|GET,POST | /courses/create/step4/ | 강의 생성 4단계 (퀴즈 추가 및 강의 정보 검토) | | ✅ |
 |GET | /course/review/ | 강의 심사 대기 페이지 | | ✅ |
-|GET | /instructor/dashboard/ | 강사 대시보드 | | ✅ |
-|GET,POST | /course/{id}/edit/ | 강의 수정 | | ✅ |
-|POST | /sections/{id}/add/ | 섹션 추가 | | ✅ |
-|POST | /sections/{id}/edit/ | 섹션 수정 | | ✅ |
-|POST | /sections/{id}/delete/ | 섹션 삭제 | | ✅ |
-|POST | /lessons/{id}/add/ | 레슨 추가 | | ✅ |
-|POST | /lessons/{id}/edit/ | 레슨 수정 | | ✅ |
-|POST | /lessons/{id}/delete/ | 레슨 삭제 | | ✅ |
+|GET | /courses/instructor/dashboard/ | 강사 대시보드 | | ✅ |
+|GET,POST | /courses/{id}/edit/ | 강의 수정 | | ✅ |
+|POST | /courses/sections/{id}/add/ | 섹션 추가 | | ✅ |
+|POST | /courses/sections/{id}/edit/ | 섹션 수정 | | ✅ |
+|POST | /courses/sections/{id}/delete/ | 섹션 삭제 | | ✅ |
+|POST | /courses/lessons/{id}/add/ | 레슨 추가 | | ✅ |
+|POST | /courses/lessons/{id}/edit/ | 레슨 수정 | | ✅ |
+|POST | /courses/lessons/{id}/delete/ | 레슨 삭제 | | ✅ |
 
 ### 3) 수강 관리 API
 
