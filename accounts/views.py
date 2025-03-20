@@ -11,7 +11,7 @@ from .models import InstructorApplication
 class InstructorApplicationView(LoginRequiredMixin, CreateView):
     model = InstructorApplication
     form_class = InstructorApplicationForm
-    template_name = "accounts/instructor_application.html"
+    template_name = "account/instructor_application.html"
     success_url = reverse_lazy("accounts:profile")
 
     def dispatch(self, request, *args, **kwargs):
@@ -19,7 +19,7 @@ class InstructorApplicationView(LoginRequiredMixin, CreateView):
 
         if user.is_instructor():
             messages.info(request, "이미 강사 권한을 가지고 있습니다.")
-            return redirect("accounts:profile")
+            return redirect("account:profile")
 
         existing_application = InstructorApplication.objects.filter(
             user=self.request.user, status=InstructorApplication.Status.PENDING
@@ -27,7 +27,7 @@ class InstructorApplicationView(LoginRequiredMixin, CreateView):
 
         if existing_application:
             messages.info(request, "이미 강사 신청이 진행 중입니다. 관리자의 승인을 기다려주세요.")
-            return redirect("accounts:profile")
+            return redirect("account:profile")
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -40,4 +40,4 @@ class InstructorApplicationView(LoginRequiredMixin, CreateView):
 
 
 class ProfileView(LoginRequiredMixin, TemplateView):
-    template_name = "accounts/profile.html"
+    template_name = "account/profile.html"
