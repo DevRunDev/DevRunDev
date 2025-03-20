@@ -274,11 +274,49 @@ python manage.py seed_data
 └── 📄 requirements.txt        # 의존성 패키지
 ```
 
-## 6. 데이터베이스 모델링(ERD)
+## 6. 화면 설계
+1) Google Social Login
+![Google Login](https://github.com/user-attachments/assets/7a151eff-1ff3-4862-b13e-7d4f6927ff3d)
+
+2) Kakao Social Login
+![Kakao Login](https://github.com/user-attachments/assets/2bb2f899-21b6-4c32-9ffe-32c7e146e55b)
+
+3) Naver Social Login
+![Naver Login](https://github.com/user-attachments/assets/b3df8b03-065f-4a29-8243-44fa85af75fb)
+
+4) 회원가입
+![signup](https://github.com/user-attachments/assets/4108cbf7-6226-43c6-87f5-4ec34ca5d4c0)
+
+5) 강사 신청
+![강사 신청](https://github.com/user-attachments/assets/703489c8-f76a-442a-8e94-dcb14c72941e)
+
+6) 강의 생성
+![강의 생성](https://github.com/user-attachments/assets/76148a2b-8cfd-4758-9b6b-9935e632aefd)
+
+7) 강의 및 섹션 수정
+![강의 및 섹션 수정](https://github.com/user-attachments/assets/5718fe3e-b8cf-4192-a1aa-2740b3c8bd5a)
+
+8) 장바구니 담기 및 수강 신청
+![장바구니 담기 및 수강 신청](https://github.com/user-attachments/assets/04660b1a-4f3a-469d-9e63-964b90656ec0)
+
+9) 강의 상세 페이지
+<img width="1280" alt="강의 상세 페이지" src="https://github.com/user-attachments/assets/70800157-0ecc-47cc-8d0d-0a576315bde8" />
+
+10) 퀴즈 응시
+![퀴즈 응시](https://github.com/user-attachments/assets/0b7a6027-edef-4b7c-8a87-a0a8c654b9ce)
+
+11) 수료증 발급
+![수료증 발급](https://github.com/user-attachments/assets/52eb8d29-f8df-42e1-bf19-e6bc1d3b080d)
+
+12) 리뷰 작성
+![리뷰 작성](https://github.com/user-attachments/assets/e043673e-a678-4479-b2ed-3e9bce57156c)
+
+
+## 7. 데이터베이스 모델링(ERD)
 
 ![devrundev_erd](https://github.com/user-attachments/assets/3e15deb4-62c1-4198-8fd0-d9f7b8cf56be)
 
 
-## 7. Architecture
+## 8. Architecture
 
 ![DevRunDev_mermaid-diagram](https://github.com/user-attachments/assets/15a95f8f-5c60-49ce-8699-ed6b8b5531c4)
