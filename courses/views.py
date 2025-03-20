@@ -67,7 +67,7 @@ class CourseDetailView(DetailView):
         """✅ 모든 사용자가 승인된 강의에 접근할 수 있도록 설정"""
         queryset = Course.objects.filter(status="approved")
         if self.request.user.is_authenticated and self.request.user.is_instructor():
-            queryset = Course.objects.all()  # ✅ 강사는 모든 강의 조회 가능
+            queryset = Course.objects.all()
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -83,13 +83,12 @@ class CourseDetailView(DetailView):
         # ✅ 기본 설정
         context["is_enrolled"] = False
         context["progress"] = 0  # ✅ 기본값을 0으로 설정
-        context["completed_lessons"] = set()  # ✅ 완료된 레슨 목록을 저장할 Set
+        context["completed_lessons"] = set()
         context["average_rating"] = (
             course.reviews.aggregate(avg_rating=Avg("rating"))["avg_rating"] or 0
         )  # ✅ 평균 별점 추가
 
         if self.request.user.is_authenticated:
-            # ✅ 강사는 항상 수강 상태를 True로 설정 (수강 신청 없이 레슨 접근 가능)
             if self.request.user == course.instructor:
                 context["is_enrolled"] = True
             else:
@@ -97,16 +96,16 @@ class CourseDetailView(DetailView):
                 enrollment = Enrollment.objects.filter(student=self.request.user, course=course).first()
                 if enrollment:
                     context["is_enrolled"] = True
-                    context["progress"] = enrollment.progress  # ✅ 진행률 반영
+                    context["progress"] = enrollment.progress
 
                     # ✅ 사용자가 완료한 레슨 목록을 가져와 저장
                     completed_lessons = LessonProgress.objects.filter(
                         student=self.request.user, completed=True
                     ).values_list("lesson_id", flat=True)
-                    context["completed_lessons"] = set(completed_lessons)  # ✅ Set으로 변환하여 빠른 조회 가능
+                    context["completed_lessons"] = set(completed_lessons)
 
         # ✅ 학생이 이미 리뷰를 남겼는지 확인
-        context["has_reviewed"] = False  # 기본값 설정
+        context["has_reviewed"] = False
         if self.request.user.is_authenticated and not self.request.user.is_instructor():
             context["has_reviewed"] = Review.objects.filter(course=course, user=self.request.user).exists()
 
@@ -119,11 +118,9 @@ class LessonDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "lesson"
 
     def dispatch(self, request, *args, **kwargs):
-        """🚨 수강하지 않은 사용자는 레슨 상세 페이지 접근 불가 (단, 강사는 예외)"""
         lesson = self.get_object()
         course = lesson.section.course
 
-        # ✅ 강사는 항상 접근 가능, 학생은 수강 여부 확인 후 접근
         if (
             request.user != course.instructor
             and not Enrollment.objects.filter(student=request.user, course=course).exists()
@@ -144,7 +141,7 @@ class LessonDetailView(LoginRequiredMixin, DetailView):
         completed_lessons = LessonProgress.objects.filter(student=self.request.user, completed=True).values_list(
             "lesson_id", flat=True
         )
-        context["completed_lessons"] = set(completed_lessons)  # ✅ 빠른 조회를 위해 Set 사용
+        context["completed_lessons"] = set(completed_lessons)
 
         # ✅ 다음 레슨 찾기 (현재 섹션 내)
         next_lesson = (
@@ -266,7 +263,7 @@ class CourseStep2View(LoginRequiredMixin, View):
         request.session.modified = True
 
         messages.success(request, "강의 기본 정보가 저장되었습니다.")
-        return redirect("courses:course_step3")  # ✅ 다음 단계로 이동
+        return redirect("courses:course_step3")
 
 
 class CourseStep3View(LoginRequiredMixin, View):
@@ -353,7 +350,7 @@ class CourseStep3View(LoginRequiredMixin, View):
             messages.warning(request, "최소한 하나의 레슨을 추가해야 합니다.")
             return redirect("courses:course_step3")
 
-        # ✅ 기존에 생성된 강의를 가져옴 (새로 생성하지 않음)
+        # ✅ 기존에 생성된 강의를 가져옴
         course_id = request.session["created_course_id"]
         course = get_object_or_404(Course, id=course_id, instructor=request.user)
 
@@ -379,7 +376,7 @@ class CourseStep3View(LoginRequiredMixin, View):
             del request.session["lesson_data"]
 
         messages.success(request, "강의 기본 정보가 저장되었습니다. 퀴즈를 추가해 강의를 완성하세요.")
-        return redirect("courses:course_step4")  # ✅ 퀴즈 생성 페이지로 이동
+        return redirect("courses:course_step4")
 
 
 class CourseStep4View(LoginRequiredMixin, View):
@@ -506,7 +503,7 @@ class InstructorDashboardView(LoginRequiredMixin, View):
         if status_filter in ["approved", "review", "not_approved"]:
             my_courses = my_courses.filter(status=status_filter)
 
-        # ✅ 상태별 강의 개수 조회 (쿼리 최적화)
+        # ✅ 상태별 강의 개수 조회
         course_counts = Course.objects.filter(instructor=request.user).values("status").annotate(count=Count("status"))
         status_counts = {item["status"]: item["count"] for item in course_counts}
 
@@ -535,28 +532,25 @@ class CourseUpdateView(LoginRequiredMixin, UpdateView):
 
         # ✅ 기존 썸네일 삭제 후 새로운 썸네일 저장
         if "thumbnail" in self.request.FILES:
-            # 기존 썸네일이 있고, 기본 썸네일이 아니라면 삭제
             if course.thumbnail and course.thumbnail.name != "courses/default.jpg":
                 old_thumbnail_path = os.path.join(settings.MEDIA_ROOT, course.thumbnail.name)
 
                 # ✅ 파일 존재 여부 확인 후 삭제
-                if os.path.exists(old_thumbnail_path):  # `default_storage.exists()` 대신 OS 파일 확인
+                if os.path.exists(old_thumbnail_path):
                     os.remove(old_thumbnail_path)
 
             # ✅ 새로운 파일명을 랜덤하게 생성하여 저장
-            extension = os.path.splitext(self.request.FILES["thumbnail"].name)[1]  # 확장자 가져오기
-            new_filename = f"{uuid.uuid4().hex}{extension}"  # 랜덤한 파일명 생성
+            extension = os.path.splitext(self.request.FILES["thumbnail"].name)[1]
+            new_filename = f"{uuid.uuid4().hex}{extension}"
 
-            # ✅ Django가 자동으로 저장하도록 파일을 할당 (경로는 models.py에서 `upload_to="courses/"`에 의해 설정됨)
-            self.request.FILES["thumbnail"].name = (
-                new_filename  # ✅ 파일명만 설정, Django가 자동으로 `upload_to="courses/"` 적용
-            )
+            # ✅ Django가 자동으로 저장하도록 파일을 할당
+            self.request.FILES["thumbnail"].name = new_filename
             course.thumbnail = self.request.FILES["thumbnail"]
 
         if course.status == "not_approved":
             course.status = "review"
 
-        course.save()  # ✅ 저장
+        course.save()
 
         # ✅ 섹션 및 레슨 정보 업데이트
         section_titles = self.request.POST.getlist("section_titles")
