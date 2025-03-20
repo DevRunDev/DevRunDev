@@ -1,34 +1,37 @@
 # DevRunDev
+- DevRunDev는 IT 및 개발자를 위한 온라인 교육 플랫폼입니다.
+- 강사들은 실무 중심의 강의를 제작하고 수강생들은 최신 기술을 배우며 성장할 수 있도록 지원합니다.
+- 또한 강의 진행률, 평가 시스템, 강의 별 퀴즈 등의 기능을 통해 효율적인 학습 경험을 제공합니다.
 
-## 주요 기능
-### 사용자 관리
+## 1. 🎯 주요 기능
+### 1) 사용자 관리
 
 - 역할 기반 사용자 시스템: 학생, 강사, 관리자 역할 구분
 - 소셜 로그인: Google, Kakao, Naver 로그인 지원
 - 강사 신청: 강사 자격 신청 및 관리자 승인 기능
 
-### 강의 관리
+### 2) 강의 관리
 
 - 섹션 및 레슨 구조: 체계적인 강의 구조 제공
 - 강의 승인 프로세스: 품질 관리를 위한 강의 승인 워크플로우
 - 강의 검색 및 필터링: 사용자 친화적인 강의 탐색 기능
 - 강의 수정 및 관리: 강사가 직접 강의 콘텐츠 관리
 
-### 학습 기능
+### 3) 학습 기능
 
 - 강의 진행률 추적: 학습 현황 및 진행률 확인
 - 퀴즈 및 평가: 학습 이해도 확인을 위한 퀴즈 시스템
 - 수료증 발급: 강의 완료 시 수료증 발급 기능
 - 강의 리뷰 및 평가: 강의 품질을 위한 리뷰 시스템
 
-### 결제 및 수강 관리
+### 4) 수강 관리
 
 - 장바구니 기능: 여러 강의 동시 수강 신청
 - 수강 신청 관리: 수강 현황 및 관리 대시보드
 
-## 🛠️ 기술 스택
+## 2. 🛠️ 기술 스택
 
-### Environment
+### 1) Environment
 ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-007ACC?style=for-the-badge&logo=Visual%20Studio%20Code&logoColor=white)
 ![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=Git&logoColor=white)
 ![Github](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white)
@@ -36,7 +39,7 @@
 ![precommit](https://img.shields.io/badge/precommit-FAB040?style=for-the-badge&logo=precommit&logoColor=white)
 ![githubactions](https://img.shields.io/badge/githubactions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
 
-### 백엔드
+### 2) 백엔드
 
 ![Django](https://img.shields.io/badge/django-092E20?style=for-the-badge&logo=django&logoColor=white)
 
@@ -52,11 +55,10 @@ django-debug-toolbar: 개발 디버깅 도구
 
 Authentication: Django Authentication + django-allauth
 
-### Database
+### 3) Database
 ![SQLite3](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=SQLite&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=PostgreSQL&logoColor=white)
 
-### 프론트엔드
+### 4) 프론트엔드
 
 ![Bootstrap](https://img.shields.io/badge/bootstrap-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
@@ -65,7 +67,7 @@ Authentication: Django Authentication + django-allauth
 
 
 
-## 개발 환경 세팅
+## 3. 🌐 개발 환경 세팅
 
 ### git clone
 ```sh
@@ -107,141 +109,108 @@ python manage.py migrate
 python manage.py seed_data
 ```
 
-## API 문서
-### 사용자 관리 API
+## 4.📝 API 문서
+### 1) 사용자 관리 API
 
 #### 로그인 및 인증
 
-| 메서드 | URL패턴 | 기능 |
-|--------|-----|-------------|
+| 메서드 | URL패턴 | 기능 | 로그인 권한 필요 | 학생 권한 필요 | 강사 권한 필요 |
+|:-|:-|:-|:-:|:-:|:-:|
 |POST | /accounts/login/ | 사용자 로그인 |
-|POST | /accounts/logout/ | 사용자 로그아웃 |
-|GET | /accounts/profile/ | 사용자 프로필 조회 |
-|POST | /accounts/instructor/apply/ | 강사 신청 |
+|POST | /accounts/logout/ | 사용자 로그아웃 | ✅ | |
+|GET | /accounts/profile/ | 사용자 프로필 조회 | ✅ | |
+|POST | /accounts/instructor/apply/ | 강사 신청 | ✅ | ✅ |
 
-### 강의 관리 API
+### 2) 강의 관리 API
 
 #### 강의 목록 및 상세
 
-| 메서드 | URL패턴 | 기능 |
-|--------|-----|-------------|
-|GET | / | 강의 목록 조회 |
-|GET | /course/{id}/ | 강의 상세 조회 |
-|GET | /lesson/{id}/ | 레슨 상세 조회 |
+| 메서드 | URL패턴 | 기능 | 학생 권한 필요 | 강사 권한 필요 |
+|:-|:-|:-|:-:|:-:|
+|GET | / | 강의 목록 조회 | ✅ | |
+|GET | /course/{id}/ | 강의 상세 조회 | ✅ | |
+|GET | /lesson/{id}/ | 레슨 상세 조회 | ✅ | |
 
 #### 강의 생성 및 관리
 
-| 메서드 | URL패턴 | 기능 |
-|--------|-----|-------------|
-|GET,POST | /create/step1/ | 강의 생성 1단계 (기본 정보) |
-|GET,POST | /create/step2/ | 강의 생성 2단계 (섹션 구성) |
-|GET,POST | /create/step3/ | 강의 생성 3단계 (레슨 추가) |
-|GET,POST | /create/step4/ | 강의 생성 4단계 (퀴즈 추가 및 강의 정보 검토) |
-|GET | /course/review/ | 강의 심사 대기 페이지 |
-|GET | /instructor/dashboard/ | 강사 대시보드 |
-|GET,POST | /course/{id}/edit/ | 강의 수정 |
-|POST | /sections/{id}/add/ | 섹션 추가 |
-|POST | /sections/{id}/edit/ | 섹션 수정 |
-|POST | /sections/{id}/delete/ | 섹션 삭제 |
-|POST | /lessons/{id}/add/ | 레슨 추가 |
-|POST | /lessons/{id}/edit/ | 레슨 수정 |
-|POST | /lessons/{id}/delete/ | 레슨 삭제 |
+| 메서드 | URL패턴 | 기능 | 학생 권한 필요 | 강사 권한 필요 |
+|:-|:-|:-|:-:|:-:|
+|GET,POST | /create/step1/ | 강의 생성 1단계 (기본 정보) | | ✅ |
+|GET,POST | /create/step2/ | 강의 생성 2단계 (섹션 구성) | | ✅ |
+|GET,POST | /create/step3/ | 강의 생성 3단계 (레슨 추가) | | ✅ |
+|GET,POST | /create/step4/ | 강의 생성 4단계 (퀴즈 추가 및 강의 정보 검토) | | ✅ |
+|GET | /course/review/ | 강의 심사 대기 페이지 | | ✅ |
+|GET | /instructor/dashboard/ | 강사 대시보드 | | ✅ |
+|GET,POST | /course/{id}/edit/ | 강의 수정 | | ✅ |
+|POST | /sections/{id}/add/ | 섹션 추가 | | ✅ |
+|POST | /sections/{id}/edit/ | 섹션 수정 | | ✅ |
+|POST | /sections/{id}/delete/ | 섹션 삭제 | | ✅ |
+|POST | /lessons/{id}/add/ | 레슨 추가 | | ✅ |
+|POST | /lessons/{id}/edit/ | 레슨 수정 | | ✅ |
+|POST | /lessons/{id}/delete/ | 레슨 삭제 | | ✅ |
 
-### 수강 관리 API
+### 3) 수강 관리 API
 
 #### 수강 신청 및 관리
 
-| 메서드 | URL패턴 | 기능 |
-|--------|-----|-------------|
-|POST | /enrollments/enroll/{course_id}/ | 강의 수강 신청 |
-|GET | /enrollments/enroll/{course_id}/success/ | 수강 신청 성공 페이지 |
-|POST | /enrollments/lesson/{lesson_id}/complete/ | 레슨 완료 처리 |
-|GET | /enrollments/dashboard/ | 학생 대시보드 |
-|GET | /enrollments/ | 수강 중인 강의 목록 |
-|GET | /enrollments/{id}/ | 수강 상세 정보 |
-|GET | /enrollments/{id}/generate-certificate/ | 수료증 발급 |
-|GET | /enrollments/certificate/{id}/ | 수료증 조회 |
-|GET | /enrollments/certificate/{id}/download/ | 수료증 다운로드 |
+| 메서드 | URL패턴 | 기능 | 학생 권한 필요 | 강사 권한 필요 |
+|:-|:-|:-|:-:|:-:|
+|POST | /enrollments/enroll/{course_id}/ | 강의 수강 신청 | ✅ | |
+|GET | /enrollments/enroll/{course_id}/success/ | 수강 신청 성공 페이지 | ✅ | |
+|POST | /enrollments/lesson/{lesson_id}/complete/ | 레슨 완료 처리 | ✅ | |
+|GET | /enrollments/dashboard/ | 학생 대시보드 | ✅ | |
+|GET | /enrollments/ | 수강 중인 강의 목록 | ✅ | |
+|GET | /enrollments/{id}/ | 수강 상세 정보 | ✅ | |
+|GET | /enrollments/{id}/generate-certificate/ | 수료증 발급 | ✅ | |
+|GET | /enrollments/certificate/{id}/ | 수료증 조회 | ✅ | |
+|GET | /enrollments/certificate/{id}/download/ | 수료증 다운로드 | ✅ | |
 
 #### 장바구니 기능
 
-| 메서드 | URL패턴 | 기능 |
-|--------|-----|-------------|
-|GET | /enrollments/cart/ | 장바구니 조회 |
-|POST | /enrollments/cart/add/{course_id}/ | 장바구니 추가 |
-|POST | /enrollments/cart/enroll/ | 장바구니에서 수강 신청 |
-|POST | /enrollments/cart/remove/{course_id}/ | 장바구니에서 제거 |
+| 메서드 | URL패턴 | 기능 | 학생 권한 필요 | 강사 권한 필요 | 
+|:-|:-|:-|:-:|:-:|
+|GET | /enrollments/cart/ | 장바구니 조회 | ✅ | |
+|POST | /enrollments/cart/add/{course_id}/ | 장바구니 추가 | ✅ | |
+|POST | /enrollments/cart/enroll/ | 장바구니에서 수강 신청 | ✅ | |
+|POST | /enrollments/cart/remove/{course_id}/ | 장바구니에서 제거 | ✅ | |
 
-### 퀴즈 API
+### 4) 퀴즈 API
 
 #### 퀴즈 관리
 
-| 메서드 | URL패턴 | 기능 |
-|--------|-----|-------------|
-|GET | /quizzes/course/{course_id}/quizzes/ | 퀴즈 목록 |
-|POST | /quizzes/course/{course_id}/quizzes/create/ | 퀴즈 생성 |
-|GET | /quizzes/{id}/ | 퀴즈 상세 |
-|POST | /quizzes/{id}/edit/ | 퀴즈 수정 |
-|POST | /quizzes/{id}/delete/ | 퀴즈 삭제 |
+| 메서드 | URL패턴 | 기능 | 학생 권한 필요 | 강사 권한 필요 |
+|:-|:-|:-|:-:|:-:|
+|GET | /quizzes/course/{course_id}/quizzes/ | 퀴즈 목록 | | ✅ | 
+|POST | /quizzes/course/{course_id}/quizzes/create/ | 퀴즈 생성  | | ✅ | 
+|GET | /quizzes/{id}/ | 퀴즈 상세 | | ✅ | 
+|POST | /quizzes/{id}/edit/ | 퀴즈 수정 | | ✅ | 
+|POST | /quizzes/{id}/delete/ | 퀴즈 삭제 | | ✅ | 
 
 #### 문제 관리
 
-| 메서드 | URL패턴 | 기능 |
-|--------|-----|-------------|
-|POST | /quizzes/quizzes/{quiz_id}/questions/create/ | 문제 생성 |
-|POST | /quizzes/questions/{id}/edit/ | 문제 수정 |
-|POST | /quizzes/questions/{id}/delete/ | 문제 삭제 |
+| 메서드 | URL패턴 | 기능 | 학생 권한 필요 | 강사 권한 필요 |
+|:-|:-|:-|:-:|:-:|
+|POST | /quizzes/quizzes/{quiz_id}/questions/create/ | 문제 생성 | | ✅ | 
+|POST | /quizzes/questions/{id}/edit/ | 문제 수정 | | ✅ | 
+|POST | /quizzes/questions/{id}/delete/ | 문제 삭제 | | ✅ | 
 
 #### 퀴즈 응시
 
-| 메서드 | URL패턴 | 기능 |
-|--------|-----|-------------|
-|POST | /quizzes/quizzes/{id}/take/ | 퀴즈 응시 |
-|GET | /quizzes/attempts/{id}/result/ | 퀴즈 결과 조회 |
+| 메서드 | URL패턴 | 기능 | 학생 권한 필요 | 강사 권한 필요 |
+|:-|:-|:-|:-:|:-:|
+|POST | /quizzes/quizzes/{id}/take/ | 퀴즈 응시 | ✅ | | 
+|GET | /quizzes/attempts/{id}/result/ | 퀴즈 결과 조회 | ✅ | |
 
-### 리뷰 API
+### 5) 리뷰 API
 
-| 메서드 | URL패턴 | 기능 |
-|--------|-----|-------------|
-|POST | /reviews/course/{course_id}/add/ | 리뷰 작성 |
-|POST | /reviews/review/{review_id}/edit/ | 리뷰 수정 |
-|POST | /reviews/review/{review_id}/delete/ | 리뷰 삭제 |
+| 메서드 | URL패턴 | 기능 |학생 권한 필요 | 강사 권한 필요 |
+|:-|:-|:-|:-:|:-:|
+|POST | /reviews/course/{course_id}/add/ | 리뷰 작성 | ✅ | | 
+|POST | /reviews/review/{review_id}/edit/ | 리뷰 수정 |✅ | | 
+|POST | /reviews/review/{review_id}/delete/ | 리뷰 삭제 |✅ | | 
 
 
-## 소셜 로그인 설정
-
-### Google OAuth 설정
-1. [Google Cloud Console](https://console.cloud.google.com/)에서 새 프로젝트 생성
-2. OAuth 2.0 클라이언트 ID 생성
-   - 승인된 리디렉션 URI: `http://localhost:8000/accounts/google/login/callback/`
-3. 발급받은 클라이언트 ID와 시크릿을 `.env`에 설정
-   ```
-   GOOGLE_CLIENT_ID=your-client-id
-   GOOGLE_CLIENT_SECRET=your-client-secret
-   ```
-### Kakao OAuth 설정
-1. [Kakap Developers](https://developers.kakao.com/)에서 애플리케이션 추가
-2. 카카오 로그인 활성화 및 Redirect URI 설정, 동의 항목 설정
-   - Redirect URI: `http://localhost:8000/accounts/kakao/login/callback/`, `http://localhost:8000/oauth`
-3. 발급받은 REST API 키를 `.env`에 설정
-   ```
-   KAKAO_CLIENT_ID=Your REST API KEY
-   KAKAO_CLIENT_SECRET= 'None'
-   ```
-
-### Naver OAuth 설정
-1. [Naver Developers](https://developers.naver.com/products/login/api/api.md)에서 오픈 API 이용 신청
-2. 사용 API를 네이버 로그인으로 설정 및 제공 정보 설정
-3. 로그인 오픈 API 서비스 환경 설정
-   - 서비스 URL : `http://localhost:8000/`
-   - 네이버 로그인 Callback URL : `http://localhost:8000/accounts/naver/login/callback/`
-4. 발급받은 클라이언트 ID와 시크릿을 `.env`에 설정
-   ```
-   Naver_CLIENT_ID=your-client-id
-   Naver_CLIENT_SECRET=your-client-secret
-   ```
-
-## 📁프로젝트 구조
+## 5. 📁프로젝트 구조
 ```
 📁DevRunDev/
 ├── 📁 .github/workflows/      # GitHub CI/CD 워크플로우
@@ -305,10 +274,11 @@ python manage.py seed_data
 └── 📄 requirements.txt        # 의존성 패키지
 ```
 
-## 데이터베이스 모델링(ERD)
+## 6. 데이터베이스 모델링(ERD)
+
 ![devrundev_erd](https://github.com/user-attachments/assets/3e15deb4-62c1-4198-8fd0-d9f7b8cf56be)
 
 
-## Architecture
-![DevRunDev_mermaid-diagram](https://github.com/user-attachments/assets/8ea9f2ff-e9e4-444a-9f7a-a489b97469c1)
+## 7. Architecture
 
+![DevRunDev_mermaid-diagram](https://github.com/user-attachments/assets/15a95f8f-5c60-49ce-8699-ed6b8b5531c4)
