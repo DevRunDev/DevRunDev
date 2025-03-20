@@ -221,6 +221,8 @@ LOGIN_REDIRECT_URL = "/"  # 로그인 성공 후 이동할 URL
 ACCOUNT_LOGOUT_REDIRECT_URL = "/"  # 로그아웃 후 이동할 URL
 ACCOUNT_SIGNUP_REDIRECT_URL = 'account_login'
 
+SOCIALACCOUNT_LOGIN_ON_GET = True  # 소셜 로그인 중간 페이지 건너뛰기
+
 # allauth 관련 설정 추가/수정
 ACCOUNT_LOGOUT_ON_GET = True
 ACCOUNT_EMAIL_VERIFICATION = "none"
