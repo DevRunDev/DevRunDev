@@ -1,6 +1,5 @@
 # DevRunDev
 
-
 ## 주요 기능
 ### 사용자 관리
 
@@ -242,74 +241,74 @@ python manage.py seed_data
    Naver_CLIENT_SECRET=your-client-secret
    ```
 
-
-### Django Admin 설정
-소셜 로그인을 사용하기 위해서는 Django Admin에서 추가 설정이 필요합니다:
-
-1. 관리자 계정으로 Django Admin (`http://localhost:8000/admin`) 접속
-2. Sites 섹션에서 기본 사이트의 도메인을 "localhost:8000"으로 변경
-3. Social Applications 섹션에서 소셜 앱 추가
-   - Google 설정:
-     - Provider: Google
-     - Name: Google
-     - Client ID: .env의 GOOGLE_CLIENT_ID 값
-     - Secret key: .env의 GOOGLE_CLIENT_SECRET 값
-     - Sites: localhost:8000 선택
-    
-   - Kakao 설정:
-     - Provider: Kakao
-     - Name: Kakao
-     - Client ID: .env의 Kakao_CLIENT_ID 값
-     - Secret key: .env의 Kakao_CLIENT_SECRET 값
-     - Sites: localhost:8000 선택
-  
-   - Naver 설정:
-     - Provider: Naver
-     - Name: Naver
-     - Client ID: .env의 Naver_CLIENT_ID 값
-     - Secret key: .env의 Naver_CLIENT_SECRET 값
-     - Sites: localhost:8000 선택
-
 ## 📁프로젝트 구조
 ```
 📁DevRunDev/
-├── 📁 .github/ # GitHub 워크플로우 설정
-├── 📁 accounts/ # 사용자 관리 앱
-│     ├─migrations
-│     │  └─__pycache__
-│     └─__pycache__
-├── 📁 courses/ # 강의 관리 앱
-│     ├─migrations
-│     │  └─__pycache__
-│     └─__pycache__
-├── 📁 enrollments/ # 수강 신청 및 관리 앱
-│     ├─migrations
-│     │  └─__pycache__
-│     └─__pycache__
-├── 📁 quizzes/ # 퀴즈 앱
-│     ├─migrations
-│     │  └─__pycache__
-│     └─__pycache__
-├── 📁 reviews/ # 리뷰 앱
-│     ├─migrations
-│     │  └─__pycache__
-│     └─__pycache__
-├── 📁 core/ # 공통 기능 앱
-│      └── management/ # 커스텀 관리 명령어
-├── 📁 config/ # 프로젝트 설정
-│      ├── settings.py
-│      ├── urls.py
-│      └── wsgi.py
-├── 📁 docs/ # 문서 파일
-├── 📁 static/ # 정적 파일 (CSS, JS, 이미지)
-├── 📁 templates/ # 공통 템플릿
-│      └── 📁 account
-│
+├── 📁 .github/workflows/      # GitHub CI/CD 워크플로우
+│   └── pr_ci.yml              # PR 시 테스트 자동화
+├── 📁 accounts/               # 사용자 관리
+│   ├── admin.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── tests/
+│   ├── urls.py
+│   └── views.py
+├── 📁 courses/                # 강의 관리
+│   ├── admin.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── templates/
+│   ├── tests/
+│   ├── urls.py
+│   └── views.py
+├── 📁 enrollments/            # 수강 신청 및 관리
+│   ├── admin.py
+│   ├── models.py
+│   ├── templates/
+│   ├── urls.py
+│   └── views.py
+├── 📁 quizzes/                # 퀴즈 관리
+│   ├── admin.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── templates/
+│   ├── tests/
+│   ├── urls.py
+│   └── views.py
+├── 📁 reviews/                # 리뷰 관리
+│   ├── forms.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+├── 📁 core/                   # 공통 기능
+│   └── management/
+│       └── commands/
+│           └── seed_data.py   # 샘플 데이터 생성 
+├── 📁 config/                 # 프로젝트 설정
+│   ├── settings.py            # 기본 설정 파일
+│   ├── urls.py                # 메인 URL 설정
+│   └── wsgi.py                # WSGI 설정
+├── 📁 static/                 # 정적 파일
+│   ├── css/
+│   ├── js/ 
+│   └── images/
+├── 📁 templates/              # 공통 템플릿
+│   ├── account/               # 계정 관련 템플릿
+│   └── base.html              # 기본 템플릿
+├── 📁 media/                  # 업로드 파일 저장
+├── 📁 docs/                   # 프로젝트 문서
 ├── 📄 .env.dev.example        # 환경 변수 예시
 ├── 📄 .gitignore
 ├── 📄 .pre-commit-config.yaml # pre-commit 설정
 ├── 📄 manage.py               # Django 관리 명령어
 ├── 📄 pytest.ini              # pytest 설정
-└── 📄 requirements.txt        # 의존성 패키지 목록
-
+└── 📄 requirements.txt        # 의존성 패키지
 ```
+
+## 데이터베이스 모델링(ERD)
+![devrundev_erd](https://github.com/user-attachments/assets/3e15deb4-62c1-4198-8fd0-d9f7b8cf56be)
+
+
+## Architecture
+![DevRunDev_mermaid-diagram](https://github.com/user-attachments/assets/8ea9f2ff-e9e4-444a-9f7a-a489b97469c1)
+
