@@ -69,9 +69,9 @@ def convert_youtube_url(url):
     if 'youtube.com/embed/' in url:
         return url
     
-    # 유튜브 URL에서 동영상 ID 추출하는 정규식
+    # 유튜브 URL에서 동영상 ID 추출하는 정규식 (shorts 포함)
     youtube_regex = (
-        r'(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})'
+        r'(?:youtube\.com\/(?:shorts\/|[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})'
     )
     match = re.search(youtube_regex, url)
     
