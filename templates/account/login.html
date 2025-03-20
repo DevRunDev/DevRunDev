@@ -11,7 +11,7 @@
           <h3 class="mb-0">로그인</h3>
         </div>
         <div class="card-body p-4">
-          <form method="post">
+          <form method="post" action="{% url 'account_login' %}">
             {% csrf_token %}
             
             {% if form.errors %}
@@ -23,11 +23,21 @@
             <div class="mb-3">
               <label for="id_login" class="form-label">이메일</label>
               <input type="email" name="login" id="id_login" class="form-control" placeholder="이메일 주소 입력" required>
+              {% if form.login.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in form.login.errors %}{{ error }}{% endfor %}
+                </div>
+              {% endif %}
             </div>
             
             <div class="mb-3">
               <label for="id_password" class="form-label">비밀번호</label>
               <input type="password" name="password" id="id_password" class="form-control" placeholder="비밀번호 입력" required>
+              {% if form.password.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in form.password.errors %}{{ error }}{% endfor %}
+                </div>
+              {% endif %}
             </div>
             
             <div class="mb-3 form-check">

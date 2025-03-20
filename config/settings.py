@@ -224,6 +224,14 @@ SOCIALACCOUNT_PROVIDERS = {
 LOGIN_REDIRECT_URL = "/"  # 로그인 성공 후 이동할 URL
 ACCOUNT_LOGOUT_REDIRECT_URL = "/"  # 로그아웃 후 이동할 URL
 
+# allauth 관련 설정 추가/수정
+ACCOUNT_LOGOUT_ON_GET = True
+ACCOUNT_EMAIL_VERIFICATION = "optional"
+ACCOUNT_EMAIL_REQUIRED = True
+
+# 템플릿 오버라이드를 위한 추가 설정
+ACCOUNT_TEMPLATE_EXTENSION = "html"
+
 # 이메일 필수 설정 (이메일 인증 요구)
 ACCOUNT_EMAIL_VERIFICATION = "optional"  # (optional, mandatory, none)
 ACCOUNT_EMAIL_REQUIRED = True
