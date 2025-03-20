@@ -1,3 +1,4 @@
+from allauth.account.views import SignupView
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
@@ -41,3 +42,19 @@ class InstructorApplicationView(LoginRequiredMixin, CreateView):
 
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = "account/profile.html"
+
+class CustomSignupView(SignupView):
+    """회원가입 커스텀 뷰"""
+    
+    def form_valid(self, form):
+        # 기본 form_valid 메서드 호출하여 사용자 생성
+        response = super().form_valid(form)
+        
+        # 성공 메시지 추가
+        messages.success(
+            self.request, 
+            "회원가입이 완료되었습니다. 로그인하여 서비스를 이용해주세요."
+        )
+        
+        # 로그인 페이지로 리다이렉트
+        return redirect('account_login')

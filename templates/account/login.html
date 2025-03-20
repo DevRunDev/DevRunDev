@@ -1,4 +1,5 @@
 {% extends 'courses/base.html' %}
+{% load socialaccount %}
 
 {% block title %}로그인 - DevRunDev{% endblock %}
 
@@ -11,6 +12,15 @@
           <h3 class="mb-0">로그인</h3>
         </div>
         <div class="card-body p-4">
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+          
           <form method="post" action="{% url 'account_login' %}">
             {% csrf_token %}
             
@@ -57,7 +67,7 @@
           <hr class="my-4">
           
           <div class="text-center">
-            <p>아직 계정이 없으신가요? <a href="{% url 'account_signup' %}">회원가입</a></p>
+            <p>아직 계정이 없으신가요? <a href="{% url 'accounts:signup' %}">회원가입</a></p>
             <p><a href="{% url 'account_reset_password' %}">비밀번호를 잊으셨나요?</a></p>
           </div>
           
@@ -65,13 +75,13 @@
           <div class="mt-4">
             <h5 class="text-center mb-3">소셜 계정으로 로그인</h5>
             <div class="d-grid gap-2">
-              <a href="{% url 'google_login' %}" class="btn btn-outline-danger">
+              <a href="{% provider_login_url 'google' %}" class="btn btn-outline-danger">
                 <i class="bi bi-google me-2"></i> Google로 로그인
               </a>
-              <a href="{% url 'kakao_login' %}" class="btn btn-outline-warning">
+              <a href="{% provider_login_url 'kakao' %}" class="btn btn-outline-warning">
                 <i class="bi bi-chat-fill me-2"></i> Kakao로 로그인
               </a>
-              <a href="{% url 'naver_login' %}" class="btn btn-outline-success">
+              <a href="{% provider_login_url 'naver' %}" class="btn btn-outline-success">
                 <i class="bi bi-chat-left-fill"></i> Naver로 로그인
               </a>
             </div>
