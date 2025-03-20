@@ -27,7 +27,7 @@ urlpatterns = [
     # ✅ 강의 상세 조회
     path("<int:pk>/", CourseDetailView.as_view(), name="course_detail"),
     # ✅ 레슨 상세 조회
-    path("lesson/<int:pk>/", LessonDetailView.as_view(), name="lesson_detail"),
+    path("lessons/<int:pk>/", LessonDetailView.as_view(), name="lesson_detail"),
     # ✅ 강의 생성 (단계별)
     path("create/step1/", CourseStep1View.as_view(), name="course_step1"),
     path("create/step2/", CourseStep2View.as_view(), name="course_step2"),

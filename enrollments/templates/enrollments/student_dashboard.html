@@ -9,9 +9,12 @@
       <h1 class="display-5 fw-bold">내 강의실</h1>
       <p class="lead text-muted">수강 중인 강의와 학습 진행 상황을 확인하세요.</p>
     </div>
-    <div class="col-md-4 d-flex align-items-center justify-content-md-end">
+    <div class="col-md-4 d-flex align-items-center justify-content-md-end gap-3">
       <a href="{% url 'courses:course_list' %}" class="btn btn-outline-primary">
-        <i class="bi bi-search me-2"></i> 강의 목록 보러가기
+        <i class="bi bi-search me-2"></i>강의 목록 보러가기
+      </a>
+      <a href="{% url 'enrollments:enrollment_list' %}" class="btn btn-outline-primary">
+        <i class="bi bi-list-ul me-2"></i>전체 수강 목록 보기
       </a>
     </div>
   </div>

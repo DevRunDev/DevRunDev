@@ -129,7 +129,7 @@ python manage.py seed_data
 |:-|:-|:-|:-:|:-:|
 |GET | / | 강의 목록 조회 | ✅ | |
 |GET | /courses/{id}/ | 강의 상세 조회 | ✅ | |
-|GET | /courses/lesson/{id}/ | 레슨 상세 조회 | ✅ | |
+|GET | /courses/lessons/{id}/ | 레슨 상세 조회 | ✅ | |
 
 #### 강의 생성 및 관리
 
