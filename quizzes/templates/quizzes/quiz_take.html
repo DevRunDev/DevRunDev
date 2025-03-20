@@ -78,7 +78,7 @@
                     <div class="mb-3">
                         {{ quiz.description|linebreaks }}
                     </div>
-                    
+
                     <div class="d-flex flex-wrap justify-content-between text-muted">
                         <div>
                             <i class="bi bi-book me-1"></i> 강의: <strong>{{ quiz.course.title }}</strong>
@@ -96,7 +96,7 @@
             <!-- 퀴즈 문제 폼 -->
             <form method="post" id="quizForm">
                 {% csrf_token %}
-                
+
                 <div class="mb-4">
                     <!-- 문제 네비게이션 -->
                     <div class="d-flex flex-wrap mb-3 p-2 bg-light rounded">
@@ -183,17 +183,17 @@
                 </div>
                 <div class="card-body">
                     <p class="mb-2">총 <strong>{{ answer_forms|length }}개</strong> 문제 중 <strong id="answeredCount">0</strong>개 답변 완료</p>
-                    
+
                     <div class="progress mb-3" style="height: 10px;">
                         <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
-                    
+
                     <div id="questionStatus" class="mb-3">
                         {% for item in answer_forms %}
                             <span class="badge bg-secondary me-1 mb-1 question-badge" data-question-id="{{ item.question.id }}">{{ forloop.counter }}</span>
                         {% endfor %}
                     </div>
-                    
+
                     <div class="d-flex justify-content-between text-muted small">
                         <div><i class="bi bi-circle-fill text-secondary me-1"></i> 미답변</div>
                         <div><i class="bi bi-circle-fill text-success me-1"></i> 답변 완료</div>
@@ -279,21 +279,21 @@
         const questionBadges = document.querySelectorAll('.question-badge');
         const unansweredWarning = document.getElementById('unansweredWarning');
         const scrollToTopBtn = document.getElementById('scrollToTop');
-        
+
         // 부트스트랩 모달 설정
         const submitModal = new bootstrap.Modal(document.getElementById('submitConfirmModal'));
-        
+
         // 현재 답변 상태 업데이트
         function updateProgress() {
             const inputs = document.querySelectorAll('.question-choice:checked');
             const answered = inputs.length;
             const percentage = Math.round((answered / totalQuestions) * 100);
-            
+
             // 진행바 및 카운터 업데이트
             progressBar.style.width = percentage + '%';
             progressBar.setAttribute('aria-valuenow', percentage);
             answeredCount.textContent = answered;
-            
+
             // 개별 문제 배지 업데이트
             inputs.forEach(input => {
                 const questionId = input.dataset.questionId;
@@ -303,39 +303,39 @@
                     badge.classList.add('bg-success');
                 }
             });
-            
+
             return answered;
         }
-        
+
         // 선택지 클릭 이벤트
         document.querySelectorAll('.choice-item').forEach(item => {
             item.addEventListener('click', function() {
                 const questionId = this.closest('.question-choices').dataset.questionId;
                 const radio = this.querySelector('input[type="radio"]');
-                
+
                 // 라디오 버튼 선택
                 radio.checked = true;
-                
+
                 // 같은 문제의 다른 선택지 스타일 제거
                 document.querySelectorAll(`.question-choices[data-question-id="${questionId}"] .choice-item`).forEach(choice => {
                     choice.classList.remove('selected');
                 });
-                
+
                 // 선택된 항목 스타일 적용
                 this.classList.add('selected');
-                
+
                 // 진행 상태 업데이트
                 updateProgress();
             });
         });
-        
+
         // 문제 내비게이션 클릭 이벤트
         document.querySelectorAll('.question-nav').forEach(nav => {
             nav.addEventListener('click', function(e) {
                 e.preventDefault();
                 const questionId = this.dataset.questionId;
                 const questionElement = document.getElementById(`question-${questionId}`);
-                
+
                 // 스크롤 이동
                 questionElement.scrollIntoView({
                     behavior: 'smooth',
@@ -343,11 +343,11 @@
                 });
             });
         });
-        
+
         // 제출 버튼 클릭 이벤트
         submitBtn.addEventListener('click', function() {
             const answered = updateProgress();
-            
+
             // 모달 내용 업데이트
             if (answered < totalQuestions) {
                 unansweredWarning.style.display = 'block';
@@ -358,11 +358,11 @@
             } else {
                 unansweredWarning.style.display = 'none';
             }
-            
+
             // 모달 표시
             submitModal.show();
         });
-        
+
         // 최종 제출 버튼 클릭 이벤트
         finalSubmitBtn.addEventListener('click', function() {
             // 제출 폼에 히든 필드 추가
@@ -371,11 +371,11 @@
             submitInput.name = 'submit_quiz';
             submitInput.value = 'true';
             quizForm.appendChild(submitInput);
-            
+
             // 폼 제출
             quizForm.submit();
         });
-        
+
         // 맨 위로 스크롤 버튼
         scrollToTopBtn.addEventListener('click', function() {
             window.scrollTo({
@@ -383,7 +383,7 @@
                 behavior: 'smooth'
             });
         });
-        
+
         // 스크롤 이벤트 처리 (맨 위로 버튼 표시/숨김)
         window.addEventListener('scroll', function() {
             if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
@@ -392,7 +392,7 @@
                 scrollToTopBtn.style.display = 'none';
             }
         });
-        
+
         // 페이지 로드 시 초기 상태 업데이트
         scrollToTopBtn.style.display = 'none';
         updateProgress();

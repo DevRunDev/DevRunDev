@@ -1,5 +1,7 @@
+import os
 import re
 
+from django.conf import settings
 from django.db import models
 from django.db.models import Avg
 
@@ -28,6 +30,14 @@ class Course(models.Model):
         avg = self.reviews.aggregate(avg_rating=Avg("rating"))["avg_rating"]
         self.avg_rating = round(avg, 1) if avg else 0.0  # ⭐ 없으면 0으로 설정
         self.save()
+
+    def get_thumbnail_url(self):
+        """썸네일 파일이 존재하지 않으면 기본 썸네일 반환"""
+        if self.thumbnail:
+            thumbnail_path = os.path.join(settings.MEDIA_ROOT, str(self.thumbnail))  # ✅ 실제 파일 경로 확인
+            if os.path.exists(thumbnail_path):  # ✅ 파일이 존재하면 해당 URL 반환
+                return self.thumbnail.url
+        return settings.MEDIA_URL + "default.jpg"  # ✅ 파일이 없으면 기본 썸네일 반환
 
     class Meta:
         ordering = ["-created_at"]

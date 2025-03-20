@@ -74,9 +74,9 @@ class InstructorApplication(models.Model):
 
         self.user.role = User.Role.INSTRUCTOR
         self.user.save()
-    
+
     def save(self, *args, **kwargs):
-    # 상태가 변경되었고, 새로운 상태가 APPROVED인지 확인
+        # 상태가 변경되었고, 새로운 상태가 APPROVED인지 확인
         if self.pk:  # 기존 객체 수정 시에만 체크
             try:
                 original = InstructorApplication.objects.get(pk=self.pk)
@@ -86,6 +86,6 @@ class InstructorApplication(models.Model):
                     self.user.save()
             except InstructorApplication.DoesNotExist:
                 pass  # 새 객체 생성 시 패스
-            
-    # 원래의 save 메서드 호출
+
+        # 원래의 save 메서드 호출
         super().save(*args, **kwargs)

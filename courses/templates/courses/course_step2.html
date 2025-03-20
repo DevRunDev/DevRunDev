@@ -26,7 +26,7 @@
     <div class="col-md-8 offset-md-2">
       <!-- 진행 상태 표시 -->
       <div class="progress mb-4" style="height: 30px;">
-        <div class="progress-bar bg-primary" role="progressbar" style="width: 50%;" 
+        <div class="progress-bar bg-primary" role="progressbar" style="width: 50%;"
              aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
           2/4 단계: 섹션 구성
         </div>
@@ -98,7 +98,7 @@
         <a href="{% url 'courses:course_step1' %}" class="btn btn-outline-secondary">
           <i class="bi bi-arrow-left me-2"></i> 이전 단계로 돌아가기
         </a>
-        
+
         <form method="post">
           {% csrf_token %}
           <button type="submit" class="btn btn-primary" {% if not request.session.section_data %}disabled{% endif %}>

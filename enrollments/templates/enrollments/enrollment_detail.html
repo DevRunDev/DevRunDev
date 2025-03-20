@@ -40,7 +40,7 @@
               <div class="course-description mb-4">
                 {{ enrollment.course.description|linebreaks }}
               </div>
-              
+
               <div class="row g-3">
                 <div class="col-md-6">
                   <div class="d-flex align-items-center">
@@ -80,20 +80,20 @@
                 </div>
               </div>
             </div>
-            
+
             <div class="col-md-4">
               <div class="progress mb-3" style="height: 20px;">
-                <div class="progress-bar 
+                <div class="progress-bar
                   {% if enrollment.progress == 0 %}bg-danger
                   {% elif enrollment.progress > 0 and enrollment.progress <= 50 %}bg-warning
                   {% elif enrollment.progress > 50 and enrollment.progress < 100 %}bg-info
-                  {% elif enrollment.progress == 100 %}bg-success{% endif %}" 
-                  role="progressbar" style="width: {{ enrollment.progress|floatformat:1 }}%;" 
+                  {% elif enrollment.progress == 100 %}bg-success{% endif %}"
+                  role="progressbar" style="width: {{ enrollment.progress|floatformat:1 }}%;"
                   aria-valuenow="{{ enrollment.progress|floatformat:1 }}" aria-valuemin="0" aria-valuemax="100">
                   {{ enrollment.progress|floatformat:1 }}%
                 </div>
               </div>
-              
+
               <div class="card mb-3">
                 <div class="card-body text-center p-3">
                   {% if is_completed %}
@@ -102,7 +102,7 @@
                     </div>
                     <h5 class="card-title text-success">강의 수료 완료!</h5>
                     <p class="card-text">축하합니다! 이 강의의 모든 내용을 성공적으로 수료하셨습니다.</p>
-                    
+
                     {% if certificate %}
                       <div class="certificate-info p-3 bg-light rounded mb-3">
                         <p class="mb-1"><small>수료증 번호: {{ certificate.certificate_id }}</small></p>

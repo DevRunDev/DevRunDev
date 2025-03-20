@@ -52,12 +52,12 @@
                   </div>
                   <div class="col-md-3">
                     <div class="progress mb-2" style="height: 8px;">
-                      <div class="progress-bar 
+                      <div class="progress-bar
                         {% if enrollment.status == 'completed' %}bg-success
                         {% elif enrollment.progress >= 90 %}bg-info
                         {% elif enrollment.progress >= 50 %}bg-primary
-                        {% else %}bg-secondary{% endif %}" 
-                        role="progressbar" style="width: {{ enrollment.progress|floatformat:1 }}%;" 
+                        {% else %}bg-secondary{% endif %}"
+                        role="progressbar" style="width: {{ enrollment.progress|floatformat:1 }}%;"
                         aria-valuenow="{{ enrollment.progress|floatformat:1 }}" aria-valuemin="0" aria-valuemax="100">
                       </div>
                     </div>
@@ -96,7 +96,7 @@
           </div>
         </div>
       {% endif %}
-      
+
       <div class="mt-4">
         <a href="{% url 'enrollments:student_dashboard' %}" class="btn btn-outline-secondary">
           <i class="bi bi-arrow-left me-2"></i> 내 강의실로 돌아가기

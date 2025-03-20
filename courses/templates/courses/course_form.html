@@ -23,13 +23,13 @@
         </div>
         <div class="card-body p-4">
           <p class="lead mb-4">강의에 대한 기본 정보를 입력해주세요. 이후 단계에서 섹션과 레슨을 추가할 수 있습니다.</p>
-          
+
           <form method="post">
             {% csrf_token %}
-            
+
             <div class="mb-3">
               <label for="id_title" class="form-label fw-bold">강의 제목</label>
-              <input type="text" name="title" id="id_title" value="{{ form.title.value|default:'' }}" 
+              <input type="text" name="title" id="id_title" value="{{ form.title.value|default:'' }}"
                      class="form-control form-control-lg" placeholder="강의 제목을 입력하세요" required>
               {% if form.title.errors %}
                 <div class="text-danger mt-1">
@@ -39,7 +39,7 @@
                 </div>
               {% endif %}
             </div>
-            
+
             <div class="mb-3">
               <label for="id_description" class="form-label fw-bold">강의 설명</label>
               <textarea name="description" id="id_description" rows="6" class="form-control"
@@ -52,12 +52,12 @@
                 </div>
               {% endif %}
             </div>
-            
+
             <div class="mb-4">
               <label for="id_price" class="form-label fw-bold">가격 (원)</label>
               <div class="input-group">
                 <span class="input-group-text">₩</span>
-                <input type="number" name="price" id="id_price" min="0" value="{{ form.price.value|default:'0' }}" 
+                <input type="number" name="price" id="id_price" min="0" value="{{ form.price.value|default:'0' }}"
                        class="form-control" placeholder="가격 (0원은 무료 강의)">
               </div>
               {% if form.price.errors %}
@@ -70,7 +70,7 @@
                 <div class="form-text">0원으로 설정하면 무료 강의로 제공됩니다.</div>
               {% endif %}
             </div>
-            
+
             <div class="d-grid gap-2">
               <button type="submit" class="btn btn-primary btn-lg">
                 <i class="bi bi-check-circle me-2"></i> 강의 생성

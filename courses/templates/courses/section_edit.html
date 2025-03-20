@@ -26,10 +26,10 @@
         <div class="card-body p-4">
           <form method="post">
             {% csrf_token %}
-            
+
             <div class="mb-4">
               <label for="id_title" class="form-label fw-bold">섹션 제목</label>
-              <input type="text" name="title" id="id_title" value="{{ form.title.value }}" 
+              <input type="text" name="title" id="id_title" value="{{ form.title.value }}"
                      class="form-control form-control-lg" required>
               {% if form.title.errors %}
                 <div class="text-danger mt-1">
@@ -42,7 +42,7 @@
                 섹션 제목은 해당 섹션의 주제나 학습 목표를 나타내는 간결한 문구로 작성해주세요.
               </div>
             </div>
-            
+
             <div class="d-flex justify-content-between">
               <a href="{% url 'courses:course_edit' pk=section.course.id %}" class="btn btn-outline-secondary">
                 <i class="bi bi-x-circle me-2"></i> 취소

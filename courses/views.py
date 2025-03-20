@@ -1,3 +1,7 @@
+import os
+import uuid
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files.base import ContentFile
@@ -525,34 +529,36 @@ class CourseUpdateView(LoginRequiredMixin, UpdateView):
     form_class = CourseForm
     success_url = reverse_lazy("courses:instructor_dashboard")
 
-    def dispatch(self, request, *args, **kwargs):
-        """강사만 수정 가능하도록 제한"""
-        course = self.get_object()
-
-        # ✅ 강사가 아닌 경우 접근 제한
-        if request.user.role.lower() != "instructor":
-            messages.error(request, "강사만 강의를 수정할 수 있습니다.")
-            return redirect("courses:course_list")  # ✅ 일반 사용자는 강의 목록으로 리디렉션
-
-        # ✅ 강의 작성자가 아닌 경우 접근 제한
-        if course.instructor != request.user:
-            messages.error(request, "본인의 강의만 수정할 수 있습니다.")
-            return redirect("courses:instructor_dashboard")
-
-        # ✅ 심사 중인 강의는 수정할 수 없음
-        if course.status == "review":
-            messages.error(request, "현재 심사 중인 강의는 수정할 수 없습니다.")
-            return redirect("courses:instructor_dashboard")
-
-        return super().dispatch(request, *args, **kwargs)
-
     def form_valid(self, form):
-        """반려된 강의는 '심사 중' 상태로 변경하고, 승인된 강의는 상태 유지"""
+        """반려된 강의는 '심사 중' 상태로 변경하고, 승인된 강의는 유지"""
         course = form.save(commit=False)
+
+        # ✅ 기존 썸네일 삭제 후 새로운 썸네일 저장
+        if "thumbnail" in self.request.FILES:
+            # 기존 썸네일이 있고, 기본 썸네일이 아니라면 삭제
+            if course.thumbnail and course.thumbnail.name != "courses/default.jpg":
+                old_thumbnail_path = os.path.join(settings.MEDIA_ROOT, course.thumbnail.name)
+
+                # ✅ 파일 존재 여부 확인 후 삭제
+                if os.path.exists(old_thumbnail_path):  # `default_storage.exists()` 대신 OS 파일 확인
+                    os.remove(old_thumbnail_path)
+
+            # ✅ 새로운 파일명을 랜덤하게 생성하여 저장
+            extension = os.path.splitext(self.request.FILES["thumbnail"].name)[1]  # 확장자 가져오기
+            new_filename = f"{uuid.uuid4().hex}{extension}"  # 랜덤한 파일명 생성
+
+            # ✅ Django가 자동으로 저장하도록 파일을 할당 (경로는 models.py에서 `upload_to="courses/"`에 의해 설정됨)
+            self.request.FILES["thumbnail"].name = (
+                new_filename  # ✅ 파일명만 설정, Django가 자동으로 `upload_to="courses/"` 적용
+            )
+            course.thumbnail = self.request.FILES["thumbnail"]
+
         if course.status == "not_approved":
             course.status = "review"
-        course.save()
 
+        course.save()  # ✅ 저장
+
+        # ✅ 섹션 및 레슨 정보 업데이트
         section_titles = self.request.POST.getlist("section_titles")
         lesson_titles = self.request.POST.getlist("lesson_titles")
         lesson_video_urls = self.request.POST.getlist("lesson_video_urls")

@@ -86,7 +86,7 @@
               <p class="text-muted mb-3">{{ course.description|truncatechars:200 }}</p>
               <div class="d-flex mb-2">
                 <div class="me-4">
-                  <strong><i class="bi bi-tag-fill me-2 text-primary"></i> 가격:</strong> 
+                  <strong><i class="bi bi-tag-fill me-2 text-primary"></i> 가격:</strong>
                   {% if course.price == 0 %}
                     <span class="badge bg-success">무료</span>
                   {% else %}
@@ -115,7 +115,7 @@
                           <div>
                             <h6 class="mb-1"><i class="bi bi-play-circle me-2 text-primary"></i> {{ lesson.title }}</h6>
                             <small class="text-muted">
-                              <i class="bi bi-youtube me-1"></i> 
+                              <i class="bi bi-youtube me-1"></i>
                               {% if lesson.video_url %}
                                 영상 URL 있음
                               {% else %}
@@ -147,7 +147,7 @@
                           </div>
                         </div>
                       </li>
-                      
+
                       <!-- 퀴즈 추가 모달 -->
                       <div id="addModal{{ lesson.id }}" class="modal">
                         <div class="modal-content">
@@ -158,23 +158,23 @@
                           <form method="post">
                             {% csrf_token %}
                             <input type="hidden" name="lesson_id" value="{{ lesson.id }}">
-                            
+
                             <div class="mb-3">
                               <label for="title{{ lesson.id }}" class="form-label">퀴즈 제목</label>
                               <input type="text" id="title{{ lesson.id }}" name="title" required
                                     class="form-control" placeholder="예: {{ lesson.title }} 이해도 확인 퀴즈">
                             </div>
-                            
+
                             <div class="mb-3">
                               <label for="description{{ lesson.id }}" class="form-label">퀴즈 설명 (선택사항)</label>
                               <textarea id="description{{ lesson.id }}" name="description" rows="3"
                                         class="form-control" placeholder="이 퀴즈의 목적과 내용을 간략하게 설명해주세요."></textarea>
                             </div>
-                            
+
                             <div class="form-text mb-3">
                               <i class="bi bi-info-circle me-1"></i> 퀴즈를 저장한 후 문제와 선택지를 추가할 수 있습니다.
                             </div>
-                            
+
                             <div class="d-flex justify-content-end">
                               <button type="button" onclick="closeAddModal('{{ lesson.id }}')" class="btn btn-outline-secondary me-2">
                                 취소
@@ -198,13 +198,13 @@
                           <form method="post">
                             {% csrf_token %}
                             <input type="hidden" name="lesson_id" value="{{ lesson.id }}">
-                            
+
                             <div class="mb-3">
                               <label for="edit_title{{ lesson.id }}" class="form-label">퀴즈 제목</label>
                               <input type="text" id="edit_title{{ lesson.id }}" name="title" required
                                     class="form-control" value="{{ lesson.quiz.title }}">
                             </div>
-                            
+
                             <div class="mb-3">
                               <label for="edit_description{{ lesson.id }}" class="form-label">퀴즈 설명 (선택사항)</label>
                               <textarea id="edit_description{{ lesson.id }}" name="description" rows="3"
@@ -233,12 +233,12 @@
                             {% endwith %}
 
                             <div class="d-flex justify-content-between mb-3">
-                              <a href="{% url 'quizzes:question_create' quiz_id=lesson.quiz.id %}" 
+                              <a href="{% url 'quizzes:question_create' quiz_id=lesson.quiz.id %}"
                                  class="btn btn-success" target="_blank">
                                 <i class="bi bi-pencil-square me-1"></i> 문제 관리하기
                               </a>
                             </div>
-                            
+
                             <div class="d-flex justify-content-end">
                               <button type="button" onclick="closeEditModal('{{ lesson.id }}')" class="btn btn-outline-secondary me-2">
                                 취소

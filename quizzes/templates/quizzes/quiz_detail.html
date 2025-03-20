@@ -60,14 +60,14 @@
                                 <span class="badge bg-primary rounded-pill d-flex align-items-center py-2 px-3">
                                     <i class="bi bi-book me-1"></i> 강의: {{ quiz.course.title }}
                                 </span>
-                                
+
                                 <!-- 섹션 정보 (있을 경우) -->
                                 {% if quiz.section %}
                                     <span class="badge bg-info text-dark rounded-pill d-flex align-items-center py-2 px-3">
                                         <i class="bi bi-bookmark me-1"></i> 섹션: {{ quiz.section.title }}
                                     </span>
                                 {% endif %}
-                                
+
                                 <!-- 레슨 정보 (있을 경우) -->
                                 {% if quiz.lesson %}
                                     <span class="badge bg-success rounded-pill d-flex align-items-center py-2 px-3">
@@ -105,12 +105,12 @@
                                     <div class="card-body">
                                         {% if has_completed %}
                                             <p>이전에 이 퀴즈를 <strong class="text-success">{{ previous_attempts.count }}번</strong> 응시했습니다.</p>
-                                            
+
                                             <div class="d-flex align-items-center mb-3">
                                                 <div class="display-5 fw-bold me-2">{{ previous_attempts.0.score }}</div>
                                                 <div class="text-muted">/ 100점</div>
                                             </div>
-                                            
+
                                             <p class="mb-0">
                                                 {% if previous_attempts.0.score >= 80 %}
                                                     <span class="text-success">훌륭한 성적입니다! 🎉</span>
@@ -120,7 +120,7 @@
                                                     <span class="text-warning">다시 한번 도전해보세요. 📚</span>
                                                 {% endif %}
                                             </p>
-                                            
+
                                             <div class="d-grid gap-2 mt-3">
                                                 <a href="{% url 'quizzes:quiz_result' previous_attempts.0.id %}" class="btn btn-outline-success">
                                                     <i class="bi bi-card-checklist me-2"></i> 결과 확인하기
@@ -286,7 +286,7 @@
                                     <p class="mb-1">{{ quiz.section.title }}</p>
                                 </div>
                             {% endif %}
-                            
+
                             {% if quiz.lesson %}
                                 <div class="list-group-item">
                                     <div class="d-flex w-100 justify-content-between mb-1">

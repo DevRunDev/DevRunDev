@@ -219,7 +219,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 LOGIN_REDIRECT_URL = "/"  # 로그인 성공 후 이동할 URL
 ACCOUNT_LOGOUT_REDIRECT_URL = "/"  # 로그아웃 후 이동할 URL
-ACCOUNT_SIGNUP_REDIRECT_URL = 'account_login'
+ACCOUNT_SIGNUP_REDIRECT_URL = "account_login"
 
 SOCIALACCOUNT_LOGIN_ON_GET = True  # 소셜 로그인 중간 페이지 건너뛰기
 

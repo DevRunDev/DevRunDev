@@ -26,7 +26,7 @@
     <div class="col-md-8 offset-md-2">
       <!-- 진행 상태 표시 -->
       <div class="progress mb-4" style="height: 30px;">
-        <div class="progress-bar bg-primary" role="progressbar" style="width: 75%;" 
+        <div class="progress-bar bg-primary" role="progressbar" style="width: 75%;"
              aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
           3/4 단계: 레슨 추가
         </div>
@@ -54,14 +54,14 @@
                 {% for section in sections_with_titles %}
                   <div class="accordion-item">
                     <h2 class="accordion-header" id="heading{{ section.id }}">
-                      <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" 
-                              data-bs-toggle="collapse" data-bs-target="#collapse{{ section.id }}" 
+                      <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button"
+                              data-bs-toggle="collapse" data-bs-target="#collapse{{ section.id }}"
                               aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
                               aria-controls="collapse{{ section.id }}">
                         {{ section.title }}
                       </button>
                     </h2>
-                    <div id="collapse{{ section.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" 
+                    <div id="collapse{{ section.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
                          aria-labelledby="heading{{ section.id }}" data-bs-parent="#sectionAccordion">
                       <div class="accordion-body p-0">
                         <ul class="list-group list-group-flush">
@@ -153,7 +153,7 @@
         <a href="{% url 'courses:course_step2' %}" class="btn btn-outline-secondary">
           <i class="bi bi-arrow-left me-2"></i> 이전 단계로 돌아가기
         </a>
-        
+
         <form method="post">
           {% csrf_token %}
           <button type="submit" class="btn btn-primary">

@@ -19,7 +19,7 @@
               </div>
             {% endfor %}
           {% endif %}
-          
+
           <div class="row">
             <div class="col-md-4 text-center mb-4 mb-md-0">
               <div class="avatar-circle mb-3">
@@ -28,7 +28,7 @@
               <h5 class="mb-0">{{ user.get_full_name|default:user.username }}</h5>
               <p class="text-muted">{{ user.get_role_display }}</p>
             </div>
-            
+
             <div class="col-md-8">
               <div class="list-group">
                 <div class="list-group-item">
@@ -37,14 +37,14 @@
                   </div>
                   <p class="mb-1">{{ user.email }}</p>
                 </div>
-                
+
                 <div class="list-group-item">
                   <div class="d-flex w-100 justify-content-between">
                     <h6 class="mb-1">사용자 이름</h6>
                   </div>
                   <p class="mb-1">{{ user.username|default:"미설정" }}</p>
                 </div>
-                
+
                 <div class="list-group-item">
                   <div class="d-flex w-100 justify-content-between">
                     <h6 class="mb-1">역할</h6>
@@ -59,7 +59,7 @@
                     {% endif %}
                   </p>
                 </div>
-                
+
                 <div class="list-group-item">
                   <div class="d-flex w-100 justify-content-between">
                     <h6 class="mb-1">가입일</h6>
@@ -67,7 +67,7 @@
                   <p class="mb-1">{{ user.date_joined|date:"Y년 m월 d일" }}</p>
                 </div>
               </div>
-              
+
               <div class="d-grid gap-2 mt-4">
                 {% if user.is_student %}
                   <a href="{% url 'accounts:instructor_apply' %}" class="btn btn-primary">
@@ -78,15 +78,15 @@
                     <i class="bi bi-speedometer2 me-2"></i> 강사 대시보드
                   </a>
                 {% endif %}
-                
+
                 <a href="{% url 'enrollments:student_dashboard' %}" class="btn btn-outline-primary">
                   <i class="bi bi-book me-2"></i> 내 강의실
                 </a>
-                
+
                 <a href="{% url 'account_email' %}" class="btn btn-outline-secondary">
                   <i class="bi bi-envelope me-2"></i> 이메일 관리
                 </a>
-                
+
                 <a href="{% url 'account_change_password' %}" class="btn btn-outline-secondary">
                   <i class="bi bi-key me-2"></i> 비밀번호 변경
                 </a>

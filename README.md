@@ -255,14 +255,14 @@ python manage.py seed_data
      - Client ID: .env의 GOOGLE_CLIENT_ID 값
      - Secret key: .env의 GOOGLE_CLIENT_SECRET 값
      - Sites: localhost:8000 선택
-    
+
    - Kakao 설정:
      - Provider: Kakao
      - Name: Kakao
      - Client ID: .env의 Kakao_CLIENT_ID 값
      - Secret key: .env의 Kakao_CLIENT_SECRET 값
      - Sites: localhost:8000 선택
-  
+
    - Naver 설정:
      - Provider: Naver
      - Name: Naver

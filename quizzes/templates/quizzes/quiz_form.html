@@ -47,9 +47,9 @@
 
                         <div class="mb-4">
                             <label for="{{ form.title.id_for_label }}" class="form-label fw-bold">퀴즈 제목</label>
-                            <input type="text" name="title" id="{{ form.title.id_for_label }}" 
-                                   class="form-control form-control-lg {% if form.title.errors %}is-invalid{% endif %}" 
-                                   value="{{ form.title.value|default:'' }}" 
+                            <input type="text" name="title" id="{{ form.title.id_for_label }}"
+                                   class="form-control form-control-lg {% if form.title.errors %}is-invalid{% endif %}"
+                                   value="{{ form.title.value|default:'' }}"
                                    placeholder="예: 자바스크립트 기초 개념 퀴즈" required>
                             {% if form.title.errors %}
                                 <div class="invalid-feedback">
@@ -62,8 +62,8 @@
 
                         <div class="mb-4">
                             <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">퀴즈 설명</label>
-                            <textarea name="description" id="{{ form.description.id_for_label }}" 
-                                      class="form-control {% if form.description.errors %}is-invalid{% endif %}" 
+                            <textarea name="description" id="{{ form.description.id_for_label }}"
+                                      class="form-control {% if form.description.errors %}is-invalid{% endif %}"
                                       rows="4" placeholder="이 퀴즈의 목적과 포함된 내용에 대해 설명해주세요.">{{ form.description.value|default:'' }}</textarea>
                             {% if form.description.errors %}
                                 <div class="invalid-feedback">
@@ -77,11 +77,11 @@
                         <div class="row mb-4">
                             <div class="col-md-6">
                                 <label for="{{ form.section.id_for_label }}" class="form-label fw-bold">{{ form.section.label }}</label>
-                                <select name="section" id="{{ form.section.id_for_label }}" 
+                                <select name="section" id="{{ form.section.id_for_label }}"
                                         class="form-select {% if form.section.errors %}is-invalid{% endif %}">
                                     <option value="">섹션을 선택하세요 (선택사항)</option>
                                     {% for section_choice in form.section.field.queryset %}
-                                        <option value="{{ section_choice.id }}" 
+                                        <option value="{{ section_choice.id }}"
                                             {% if form.section.value|stringformat:"s" == section_choice.id|stringformat:"s" %}selected{% endif %}>
                                             {{ section_choice.title }}
                                         </option>
@@ -99,11 +99,11 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="{{ form.lesson.id_for_label }}" class="form-label fw-bold">{{ form.lesson.label }}</label>
-                                <select name="lesson" id="{{ form.lesson.id_for_label }}" 
+                                <select name="lesson" id="{{ form.lesson.id_for_label }}"
                                         class="form-select {% if form.lesson.errors %}is-invalid{% endif %}">
                                     <option value="">강의 영상을 선택하세요 (선택사항)</option>
                                     {% for lesson_choice in form.lesson.field.queryset %}
-                                        <option value="{{ lesson_choice.id }}" 
+                                        <option value="{{ lesson_choice.id }}"
                                             {% if form.lesson.value|stringformat:"s" == lesson_choice.id|stringformat:"s" %}selected{% endif %}>
                                             {{ lesson_choice.title }}
                                         </option>
@@ -169,18 +169,18 @@
         const sectionSelect = document.getElementById('{{ form.section.id_for_label }}');
         const lessonSelect = document.getElementById('{{ form.lesson.id_for_label }}');
         const originalLessons = Array.from(lessonSelect.options);
-        
+
         sectionSelect.addEventListener('change', function() {
             const selectedSectionId = sectionSelect.value;
-            
+
             // 모든 옵션 제거
             while (lessonSelect.options.length > 0) {
                 lessonSelect.remove(0);
             }
-            
+
             // 첫 번째 기본 옵션 추가
             lessonSelect.add(new Option('강의 영상을 선택하세요 (선택사항)', ''));
-            
+
             // 선택된 섹션의 레슨만 추가
             if (selectedSectionId) {
                 originalLessons.forEach(option => {

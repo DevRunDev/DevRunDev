@@ -20,16 +20,16 @@
               </div>
             {% endfor %}
           {% endif %}
-          
+
           <form method="post" action="{% url 'account_login' %}">
             {% csrf_token %}
-            
+
             {% if form.errors %}
               <div class="alert alert-danger">
                 <strong>오류:</strong> 로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.
               </div>
             {% endif %}
-            
+
             <div class="mb-3">
               <label for="id_login" class="form-label">이메일</label>
               <input type="email" name="login" id="id_login" class="form-control" placeholder="이메일 주소 입력" required>
@@ -39,7 +39,7 @@
                 </div>
               {% endif %}
             </div>
-            
+
             <div class="mb-3">
               <label for="id_password" class="form-label">비밀번호</label>
               <input type="password" name="password" id="id_password" class="form-control" placeholder="비밀번호 입력" required>
@@ -49,28 +49,28 @@
                 </div>
               {% endif %}
             </div>
-            
+
             <div class="mb-3 form-check">
               <input type="checkbox" name="remember" id="id_remember" class="form-check-input">
               <label for="id_remember" class="form-check-label">로그인 상태 유지</label>
             </div>
-            
+
             <div class="d-grid gap-2">
               <button type="submit" class="btn btn-primary">로그인</button>
             </div>
-            
+
             {% if redirect_field_value %}
               <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
             {% endif %}
           </form>
-          
+
           <hr class="my-4">
-          
+
           <div class="text-center">
             <p>아직 계정이 없으신가요? <a href="{% url 'accounts:signup' %}">회원가입</a></p>
             <p><a href="{% url 'account_reset_password' %}">비밀번호를 잊으셨나요?</a></p>
           </div>
-          
+
           <!-- 소셜 로그인 버튼 -->
           <div class="mt-4">
             <h5 class="text-center mb-3">소셜 계정으로 로그인</h5>
