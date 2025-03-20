@@ -1,4 +1,5 @@
 import os
+import re
 
 from django.conf import settings
 from django.db import models
@@ -59,6 +60,27 @@ class Section(models.Model):
     def __str__(self):
         return f"{self.course.title} - {self.title}"
 
+def convert_youtube_url(url):
+    """YouTube URL을 embed 형식으로 변환"""
+    if not url:
+        return url
+    
+    # 이미 embed 형식인 경우
+    if 'youtube.com/embed/' in url:
+        return url
+    
+    # 유튜브 URL에서 동영상 ID 추출하는 정규식
+    youtube_regex = (
+        r'(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})'
+    )
+    match = re.search(youtube_regex, url)
+    
+    if match:
+        video_id = match.group(1)
+        return f'https://www.youtube.com/embed/{video_id}'
+    
+    # 일치하는 패턴이 없으면 원래 URL 반환
+    return url
 
 class Lesson(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name="lessons")
@@ -70,6 +92,9 @@ class Lesson(models.Model):
         if not self.order:
             last_order = Lesson.objects.filter(section=self.section).count()
             self.order = last_order + 1
+
+        if self.video_url:
+            self.video_url = convert_youtube_url(self.video_url)
 
         super().save(*args, **kwargs)
 
